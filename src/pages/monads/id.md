@@ -5,8 +5,8 @@ by writing a method that abstracted over different monads:
 
 ```scala mdoc:silent
 import cats.Monad
-import cats.syntax.functor._ // for map
-import cats.syntax.flatMap._ // for flatMap
+import cats.syntax.functor.* // for map
+import cats.syntax.flatMap.* // for flatMap
 
 def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
   for {
@@ -61,7 +61,7 @@ List(1, 2, 3) : Id[List[Int]]
 Cats provides instances of various type classes for `Id`,
 including `Functor` and `Monad`.
 These let us call `map`, `flatMap`, and `pure`
-passing in plain values:
+on plain values:
 
 ```scala mdoc
 val a = Monad[Id].pure(3)
@@ -69,8 +69,8 @@ val b = Monad[Id].flatMap(a)(_ + 1)
 ```
 
 ```scala mdoc:silent
-import cats.syntax.functor._ // for map
-import cats.syntax.flatMap._ // for flatMap
+import cats.syntax.functor.* // for map
+import cats.syntax.flatMap.* // for flatMap
 ```
 
 ```scala mdoc
@@ -116,8 +116,8 @@ All we have to do is return the initial value:
 
 ```scala mdoc:invisible:reset-object
 import cats.{Id,Monad}
-import cats.syntax.functor._ 
-import cats.syntax.flatMap._
+import cats.syntax.functor.* 
+import cats.syntax.flatMap.*
 def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
   for {
     x <- a
@@ -173,7 +173,7 @@ The compiler is able to interpret values of type `A` as `Id[A]` and vice versa
 by the context in which they are used.
 
 The only restriction we've seen to this is that Scala cannot unify
-types and type constructors when searching for implicits.
+types and type constructors when searching for given instances.
 Hence our need to re-type `Int` as `Id[Int]`
 in the call to `sumSquare` at the opening of this section:
 

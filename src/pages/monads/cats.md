@@ -18,8 +18,6 @@ Here are some examples using `pure` and `flatMap`, and `map` directly:
 
 ```scala mdoc:silent
 import cats.Monad
-import cats.instances.option._ // for Monad
-import cats.instances.list._   // for Monad
 ```
 
 ```scala mdoc
@@ -40,32 +38,7 @@ See the [scaladoc][cats.Monad] for more information.
 ### Default Instances
 
 Cats provides instances for all the monads in the standard library
-(`Option`, `List`, `Vector` and so on) via [`cats.instances`][cats.instances]:
-
-```scala mdoc:silent
-import cats.instances.option._ // for Monad
-```
-
-```scala mdoc
-Monad[Option].flatMap(Option(1))(a => Option(a*2))
-```
-
-```scala mdoc:silent
-import cats.instances.list._ // for Monad
-```
-
-```scala mdoc
-Monad[List].flatMap(List(1, 2, 3))(a => List(a, a*10))
-```
-
-```scala mdoc:silent
-import cats.instances.vector._ // for Monad
-```
-
-```scala mdoc
-Monad[Vector].flatMap(Vector(1, 2, 3))(a => Vector(a, a*10))
-```
-
+(`Option`, `List`, `Vector` and so on).
 Cats also provides a `Monad` for `Future`.
 Unlike the methods on the `Future` class itself,
 the `pure` and `flatMap` methods on the monad
@@ -75,9 +48,8 @@ To work around this, Cats requires us to have an `ExecutionContext` in scope
 when we summon a `Monad` for `Future`:
 
 ```scala mdoc:silent
-import cats.instances.future._ // for Monad
-import scala.concurrent._
-import scala.concurrent.duration._
+import scala.concurrent.*
+import scala.concurrent.duration.*
 ```
 
 ```scala mdoc:fail
@@ -122,16 +94,14 @@ The syntax for monads comes from three places:
    provides syntax for `pure`.
 
 In practice it's often easier to import everything in one go
-from [`cats.implicits`][cats.implicits].
+from `cats.syntax.all.**`.
 However, we'll use the individual imports here for clarity.
 
 We can use `pure` to construct instances of a monad.
 We'll often need to specify the type parameter to disambiguate the particular instance we want.
 
 ```scala mdoc:silent
-import cats.instances.option._   // for Monad
-import cats.instances.list._     // for Monad
-import cats.syntax.applicative._ // for pure
+import cats.syntax.applicative.* // for pure
 ```
 
 ```scala mdoc
@@ -148,14 +118,11 @@ that come wrapped in a monad of the user's choice:
 
 ```scala mdoc:silent
 import cats.Monad
-import cats.syntax.functor._ // for map
-import cats.syntax.flatMap._ // for flatMap
+import cats.syntax.functor.* // for map
+import cats.syntax.flatMap.* // for flatMap
 
 def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
   a.flatMap(x => b.map(y => x*x + y*y))
-
-import cats.instances.option._ // for Monad
-import cats.instances.list._   // for Monad
 ```
 
 ```scala mdoc
@@ -166,11 +133,11 @@ sumSquare(List(1, 2, 3), List(4, 5))
 We can rewrite this code using for comprehensions.
 The compiler will "do the right thing" by
 rewriting our comprehension in terms of `flatMap` and `map`
-and inserting the correct implicit conversions to use our `Monad`:
+and inserting the correct conversions to use our `Monad`:
 
 ```scala mdoc:invisible:reset-object
 import cats.Monad
-import cats.implicits._
+import cats.syntax.all.*
 ```
 ```scala mdoc:silent
 def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =

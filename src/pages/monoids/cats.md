@@ -26,7 +26,7 @@ import cats.*
 ```
 
 <div class="callout callout-info">
-*Cats Kernel?*
+#### Cats Kernel? {-}
 
 Cats Kernel is a subproject of Cats
 providing a small set of typeclasses

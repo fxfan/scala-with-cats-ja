@@ -7,7 +7,7 @@ that are used for error handling.
 for raising and handling errors.
 
 <div class="callout callout-info">
-*This Section is Optional!*
+#### This Section is Optional! {-}
 
 You won't need to use `MonadError`
 unless you need to abstract over error handling monads.
@@ -55,7 +55,6 @@ instantiate the type class for `Either`:
 
 ```scala mdoc:silent
 import cats.MonadError
-import cats.instances.either._ // for MonadError
 
 type ErrorOr[A] = Either[String, A]
 
@@ -126,14 +125,13 @@ and `ensure` via [`cats.syntax.monadError`][cats.syntax.monadError]:
 
 ```scala mdoc:invisible:reset
 import cats.MonadError
-import cats.instances.either._ // for MonadError
 
 type ErrorOr[A] = Either[String, A]
 ```
 ```scala mdoc:silent
-import cats.syntax.applicative._      // for pure
-import cats.syntax.applicativeError._ // for raiseError etc
-import cats.syntax.monadError._       // for ensure
+import cats.syntax.applicative.*      // for pure
+import cats.syntax.applicativeError.* // for raiseError etc
+import cats.syntax.monadError.*       // for ensure
 ```
 
 ```scala mdoc
@@ -165,7 +163,6 @@ always represent errors as `Throwables`:
 
 ```scala mdoc:silent
 import scala.util.Try
-import cats.instances.try_._ // for MonadError
 
 val exn: Throwable =
   new RuntimeException("It's all gone wrong")
@@ -206,7 +203,6 @@ We can solve this using `pure` and `raiseError`. Note the use of type parameters
 
 ```scala mdoc:invisible:reset-object
 import cats.MonadError
-import cats.implicits._
 ```
 ```scala mdoc:silent
 def validateAdult[F[_]](age: Int)(implicit me: MonadError[F, Throwable]): F[Int] =

@@ -11,13 +11,15 @@ We even have special syntax to support monads: for comprehensions.
 However, despite the ubiquity of the concept,
 the Scala standard library lacks
 a concrete type to encompass "things that can be `flatMapped`".
-This type class is one of the benefits brought to us by Cats.
 
 In this chapter we will take a deep dive into monads.
 We will start by motivating them with a few examples.
-We'll proceed to their formal definition and their implementation in Cats.
+We'll proceed to their formal definition,
+and see how we can create a concrete type as a type class.
+We'll then look at their implementation in Cats.
 Finally, we'll tour some interesting monads that you may not have seen,
 providing introductions and examples of their use.
+
 
 ## What is a Monad?
 
@@ -32,7 +34,7 @@ by stating very simply:
 
 That was easy! Problem solved, right?
 But then again, last chapter we said functors
-were a control mechanism for exactly the same thing.
+were a mechanism for exactly the same thing.
 Ok, maybe we need some more discussion...
 
 In Section [@sec:functors:examples]
@@ -55,7 +57,8 @@ and `flatMap` itself takes care of the complication
 allowing us to `flatMap` again.
 Let's ground things by looking at some examples.
 
-**Options**
+
+### Options as Monads
 
 `Option` allows us to sequence computations
 that may or may not return values.
@@ -132,7 +135,8 @@ def stringDivideBy(aStr: String, bStr: String): Option[Int] =
   } yield ans
 ```
 
-**Lists**
+
+### Lists as Monads
 
 When we first encounter `flatMap` as budding Scala developers,
 we tend to think of it as a pattern for iterating over `Lists`.
@@ -174,7 +178,7 @@ the end result is actually a larger list
 created from combinations of intermediate `As` and `Bs`.
 -->
 
-**Futures**
+### Futures as Monads
 
 `Future` is a monad that sequences computations
 without worrying that they may be asynchronous:
@@ -232,6 +236,7 @@ We *can* run futures in parallel, of course,
 but that is another story and shall be told another time.
 Monads are all about sequencing.
 
+
 ### Definition of a Monad
 
 While we have only talked about `flatMap` above,
@@ -240,8 +245,7 @@ monadic behaviour is formally captured in two operations:
 - `pure`, of type `A => F[A]`;
 - `flatMap`[^bind], of type `(F[A], A => F[B]) => F[B]`.
 
-[^bind]: In some libraries and languages,
-notably Scalaz and Haskell,
+[^bind]: In the programming literature and Haskell,
 `pure` is referred to as `point` or `return` and
 `flatMap` is referred to as `bind` or `>>=`.
 This is purely a difference in terminology.
@@ -265,7 +269,7 @@ trait Monad[F[_]] {
 ```
 
 <div class="callout callout-warning">
-*Monad Laws*
+#### Monad Laws {-}
 
 `pure` and `flatMap` must obey a set of laws
 that allow us to sequence operations freely
