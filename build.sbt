@@ -127,6 +127,10 @@ lazy val pages = List(
   "foldable-traverse/summary.md",
   // Part 3: Interpreters
   "parts/part3.md",
+  // Indexed Types
+  "indexed-type/index.md",
+  "indexed-type/conclusions.md",
+  // Interpreter optimization
   "adt-optimization/index.md",
   "adt-optimization/algebra.md",
   "adt-optimization/stack-reify.md",

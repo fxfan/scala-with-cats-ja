@@ -335,3 +335,60 @@ series = {PPDP '01}
   number       = 7,
   issue        = 2,
   doi          = {https://doi.org/10.22152/programming-journal.org/2022/6/7}}
+
+
+@article{10.1145/331963.331977,
+author = {Leijen, Daan and Meijer, Erik},
+title = {Domain specific embedded compilers},
+year = {2000},
+issue_date = {Jan. 2000},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {35},
+number = {1},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/331963.331977},
+doi = {10.1145/331963.331977},
+abstract = {Domain-specific embedded languages (DSELs) expressed in higher-order, typed (HOT) languages provide a composable framework for domain-specific abstractions. Such a framework is of greater utility than a collection of stand-alone domain-specific languages. Usually, embedded domain specific languages are build on top of a set of domain specific primitive functions that are ultimately implemented using some form of foreign function call. We sketch a general design pattern/or embedding client-server style services into Haskell using a domain specific embedded compiler for the server's source language. In particular we apply this idea to implement Haskell/DB, a domain specific embdedded compiler that dynamically generates of SQL queries from monad comprehensions, which are then executed on an arbitrary ODBC database server.},
+journal = {SIGPLAN Not.},
+month = {dec},
+pages = {109–122},
+numpages = {14}
+}
+
+@Comment Indexed types
+
+@inproceedings{10.1145/331960.331977,
+author = {Leijen, Daan and Meijer, Erik},
+title = {Domain specific embedded compilers},
+year = {2000},
+isbn = {1581132557},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/331960.331977},
+doi = {10.1145/331960.331977},
+abstract = {Domain-specific embedded languages (DSELs) expressed in higher-order, typed (HOT) languages provide a composable framework for domain-specific abstractions. Such a framework is of greater utility than a collection of stand-alone domain-specific languages. Usually, embedded domain specific languages are build on top of a set of domain specific primitive functions that are ultimately implemented using some form of foreign function call. We sketch a general design pattern/or embedding client-server style services into Haskell using a domain specific embedded compiler for the server's source language. In particular we apply this idea to implement Haskell/DB, a domain specific embdedded compiler that dynamically generates of SQL queries from monad comprehensions, which are then executed on an arbitrary ODBC database server.},
+booktitle = {Proceedings of the 2nd Conference on Domain-Specific Languages},
+pages = {109–122},
+numpages = {14},
+location = {Austin, Texas, USA},
+series = {DSL '99}
+}
+
+@inproceedings{10.1145/1708016.1708024,
+author = {Lin, Chuan-kai and Sheard, Tim},
+title = {Pointwise generalized algebraic data types},
+year = {2010},
+isbn = {9781605588919},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1708016.1708024},
+doi = {10.1145/1708016.1708024},
+abstract = {In the GADT (Generalized Algebraic Data Types) type system, a pattern-matching branch can draw type information from both the scrutinee type and the data constructor type. Even though the type system can handle complex interactions between the two types, most programs require only simple interactions in the form of parametric instantiation and type indexing.To explore the tradeoffs related to GADT patterns, we define the Pointwise GADT type system, which restricts GADTs to the common case of parametric instantiation and type indexing. The Pointwise GADT type system still accepts a wide range of GADT programs, while rejecting a pathological function whose pattern-matching branches can make arbitrarily different assumptions about the type environment. We also state and prove several properties of the type system, which we speculate might be useful in helping researchers design better type inference algorithms.},
+booktitle = {Proceedings of the 5th ACM SIGPLAN Workshop on Types in Language Design and Implementation},
+pages = {51–62},
+numpages = {12},
+keywords = {gadts, pointwise baseline, pointwise unification, pointwise unifier},
+location = {Madrid, Spain},
+series = {TLDI '10}
+}
