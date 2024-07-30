@@ -203,6 +203,7 @@ We can solve this using `pure` and `raiseError`. Note the use of type parameters
 
 ```scala mdoc:invisible:reset-object
 import cats.MonadError
+import cats.syntax.all.*
 ```
 ```scala mdoc:silent
 def validateAdult[F[_]](age: Int)(implicit me: MonadError[F, Throwable]): F[Int] =

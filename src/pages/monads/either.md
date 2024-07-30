@@ -257,6 +257,8 @@ We also get the safety of exhaustivity checking
 on any pattern matching we do:
 
 ```scala mdoc:silent
+import LoginError.*
+
 // Choose error-handling behaviour based on type:
 def handleError(error: LoginError): Unit =
   error match {
