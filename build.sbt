@@ -129,6 +129,7 @@ lazy val pages = List(
   "parts/part3.md",
   // Indexed Types
   "indexed-types/index.md",
+  "indexed-types/codata.md",
   "indexed-types/conclusions.md",
   // Interpreter optimization
   "adt-optimization/index.md",
