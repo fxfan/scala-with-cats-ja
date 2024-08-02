@@ -1,4 +1,4 @@
-## Interpreters and Reification
+## Interpreters and Reification {#sec:interpreters:reification }
 
 There are two different programming strategies at play in the regular expression code we've just written:
 
@@ -14,7 +14,7 @@ The `matches` method is an interpreter. It carries out the instructions in the d
 ### The Structure of Interpreters
 
 All uses of the interpreter strategy have a particular structure to their methods.
-There are three different types of methods:
+There are three different kinds of methods:
 
 1. **constructors**, or **introduction forms**, with type `A => Program`. Here `A` is any type that isn't a program, and `Program` is the type of programs. Constructors conventionally live on the `Program` companion object in Scala. We see that `apply` is a constructor of `Regexp`. It has type `String => Regexp`, which matches the pattern `A => Program` for a constructor. The other constructor, `empty`, is just a value of type `Regexp`. This is equivalent to a method with type `() => Regexp` and so it also matches the pattern for a constructor.
 
