@@ -1,8 +1,14 @@
 # Indexed Types
 
-In this chapter we look at **indexed types**. Both data and codata can be indexed. An indexed type is a type constructor, so a type like `F[_]`, along with a set of types that can fill in the type parameters for the constructor. Let's say the set of types is `Int`, `String`, and `Option[A]`. Then, for a type constructor `F` we can construct an indexed type from the set `F[Int]`, `F[String]`, and `F[Option[A]]`. As the name suggests, the indices act as indexes to select an element from this set.
+In this chapter we look at **indexed types**. Both data and codata can be indexed. An indexed type is a type constructor, so a type like `F[_]`, along with a set of types that can fill in the type parameters for the constructor. Let's say the set of types is `Int`, `String`, and `Option[A]`. Then, for a type constructor `F` we can construct an indexed type from the set `F[Int]`, `F[String]`, and `F[Option[A]]`. As the name suggests, the indices act as indexes into this set of types.
 
-This is a very abstract definition. How are indexed types actually useful? We'll see a lot of details and examples in this chapter, but let's start with a high-level overview. We'll begin by revisiting the definition of algebras we gave in Section [@sec:interpreters:reification], where we said algebra consists of three different kinds of methods: constructors, combinators, and interpreters. Indexed types allows us to do two things:
+This is a very abstract definition and doesn't help us understand how indexed types are useful. We'll see a lot of details and examples in this chapter, but let's start with a more useful high-level overview. When we're treating a type as indexed data we create elements from our set of types. We can think of this as providing a proof that some type parameter, `A` in the example above, is equal to some other type. When we're treating a type as indexed codata we require 
+
+**TODO: Complete**
+
+As you might expect, indexed data and indexed codata are duals. We can 
+
+We'll begin by revisiting the definition of algebras we gave in Section [@sec:interpreters:reification], where we said algebra consists of three different kinds of methods: constructors, combinators, and interpreters. Indexed types allows us to do two things:
 
 - We can restrict where constructors and combinators can be used. We can think of representing some state using a type parameter of `F`, and we can only call particular methods when we are in the correct state. In this case we are working with **indexed codata**.
 
