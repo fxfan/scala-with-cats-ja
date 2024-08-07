@@ -54,6 +54,10 @@ in further processing.
 For example, force times length gives torque (with the SI unit of newton-metres).
 However we cannot define a `*` method on `Length` that can only be called if the `Unit` is `Metre` using just the tool of phantom types.
 Similarly, we cannot define, say, a `toString` method that uses the `Unit` type to appropriately print the result.
+Solving these problems leads us to indexed codata, so let's now look at that.
+
+
+
 We'll solve all these problems in due course, but before we move on let's see another, more complex, example of phantom types to give you a better understanding of their power.
 
 Our next example will represent a subset of [HTML][html], the language used to write web pages, in a typesafe way.
@@ -69,6 +73,19 @@ An example of HTML is below.
   </body>
 </html>
 ```
+
+In HTML the content of the page is marked up with tags, like `<h1>`, that give it meaning. 
+For example, `<h1>` means a heading at level one, and `<p>` means a paragraph.
+An opening tag is closed by a corresponding closing tag such as `</h1>` for `<h1>` and `</p>` for `<p>`.
+
+There are rules that control where tags are allowed. The complete set of tags, and their associated rules, is very complex. We'll use the following much simplified rules:
+
+- the `body` tag can only contain block level tags;
+- block level tags are `h1` and `p` and can only contain inline tags; and
+- inline tags are `strong` and `em` and can only contain inline tags.
+
+We're missing one thing: we need to be able to end our recursion in text content. In fact we have two different kinds of tags: those that can contain text content in addition to other tags (we'll call these content tags) and those that cannot (which we will call structural tags.)
+
 
 [mars]: https://en.wikipedia.org/wiki/Mars_Climate_Orbiter#Cause_of_failure
 [html]: https://html.spec.whatwg.org/multipage/
