@@ -1,0 +1,19 @@
+// Disable for switch FSM
+//
+// run with
+//   dot switch.gv -Tpdf -o switch.pdf
+
+digraph switch_fsm {
+  rankdir="LR";
+  ratio=0.25;
+
+  node [shape = circle];
+
+  On[label="On"];
+  Off[label="Off"];
+
+  On->Off [label="off"];
+  // Make the two visible edges symmetric by inserting this invisible edge between them
+  On->Off [style=invis];
+  Off->On [label="on"];
+}

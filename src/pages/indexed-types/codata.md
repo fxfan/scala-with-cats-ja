@@ -79,3 +79,8 @@ The constraint is made of two parts: using clauses, which we learned about in [@
 
 ### API Protocols
 
+An API protocol defines the order in which methods on codata must be called. In the case of `Switch`, the protocol is we can only call `off` after calling `on` and vice versa. This protocol is illustrated in Figure [@img:indexed-types:switch]. Many common types have similar protocols. For example, files can only be read once they are opened and cannot be read once they have been closed.
+
+![The switch API protocol](src/pages/indexed-types/switch.pdf) {#img:indexed-types:switch}
+
+Indexed codata allows us to enforce API protocols at compile-time. 
