@@ -1,4 +1,4 @@
-## Phantom Types
+## Phantom Types {#sec:indexed-types:phantom}
 
 Phantom types are a basic building block of indexed types, so we'll start with an example of them. A phantom type is simply a type parameter that doesn't correspond to any value. In the example below, the type parameter `A` is a phantom type, because there is no value of type `A`, while `B` is not because there is a value of that type.
 
@@ -29,11 +29,11 @@ final case class Length[Unit](value: Double) {
 We'll need to define a few unit types to use this, and some `Lengths` using these units.
 
 ```scala mdoc:silent
-trait Metre
-trait Foot
+trait Metres
+trait Feet
 
-val threeMetres = Length[Metre](3)
-val threeFeetAndRising = Length[Foot](3)
+val threeMetres = Length[Metres](3)
+val threeFeetAndRising = Length[Feet](3)
 ```
 
 Now we can add `Lengths` together if they have the same unit.
@@ -78,7 +78,7 @@ In HTML the content of the page is marked up with tags, like `<h1>`, that give i
 For example, `<h1>` means a heading at level one, and `<p>` means a paragraph.
 An opening tag is closed by a corresponding closing tag such as `</h1>` for `<h1>` and `</p>` for `<p>`.
 
-There are rules that control where tags are allowed. The complete set of tags, and their associated rules, is very complex. We'll use the following much simplified rules:
+There are rules that control where tags are allowed. The complete set of tags, and their associated rules, is very complex. We'll use the following, much simplified, rules:
 
 - the `body` tag can only contain block level tags;
 - block level tags are `h1` and `p` and can only contain inline tags; and
