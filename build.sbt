@@ -142,6 +142,7 @@ lazy val pages = List(
   // Part 4: Craft
   // Part 5: Case Studies
   "parts/part4.md",
+  "usability/index.md",
   "case-studies/testing/index.md",
   "case-studies/map-reduce/index.md",
   "case-studies/validation/index.md",

@@ -1,0 +1,34 @@
+// Diagram for html FSM
+//
+// run with
+//   dot html.gv -Tpdf -o html.pdf
+
+digraph html_fsm {
+  rankdir="LR";
+  ratio=0.25;
+
+  node [shape = circle];
+
+  Head[label="Head"];
+  Link1[label="Link"];
+  Title[label="Title"];
+  Link2[label="Link"];
+  Body[label="Body"];
+  H1[label="H1"];
+  P[label="P"];
+
+  Head->Link1
+  Head->Title
+  Link1->Link1
+  Link1->Title
+  Title->Link2
+  Title->Body
+  Link2->Link2
+  Link2->Body
+  Body->H1
+  Body->P
+  H1->P
+  H1->H1
+  P->H1
+  P->P
+}

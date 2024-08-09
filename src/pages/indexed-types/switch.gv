@@ -1,4 +1,4 @@
-// Disable for switch FSM
+// Diagram for switch FSM
 //
 // run with
 //   dot switch.gv -Tpdf -o switch.pdf

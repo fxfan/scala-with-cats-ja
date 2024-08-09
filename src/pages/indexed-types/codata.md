@@ -31,8 +31,6 @@ It is in this way that indexed codata goes beyond what phantom types alone can d
 Implementing these constraints has two parts.
 The first is defining types to represent on and off. 
 
-Here are the types.
-
 ```scala mdoc:reset:silent
 trait On
 trait Off
@@ -77,6 +75,15 @@ SimpleSwitch.on.on
 ```
 
 The constraint is made of two parts: using clauses, which we learned about in [@sec:type-classes], and the [`A =:= B`][scala.=:=] construction, which is new. `=:=` represents a type equality. If a given instance `A =:= B` exists, then the type `A` is equal to the type `B`. (Note we can write this with the more familiar prefix notation `=:=[A, B]` if we prefer.) We never create these instances ourselves. Instead the compiler creates them for us. In the `on` method, we are asking the compiler to construct an instance `A =:= Off`, which can only be done if `A` *is* `Off`. This in turn means we can only call the method when the `Switch` is `Off`. This is the core idea of indexed codata: we reflect states as types, and restrict method calls to a subset of states.
+
+This is a different use of contextual abstraction to type classes. 
+Type classes associate operations with types.
+What we're doing here is proving some property of a type with respect to another type.
+More precisely we're proving that a type parameter is equal to a particular type.
+The given instance only exists when the compiler can prove this is the case.
+Hence these given instances are sometimes called **evidence** or **witnesses**.
+This different view subsumes type classes, 
+as we can think of type classes as evidence that a type implements a certain interface.
 
 
 #### Exercise: Torque {-}
@@ -135,9 +142,9 @@ final case class Force[Unit](value: Double) {
 
 ### API Protocols
 
-An API protocol defines the order in which methods must be called. The protocol in the case of `Switch` is that we can only call `off` after calling `on` and vice versa. This protocol is a simple finite state machine, and illustrated in Figure [@img:indexed-types:switch]. Many common types have similar protocols. For example, files can only be read once they are opened and cannot be read once they have been closed.
+An API protocol defines the order in which methods must be called. The protocol in the case of `Switch` is that we can only call `off` after calling `on` and vice versa. This protocol is a simple finite state machine, and illustrated in Figure [@fig:indexed-types:switch]. Many common types have similar protocols. For example, files can only be read once they are opened and cannot be read once they have been closed.
 
-![The switch API protocol](src/pages/indexed-types/switch.pdf) {#img:indexed-types:switch}
+![The switch API protocol](src/pages/indexed-types/switch.pdf){#fig:indexed-types:switch}
 
 Indexed codata allows us to enforce API protocols at compile-time. Often these protocols are finite-state machines. We can represent these protocols with a single type parameter that represents the state, as we did with `Switch`. We can also use multiple type parameters if that makes for a more convenient representation. 
 
@@ -161,10 +168,18 @@ An opening tag is closed by a corresponding closing tag such as `</h1>` for `<h1
 There are several rules for valid HTML[^valid-html]. We're going to focus on the following:
 
 1. Within the `html` tag there can only be a `head` and a `body` tag, in that order.
-2. Within the `head` tag there must be exactly one `title`, and there can be any other number of allowed tags.
-3. Within the `body` there can be any number of allowed tags.
+2. Within the `head` tag there must be exactly one `title`, and there can be any other number of allowed tags (of which we're only going to model `link`).
+3. Within the `body` there can be any number of allowed tags (of which we are only going to model `h1` and `p`).
 
-We're going to use a Church-encoded representation for HTML.
+We're going to use a Church-encoded representation for HTML, so tags are created by method calls. Figure [@fig:indexed-types:html] shows the finite state machine representation of the API protocol.
+I find it easier to read as a regular expression, which we can write down as
+
+$$
+\text{head}\ \text{link}^*\ \text{title}\ \text{link}^*\ \text{body}\ (\text{h1}\, |\, \text{p})^*
+$$
+
+![The HTML API protocol](src/pages/indexed-types/html.pdf){#fig:indexed-types:html}
+
 As the code is fairly repetitive we will just present all the code and then discuss the important parts.
 Here's the implementation.
 
@@ -179,10 +194,10 @@ trait WithoutTitle extends TitleState
 trait WithTitle extends TitleState
 
 final class Html[S <: StructureState, T <: TitleState](
-    head: List[String],
-    body: List[String]
+    head: Vector[String],
+    body: Vector[String]
 ) {
-  // Head tags ------------------------------------------------------------------
+  // Head tags -------------------------------------------------------------
 
   def head(using S =:= Empty): Html[InHead, WithoutTitle] =
     Html(head, body)
@@ -195,7 +210,7 @@ final class Html[S <: StructureState, T <: TitleState](
   def link(rel: String, href: String)(using S =:= InHead): Html[InHead, T] =
     Html(head :+ s"<link rel=\"$rel\" href=\"$href\"/>", body)
 
-  // Body tags ------------------------------------------------------------------
+  // Body tags -------------------------------------------------------------
 
   def body(using S =:= InHead, T =:= WithTitle): Html[InBody, WithTitle] =
     Html(head, body)
@@ -206,7 +221,7 @@ final class Html[S <: StructureState, T <: TitleState](
   def p(text: String)(using S =:= InBody): Html[InBody, T] =
     Html(head, body :+ s"<p>$text</p>")
 
-  // Interpreter ----------------------------------------------------------------
+  // Interpreter -----------------------------------------------------------
 
   override def toString(): String = {
     val h = head.mkString("  <head>\n    ", "\n    ", "\n  </head>")
@@ -216,14 +231,20 @@ final class Html[S <: StructureState, T <: TitleState](
   }
 }
 object Html {
-  val empty: Html[Empty, WithoutTitle] = Html(List.empty, List.empty)
+  val empty: Html[Empty, WithoutTitle] = Html(Vector.empty, Vector.empty)
 }
 ```
+
+The important detail is that we factor the state into two components.
+One represents where in the overall structure we are (inside the `head`, inside the `body`, or inside neither).
+The other represents whether we have a `title` element or not.
+We could certainly represent this with one state type variable, but I find the factored representation easier to deal with.
 
 Here's an example in use.
 
 ```scala mdoc
 Html.empty.head
+  .link("stylesheet", "styles.css")
   .title("Our Amazing Webpage")
   .body
   .h1("Where Amazing Exists")
@@ -231,7 +252,7 @@ Html.empty.head
   .toString
 ```
 
-Here's an example of the type system preventing an invalid construction.
+Here's an example of the type system preventing an invalid construction, in this case the lack of a title.
 
 ```scala mdoc:fail
 Html.empty.head
@@ -240,15 +261,78 @@ Html.empty.head
   .h1("This Shouldn't Work")
 ```
 
+(Note that the error messages are not great. We'll address this in Chapter [@sec:usability]).
 
-
-- We start defining elements that go in the `head` of an HTML document. We'll only allow `title` and `link` elements, for simplicity.
-- There must be exactly one `title` element, but there can be zero or more `link` elements.
-- Once we start defining `body` elements, we cannot 
-
-
-We can also implement more complex protcols, such as those that can be represented by context-free grammars, with more work. Let's see an example.
+We can implement more complex protcols, such as those that can be represented by context-free or even context-sensitive grammars, using the same technique.
 
 [html]: https://html.spec.whatwg.org/multipage/
 
 [^valid-html]: The HTML specification allows for very lenient parsing of HTML. For example, if we don't define the `head` tag it will usually be inferred. However we aren't going to allow that kind of leniency in our API.
+
+
+### Beyond Equality Constraints
+
+Indexed data is all about equality constraints: proofs that some type parameter is equal to some type.
+However we can go beyond equality constraints with contextual abstraction.
+We can use [`<:<`][scala.<:<] for evidence of a subtyping relationship, 
+and [`NotGiven`][scala.NotGiven] for evidence that no given instance exists.
+Beyond that, we can view any given instance as evidence.
+
+Let's return to our example of length, force, and torque to see how this is useful.
+In the exercise where we defined torque as force times length, we fixed the computation to have SI units.
+Example code is below.
+This is a reasonable thing to do, as other units are insane, but there are a lot of insane people out there.
+
+```scala
+final case class Force[Unit](value: Double) {
+  def *[L](length: Length[L])(using Unit =:= Newtons, L =:= Metres): Torque[NewtonMetres] =
+    Torque(this.value * length.value)
+}
+```
+
+To accomodate other unit types we can create given instances that represent the results of operations of interest.
+In this case we want to represent the result of multiplying a length unit by the force unit.
+In code we can write the following.
+
+```scala mdoc:reset:invisible
+trait Metres
+trait Feet
+trait Newtons
+trait NewtonMetres
+
+final case class Torque[Unit](value: Double)
+```
+```scala mdoc:silent
+// A * B = C
+trait Multiply[A, B, C]
+object Multiply {
+  given Multiply[Metres, Newtons, NewtonMetres] = new Multiply {}
+  
+  // A * B == B * A
+  given commutative[A, B, C](using Multiply[A, B, C]): Multiply[B, A, C] =
+    new Multiply {}
+}
+```
+
+Note that I defined the `commutative` given instance to represent that `Multiply[A, B, C]` is equal to `Multiply[B, A, C]`.
+Now we can define `*` methods on `Length` and `Force` in terms of `Multiply`.
+
+```scala mdoc:silent
+final case class Length[L](value: Double) {
+  def *[F, T](that: Force[F])(using Multiply[L, F, T]): Torque[T] =
+    Torque(this.value * that.value)
+}
+
+final case class Force[F](value: Double) {
+  def *[L, T](that: Length[L])(using Multiply[F, L, T]): Torque[T] =
+    Torque(this.value * that.value)
+}
+```
+
+Here's an example showing it works. 
+Notice in particular that `commutative` generates a `Multiply[Newtons, Metres, NewtonMetres]` instance for us.
+
+```scala mdoc
+Length[Metres](3) * Force[Newtons](4)
+Force[Newtons](3) * Length[Metres](4)
+```

@@ -1,5 +1,7 @@
 [scala.Option]: http://www.scala-lang.org/api/current/scala/Option.html
-[scala.=:=]: https://www.scala-lang.org/api/current/scala/=:=.html#
+[scala.=:=]: https://www.scala-lang.org/api/current/scala/=:=.html
+[scala.<:<]: https://www.scala-lang.org/api/current/scala/<:<.html
+[scala.NotGiven]: https://www.scala-lang.org/api/current/scala/util/NotGiven.html
 
 [cats.package]: http://typelevel.org/cats/api/cats/
 [cats.Apply]: http://typelevel.org/cats/api/cats/Apply.html
