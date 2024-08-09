@@ -197,7 +197,7 @@ final class Html[S <: StructureState, T <: TitleState](
     head: Vector[String],
     body: Vector[String]
 ) {
-  // Head tags -------------------------------------------------------------
+  // Head tags ---------------------------------------------
 
   def head(using S =:= Empty): Html[InHead, WithoutTitle] =
     Html(head, body)
@@ -210,7 +210,7 @@ final class Html[S <: StructureState, T <: TitleState](
   def link(rel: String, href: String)(using S =:= InHead): Html[InHead, T] =
     Html(head :+ s"<link rel=\"$rel\" href=\"$href\"/>", body)
 
-  // Body tags -------------------------------------------------------------
+  // Body tags ---------------------------------------------
 
   def body(using S =:= InHead, T =:= WithTitle): Html[InBody, WithTitle] =
     Html(head, body)
@@ -221,7 +221,7 @@ final class Html[S <: StructureState, T <: TitleState](
   def p(text: String)(using S =:= InBody): Html[InBody, T] =
     Html(head, body :+ s"<p>$text</p>")
 
-  // Interpreter -----------------------------------------------------------
+  // Interpreter ------------------------------------------
 
   override def toString(): String = {
     val h = head.mkString("  <head>\n    ", "\n    ", "\n  </head>")
