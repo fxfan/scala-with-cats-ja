@@ -180,7 +180,7 @@ $$
 
 ![The HTML API protocol](src/pages/indexed-types/html.pdf){#fig:indexed-types:html}
 
-As the code is fairly repetitive we will just present all the code and then discuss the important parts.
+As the code is fairly repetitive I will just present all the code and then discuss the important parts.
 Here's the implementation.
 
 ```scala mdoc:silent
@@ -238,7 +238,7 @@ object Html {
 The important detail is that we factor the state into two components.
 One represents where in the overall structure we are (inside the `head`, inside the `body`, or inside neither).
 The other represents whether we have a `title` element or not.
-We could certainly represent this with one state type variable, but I find the factored representation easier to deal with.
+We could certainly represent this with one state type variable, but I find the factored representation easier to work with.
 
 Here's an example in use.
 
@@ -275,12 +275,12 @@ We can implement more complex protcols, such as those that can be represented by
 Indexed data is all about equality constraints: proofs that some type parameter is equal to some type.
 However we can go beyond equality constraints with contextual abstraction.
 We can use [`<:<`][scala.<:<] for evidence of a subtyping relationship, 
-and [`NotGiven`][scala.NotGiven] for evidence that no given instance exists.
+and [`NotGiven`][scala.NotGiven] for evidence that no given instance exists (with which we can test that types are not equal, for example).
 Beyond that, we can view any given instance as evidence.
 
 Let's return to our example of length, force, and torque to see how this is useful.
 In the exercise where we defined torque as force times length, we fixed the computation to have SI units.
-Example code is below.
+The example code is below.
 This is a reasonable thing to do, as other units are insane, but there are a lot of insane people out there.
 
 ```scala
@@ -296,25 +296,25 @@ In code we can write the following.
 
 ```scala mdoc:reset:invisible
 trait Metres
-trait Feet
 trait Newtons
 trait NewtonMetres
 
 final case class Torque[Unit](value: Double)
 ```
 ```scala mdoc:silent
-// A * B = C
+// Weird units
+trait Feet
+trait Pounds
+trait PoundsFeet
+
+// An instance exists if A * B = C
 trait Multiply[A, B, C]
 object Multiply {
   given Multiply[Metres, Newtons, NewtonMetres] = new Multiply {}
-  
-  // A * B == B * A
-  given commutative[A, B, C](using Multiply[A, B, C]): Multiply[B, A, C] =
-    new Multiply {}
+  given Multiply[Feet, Pounds, PoundsFeet] = new Multiply {}
 }
 ```
 
-Note that I defined the `commutative` given instance to represent that `Multiply[A, B, C]` is equal to `Multiply[B, A, C]`.
 Now we can define `*` methods on `Length` and `Force` in terms of `Multiply`.
 
 ```scala mdoc:silent
@@ -330,9 +330,68 @@ final case class Force[F](value: Double) {
 ```
 
 Here's an example showing it works. 
-Notice in particular that `commutative` generates a `Multiply[Newtons, Metres, NewtonMetres]` instance for us.
 
 ```scala mdoc
 Length[Metres](3) * Force[Newtons](4)
+
+// What is this nonsense?
+Length[Feet](3) * Force[Pounds](4)
+```
+
+Note that's it hard to think of `Multiply` as a type class, as it does not provide *any* methods.
+Viewing it as evidence, however, does make sense.
+
+
+#### Exercise: Commutivitiy {-}
+
+In the example above we defined a `Multiply` type class to represent that metres times newtons gives newton metres.
+Multiplication is commutative. If $A \times B = C$, then $B \times A = C$. 
+However we have not represented this, and if we try newtons times metres, as in the example below, the code will fail.
+
+```scala mdoc:fail
 Force[Newtons](3) * Length[Metres](4)
 ```
+
+Add evidence to `Multiply` that if `Multiply[A, B, C]` exists, then so does `Multiply[B, A, C]`, and show that it solves this problem.
+
+
+<div class="solution">
+```scala mdoc:reset:invisible
+trait Metres
+trait Newtons
+trait NewtonMetres
+
+final case class Torque[Unit](value: Double)
+```
+
+To solve this I defined a given instance called `commutative`, as shown below.
+
+```scala mdoc:silent
+// An instance exists if A * B = C
+trait Multiply[A, B, C]
+object Multiply {
+  given Multiply[Metres, Newtons, NewtonMetres] = new Multiply {}
+  
+  // A * B == B * A
+  given commutative[A, B, C](using Multiply[A, B, C]): Multiply[B, A, C] =
+    new Multiply {}
+}
+```
+```scala mdoc:invisible
+final case class Length[L](value: Double) {
+  def *[F, T](that: Force[F])(using Multiply[L, F, T]): Torque[T] =
+    Torque(this.value * that.value)
+}
+
+final case class Force[F](value: Double) {
+  def *[L, T](that: Length[L])(using Multiply[F, L, T]): Torque[T] =
+    Torque(this.value * that.value)
+}
+```
+
+Now the example works as expected.
+
+```scala mdoc
+Force[Newtons](3) * Length[Metres](4)
+```
+</div>
