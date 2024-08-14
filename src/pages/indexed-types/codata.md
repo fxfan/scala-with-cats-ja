@@ -193,6 +193,8 @@ sealed trait TitleState
 trait WithoutTitle extends TitleState
 trait WithTitle extends TitleState
 
+// Not a case class so external users cannot copy it
+// and break invariants
 final class Html[S <: StructureState, T <: TitleState](
     head: Vector[String],
     body: Vector[String]
@@ -227,7 +229,7 @@ final class Html[S <: StructureState, T <: TitleState](
     val h = head.mkString("  <head>\n    ", "\n    ", "\n  </head>")
     val b = body.mkString("  <body>\n    ", "\n    ", "\n  </body>")
 
-    s"\n<html>\n$h\n$b\n</head>"
+    s"\n<html>\n$h\n$b\n</html>"
   }
 }
 object Html {
@@ -235,10 +237,11 @@ object Html {
 }
 ```
 
-The important detail is that we factor the state into two components.
-One represents where in the overall structure we are (inside the `head`, inside the `body`, or inside neither).
-The other represents whether we have a `title` element or not.
-We could certainly represent this with one state type variable, but I find the factored representation easier to work with.
+The key point is that we factor the state into two components.
+`StructureState` represents where in the overall structure we are (inside the `head`, inside the `body`, or inside neither).
+`TitleState` represents the state when defining the elements inside the `head`, specifically whether we have a `title` element or not.
+We could certainly represent this with one state type variable, but I find the factored representation both easier to work with and easier for other developers to understand.
+We can implement more complex protcols, such as those that can be represented by context-free or even context-sensitive grammars, using the same technique.
 
 Here's an example in use.
 
@@ -261,9 +264,109 @@ Html.empty.head
   .h1("This Shouldn't Work")
 ```
 
-(Note that the error messages are not great. We'll address this in Chapter [@sec:usability]).
+These error messages are not great. We'll address this in Chapter [@sec:usability].
 
-We can implement more complex protcols, such as those that can be represented by context-free or even context-sensitive grammars, using the same technique.
+
+#### Exercise: HTML API Design {-}
+
+I don't particularly like the HTML API we developed above, 
+as the flat method call structure doesn't match the nesting in the HTML structure we're creating.
+I would prefer to write the following.
+
+```scala 
+Html.empty
+  .head(_.title("Our Amazing Webpage"))
+  .body(_.h1("Where Amazing Happens").p("Right here"))
+  .toString
+```
+
+We still require the head is specified before the body, 
+but now the nesting of the method calls matches the nesting of the structure.
+Notice we're still using a Church-encoded representation.
+
+Can you think of how to implement this? 
+You'll need to use indexed codata, and perhaps a bit of inspiration.
+This is a very open ended question, so don't worry if you struggle with it!
+
+<div class="solution">
+Here's how I implemented it.
+The structure is very similar to the original implementation,
+but where we factored the state into type parameters 
+I also factored the implementation into types.
+Notice how we use `Head` and `Body` to accumulate the set of tags that make up the head and body respectively.
+We still need to use indexed codata in some place, but we can avoid it in others.
+For example, the `head` method simply requires a function of type `Head[WithoutTitle] => Head[WithTitle]`.
+
+```scala mdoc:reset:silent
+sealed trait StructureState
+trait NeedsHead extends StructureState
+trait NeedsBody extends StructureState
+trait Complete extends StructureState
+
+sealed trait TitleState
+trait WithoutTitle extends TitleState
+trait WithTitle extends TitleState
+
+final class Head[S <: TitleState](contents: Vector[String]) {
+  def title(text: String)(using S =:= WithoutTitle): Head[WithTitle] =
+    Head(contents :+ s"<title>$text</title>")
+
+  def link(rel: String, href: String): Head[S] =
+    Head(contents :+ s"<link rel=\"$rel\" href=\"$href\"/>")
+
+  override def toString(): String =
+    contents.mkString("  <head>\n    ", "\n    ", "\n  </head>")
+}
+object Head {
+  val empty: Head[WithoutTitle] = Head(Vector.empty)
+}
+
+final class Body(contents: Vector[String]) {
+  def h1(text: String): Body =
+    Body(contents :+ s"<h1>$text</h1>")
+
+  def p(text: String): Body =
+    Body(contents :+ s"<p>$text</p>")
+
+  override def toString(): String =
+    contents.mkString("  <body>\n    ", "\n    ", "\n  </body>")
+}
+object Body {
+  val empty: Body = Body(Vector.empty)
+}
+
+final class Html[S <: StructureState](
+    head: Head[?],
+    body: Body
+) {
+  def head(f: Head[WithoutTitle] => Head[WithTitle])(using
+      S =:= NeedsHead
+  ): Html[NeedsBody] =
+    Html(f(Head.empty), body)
+
+  def body(f: Body => Body)(using S =:= NeedsBody): Html[Complete] =
+    Html(head, f(Body.empty))
+
+  override def toString(): String = {
+    s"\n<html>\n${head.toString()}\n${body.toString()}\n</html>"
+
+  }
+}
+object Html {
+  val empty: Html[NeedsHead] = Html(Head.empty, Body.empty)
+}
+```
+
+As always, we should show that is works.
+Here's the output from the motivating example.
+
+```scala mdoc
+Html.empty
+  .head(_.title("Our Amazing Webpage"))
+  .body(_.h1("Where Amazing Happens").p("Right here"))
+  .toString()
+```
+</div>
 
 [html]: https://html.spec.whatwg.org/multipage/
 
