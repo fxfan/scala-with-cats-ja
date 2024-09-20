@@ -6,6 +6,8 @@ provided by the [`cats.Contravariant`][cats.Contravariant]
 and [`cats.Invariant`][cats.Invariant] type classes respectively.
 Here's a simplified version of the code:
 
+Catsにおける反変および非変ファンクターの実装を見ていこう。これらはそれぞれ [`cats.Contravariant`][cats.Contravariant] および [`cats.Invariant`][cats.Invariant] 型クラスとして提供されている。その定義を簡略化して以下に示す。
+
 ```scala mdoc:invisible
 ```
 
@@ -27,6 +29,8 @@ Cats provides instances for data types that consume parameters,
 including `Eq`, `Show`, and `Function1`.
 Here's an example:
 
+`Contravariant` インスタンスは `Contravariant.apply` メソッドを使って取得できる。Catsは `Eq`、`Show`、`Function1` などパラメータを受け取るデータ型に対して `Contravariant` インスタンスを提供している。以下はその例である。
+
 ```scala mdoc:silent:reset
 import cats.*
 
@@ -43,6 +47,8 @@ showSymbol.show(Symbol("dave"))
 More conveniently, we can use
 [`cats.syntax.contravariant`][cats.syntax.contravariant],
 which provides a `contramap` extension method:
+
+`contramap` 拡張メソッドを提供する [`cats.syntax.contravariant`][cats.syntax.contravariant] を使えば、もっと便利に書くことができる。
 
 ```scala mdoc:silent
 import cats.syntax.contravariant.* // for contramap
@@ -61,6 +67,8 @@ Cats provides an instance of `Invariant` for `Monoid`.
 This is a little different from the `Codec`
 example we introduced in Section [@sec:functors:invariant].
 If you recall, this is what `Monoid` looks like:
+
+Catsはさまざまな型に対する `Invariant` インスタンスを提供しているが、その中に `Monoid` に対するインスタンスがある。これは、[@sec:functors:invariant]節で紹介した `Codec` の例とはすこし異なる。`Monoid` は以下のような型クラスだった。
 
 ```scala
 package cats
@@ -84,6 +92,13 @@ and a `combine` method that works as follows:
 3. combine the `Strings` using `Monoid[String]`;
 4. convert the result back to a `Symbol`.
 
+Scalaの [`Symbol`][link-symbol] 型に対して `Monoid` を作成したいとする。Catsは `Symbol` に対する `Monoid` インスタンスを提供していないが、それと似た型である `String` に対してなら提供している。ここで新たに定義する `Monoid` インスタンスの `empty` メソッドは空の `String` を用いて実装することができ、`combine` メソッドは以下のように動作する。
+
+1. 二つの `Symbol` をパラメータとして受け取る
+2. 二つの `Symbol` 型パラメータをそれぞれ `String` 値に変換する
+3. `Monoid[String]` を使って二つの `String` 値を結合する
+4. 得られた `String` 値を `Symbol` 値に戻す
+
 We can implement `combine` using `imap`,
 passing functions of type `String => Symbol`
 and `Symbol => String` as parameters.
@@ -91,10 +106,12 @@ Here' the code, written out using
 the `imap` extension method
 provided by `cats.syntax.invariant`:
 
+`imap` を使用してこの `combine` を実装することができる。`imap` には `String => Symbol` 型と `Symbol => String` 型の関数をパラメータとして渡す。以下は、`cats.syntax.invariant` によって提供される `imap` 拡張メソッドを使って記述したコードである。
+
 ```scala mdoc:silent
 import cats.*
-import cats.syntax.invariant.* // for imap
-import cats.syntax.semigroup.* // for |+|
+import cats.syntax.invariant.* // imap
+import cats.syntax.semigroup.* // |+|
 
 given symbolMonoid: Monoid[Symbol] =
   Monoid[String].imap(Symbol.apply)(_.name)

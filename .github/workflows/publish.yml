@@ -66,8 +66,14 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y ttf-bitstream-vera
 
-      - name: Generate book
-        run: sbt all
+      - name: Generate book in HTML format
+        run: sbt html
+
+      - name: Generate book in EPUB format
+        run: sbt epub
+      
+      - name: Generate book in PDF format
+        run: sbt pdf
 
       - name: Copy book to site
         run: |

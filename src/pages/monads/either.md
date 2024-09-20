@@ -7,7 +7,9 @@ many people didn't consider `Either` a monad
 because it didn't have `map` and `flatMap` methods.
 In Scala 2.12, however, `Either` became *right biased*.
 
-### Left and Right Bias
+もうひとつ有用なモナドを見てみよう。Scala標準ライブラリの `Either` 型である。Scala 2.11以前は、`Either` は `map` や `flatMap` メソッドをもたなかったため、多くの人は `Either` をモナドとは考えていなかった。しかし、Scala 2.12から、`Either`  は*右バイアス（right biased）*となった。
+
+### 左バイアスと右バイアス Left and Right Bias
 
 In Scala 2.11, `Either` had no default
 `map` or `flatMap` method.
@@ -15,6 +17,8 @@ This made the Scala 2.11 version of `Either`
 inconvenient to use in for comprehensions.
 We had to insert calls to `.right`
 in every generator clause:
+
+Scala 2.11では、`Either` はデフォルトの `map` や `flatMap` メソッドをもっておらず、for内包表記で使うには不便だった。各ジェネレーター句で `.right` 呼び出しを挿入する必要があったのである。
 
 ```scala mdoc:silent:reset-object
 val either1: Either[String, Int] = Right(10)
@@ -34,6 +38,8 @@ that the right side represents the success case
 and thus supports `map` and `flatMap` directly.
 This makes for comprehensions much more pleasant:
 
+Scala 2.12で `Either` は再設計された。現在の `Either` では、右側が成功ケースを表すという決定がなされ、それに伴い `map` と `flatMap` が直接サポートされている。これにより、for内包表記における `Either` の利用は非常に快適になった。
+
 ```scala mdoc
 for {
   a <- either1
@@ -48,8 +54,10 @@ in all supported versions of Scala.
 In Scala 2.12+ we can either omit this import
 or leave it in place without breaking anything:
 
+Catsはこの動作を `cats.syntax.either` のインポートを通じてScala 2.11にバックポートし、サポートされているすべてのScalaバージョンで右バイアスの `Either` を使用できるようにしている。Scala 2.12以降では、このインポートを省略することもできるし、残しておいても不都合が生じることはない。
+
 ```scala mdoc:silent
-import cats.syntax.either.* // for map and flatMap
+import cats.syntax.either.* // map と flatMap
 
 for {
   a <- either1
@@ -57,14 +65,16 @@ for {
 } yield a + b
 ```
 
-### Creating Instances
+### インスタンスの作成 Creating Instances
 
 In addition to creating instances of `Left` and `Right` directly,
 we can also import the `asLeft` and `asRight` extension methods
 from [`cats.syntax.either`][cats.syntax.either]:
 
+直接 `Left` と `Right` のインスタンスを作成する他に、[`cats.syntax.either`][cats.syntax.either] から拡張メソッドの `asLeft` と `asRight` をインポートして使用することもできる。
+
 ```scala mdoc:silent
-import cats.syntax.either.* // for asRight
+import cats.syntax.either.* // asRight
 ```
 
 ```scala mdoc
@@ -84,6 +94,8 @@ instead of `Left` and `Right`.
 This helps avoid type inference problems
 caused by over-narrowing,
 like the issue in the example below:
+
+これらのスマートコンストラクタには `Left.apply` や `Right.apply` にない利点がある。それは、`Left` や `Right` ではなく、`Either` 型の結果を返すためである。これにより、過度に型を狭めることによる型推論の問題を回避できる。以下の例に示すような問題を防ぐのに役立つ。
 
 ```scala mdoc:fail
 def countPositive(nums: List[Int]) =
