@@ -1,6 +1,6 @@
 import scala.sys.process._
 
-ThisBuild / name := "scala-with-cats"
+ThisBuild / name := "scala-with-cats-ja"
 ThisBuild / organization := "com.scalawithcats"
 ThisBuild / version := "0.0.1"
 

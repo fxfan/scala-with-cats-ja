@@ -1,16 +1,20 @@
-## Functors in Cats
+## Catsにおけるファンクター Functors in Cats
 
 Let's look at the implementation of functors in Cats.
 We'll examine the same aspects we did for monoids:
 the *type class*, the *instances*, and the *syntax*.
 
-### The Functor Type Class and Instances
+Catsにおけるファンクターの実装を見ていこう。調べるのは、モノイドのときと同じ3つの側面、*型クラス*、*インスタンス*、*構文*である。
+
+### ファンクターの型クラスとインスタンス The Functor Type Class and Instances
 
 The functor type class is [`cats.Functor`][cats.Functor].
 We obtain instances using the standard `Functor.apply`
 method on the companion object.
 As usual, default instances are found on companion objects
 and do not have to be explicity imported:
+
+ファンクター型クラスは [`cats.Functor`][cats.Functor] として定義されている。インスタンスは、Catsの標準的な設計に従い、コンパニオンオブジェクト上の `Functor.apply` メソッドを使って取得する。通常通り、デフォルトのインスタンスはコンパニオンオブジェクト上に置かれており、明示的にインポートする必要はない。
 
 ```scala mdoc:silent:reset-object
 import cats.*
@@ -29,6 +33,8 @@ val option2 = Functor[Option].map(option1)(_.toString)
 which converts a function of type `A => B`
 to one that operates over a functor and has type `F[A] => F[B]`:
 
+`Functor` は `lift` というメソッドを提供している。これは、`A => B` 型の関数を、ファンクター内の値を操作する `F[A] => F[B]` 型の関数に変換する。
+
 ```scala mdoc
 val func = (x: Int) => x + 1
 
@@ -40,11 +46,13 @@ liftedFunc(Option(1))
 The `as` method is the other method you are likely to use.
 It replaces with value inside the `Functor` with the given value.
 
+もうひとつよく使うメソッドとして `as` がある。これは、ファンクター内の値を指定された値に置き換えるメソッドである。
+
 ```scala mdoc
 Functor[List].as(list1, "As")
 ```
 
-### Functor Syntax
+### ファンクターの構文 Functor Syntax
 
 The main method provided by the syntax for `Functor` is `map`.
 It's difficult to demonstrate this with `Options` and `Lists`
@@ -53,10 +61,14 @@ and the Scala compiler will always prefer
 a built-in method over an extension method.
 We'll work around this with two examples.
 
+`Functor` の構文によって提供される主なメソッドは `map` だが、これを `Option` や `List` を使って実演するのは難しい。それらのクラスには元々 `map` メソッドが組み込まれており、そしてScalaコンパイラは常に拡張メソッドよりも組み込みのメソッドを優先するからである。以下では、このような問題をもたない例を二つ挙げて説明する。
+
 First let's look at mapping over functions.
 Scala's `Function1` type doesn't have a `map` method
 (it's called `andThen` instead)
 so there are no naming conflicts:
+
+まずは関数に対する変換を見てみよう。Scalaの `Function1` 型には `map` メソッドが存在しない（同じ機能をもつメソッドは `andThen` と呼ばれる）ので、ファンクターの構文と名前が衝突することはない。
 
 ```scala mdoc:silent
 val func1 = (a: Int) => a + 1

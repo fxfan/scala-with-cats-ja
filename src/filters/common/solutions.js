@@ -259,7 +259,7 @@ function createFilter() {
             const solutionHeadingTemplate = metadata.getString(
               meta,
               ["solutions", "solutionHeadingTemplate"],
-              "Solution to: $title $part"
+              "【解】 $title $part"
             );
 
             const solutionHeadingLevel = metadata.getInt(
