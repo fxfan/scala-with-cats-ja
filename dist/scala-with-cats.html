@@ -6999,8 +6999,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         代数的データ型の構築</a></li>
         <li><a href="#scalaにおける代数的データ型" id="toc-scalaにおける代数的データ型"><span class="toc-section-number">2.2</span>
         Scalaにおける代数的データ型</a></li>
-        <li><a href="#structural-recursion" id="toc-structural-recursion"><span class="toc-section-number">2.3</span> Structural
-        Recursion</a></li>
+        <li><a href="#構造的再帰" id="toc-構造的再帰"><span class="toc-section-number">2.3</span> 構造的再帰</a></li>
         <li><a href="#structural-corecursion" id="toc-structural-corecursion"><span class="toc-section-number">2.4</span> Structural
         Corecursion</a></li>
         <li><a href="#the-algebra-of-algebraic-data-types" id="toc-the-algebra-of-algebraic-data-types"><span class="toc-section-number">2.5</span> The Algebra of Algebraic
@@ -7897,7 +7896,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">C</span><span class="op">()</span> <span class="kw">extends</span> A</span></code></pre></div>
     <p>Scala 2 has several little tricks to defining algebraic data
     types.</p>
-    <p>Scala2で代数的データ型を定義するにあたっては小さなトリックがいくつかあります。</p>
+    <p>Scala2で代数的データ型を定義するにあたっては小さなテクニックがいくつかあります。</p>
     <p>Firstly, instead of using a <code>sealed abstract class</code>
     you can use a <code>sealed trait</code>. There isn’t much practical
     difference between the two. When teaching beginners I’ll often use
@@ -7909,20 +7908,22 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     meaning of a sum type.</p>
     <p>まず、<code>sealed abstract class</code> の代わりに
     <code>sealed trait</code>
-    を使用することができます。両者の間には大きな実用的差異はありません。初心者に教えるときには、<code>abstract class</code>
-    を紹介する手間を避けるために、私はよく <code>sealed trait</code>
-    を使います。<code>sealed abstract class</code>
-    の方が若干パフォーマンスが良く、Javaとの互換性が高いと思いますが、テストして確認したわけではありません。また、<code>sealed abstract class</code>
+    を使用できます。この二つの間には大きな実用的差異はありません。初心者に教える際には、私はよく
+    <code>sealed trait</code> を使います。<code>abstract class</code>
+    を紹介する手間を避けるためです。<code>sealed abstract class</code>
+    の方が若干パフォーマンスが良く、Javaとの互換性が高いと思いますが、テストをして確認したわけではありません。また、<code>sealed abstract class</code>
     の方が意味的に和型に近いとも考えています。</p>
     <p>For extra style points we can
     <code>extend Product with Serializable</code> from
     <code>sealed abstract class</code>. Compare the reported types below
     with and without this little addition.</p>
-    <p>スタイルをさらに高めるために、sealed abstract class から Product
-    と Serializable
-    を拡張することができます。このちょっとした追加がある場合とない場合で、報告される型を比較してみてください。」</p>
+    <p>スタイルをさらに高めるために、<code>sealed abstract class</code>
+    で <code>extends Product with Serializable</code>
+    できます。このちょっとした追加がある場合とない場合で、推論される型を比較してみてください。</p>
     <p>Let’s first see the code without extending <code>Product</code>
     and <code>Serializable</code>.</p>
+    <p>まずは <code>Product</code> と <code>Serializable</code>
+    を拡張しないコードを見てみましょう。</p>
     <div class="sourceCode" id="cb16"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> A</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">B</span><span class="op">()</span> <span class="kw">extends</span> A</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">C</span><span class="op">()</span> <span class="kw">extends</span> A</span></code></pre></div>
@@ -7930,48 +7931,68 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">// list: List[A extends Product with Serializable] = List(B(), C())</span></span></code></pre></div>
     <p>Notice how the type of <code>list</code> includes
     <code>Product</code> and <code>Serializable</code>.</p>
+    <p><code>list</code> 変数の型に <code>Product</code> と
+    <code>Serializable</code> が含まれている点に注目してください。</p>
     <p>Now we have extending <code>Product</code> and
     <code>Serializable</code>.</p>
+    <p>そこで <code>A</code> に <code>Product</code> と
+    <code>Serializable</code> を継承させます。</p>
     <div class="sourceCode" id="cb18"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> A <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">B</span><span class="op">()</span> <span class="kw">extends</span> A</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">C</span><span class="op">()</span> <span class="kw">extends</span> A</span></code></pre></div>
     <div class="sourceCode" id="cb19"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> list <span class="op">=</span> <span class="ex">List</span><span class="op">(</span><span class="fu">B</span><span class="op">(),</span> <span class="fu">C</span><span class="op">())</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">// list: List[A] = List(B(), C())</span></span></code></pre></div>
     <p>Much easier to read!</p>
+    <p>これで推論される型がシンプルに読みやすくなります。</p>
     <p>You’ll only see this in Scala 2. Scala 3 has the concept of
     <strong>transparent traits</strong>, which aren’t reported in
     inferred types, so you’ll see the same output in Scala 3 no matter
     whether you add <code>Product</code> and <code>Serializable</code>
     or not.</p>
+    <p>これはScala2でのみ見られます。Scala3には<strong>transparentトレイト</strong>という概念があり、このトレイトは型推論で報告される型には反映されません。そのため、Scala3では
+    <code>Product</code> と <code>Serializable</code>
+    を追加してもしなくても同じ結果が得られます。</p>
     <p>Finally, if a logical and holds no data we can use a
     <code>case object</code> instead of a <code>case class</code>. For
     example, if we’re defining some type <code>A</code> that holds no
     data we can just write</p>
+    <p>最後に、論理積がデータをひとつも保持しない場合、<code>case class</code>
+    の代わりに <code>case object</code>
+    を使用することができます。例えば、データを保持しない型
+    <code>A</code> を定義する場合、次のように記述できます。</p>
     <div class="sourceCode" id="cb20"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">object</span> A</span></code></pre></div>
     <p>There is no need to mark the <code>case object</code> as
     <code>final</code>, as objects cannot be extended.</p>
-    <h3 data-number="2.2.3" id="examples"><span class="header-section-number">2.2.3</span> Examples</h3>
+    <p>オブジェクトは拡張できませんから、<code>case object</code> を
+    <code>final</code> としてマークする必要はありません。</p>
+    <h3 data-number="2.2.3" id="例"><span class="header-section-number">2.2.3</span> 例</h3>
     <p>Let’s make the discussion above more concrete with some
     examples.</p>
-    <h4 data-number="2.2.3.1" id="role-and-user"><span class="header-section-number">2.2.3.1</span> Role and User</h4>
+    <p>いくつか例を挙げて、ここまでの議論をもっと具体的に考えてみましょう。</p>
+    <h4 data-number="2.2.3.1" id="roleとuser"><span class="header-section-number">2.2.3.1</span> RoleとUser</h4>
     <p>In the discussion forum example, we said a role is normal,
     moderator, or administrator. This is a logical or, so we can
     directly translate it to Scala using the appropriate pattern. In
     Scala 3 we write</p>
+    <p>ディスカッションフォーラムの例では、ロールは一般ユーザ・モデレータ・管理者のいずれかであるとしました。これは論理和です。適切なパターンを使って、機械的にScalaに翻訳することができます。Scala3なら次のように書けます。</p>
     <div class="sourceCode" id="cb21"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>enum <span class="ex">Role</span> <span class="op">{</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> Normal</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> Moderator</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> Administrator</span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-    <p>In Scala 2 we write</p>
+    <p>Scala2の場合は以下のようになります。</p>
     <div class="sourceCode" id="cb22"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> <span class="ex">Role</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">object</span> Normal <span class="kw">extends</span> <span class="ex">Role</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">object</span> Moderator <span class="kw">extends</span> <span class="ex">Role</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">object</span> Administrator <span class="kw">extends</span> <span class="ex">Role</span></span></code></pre></div>
     <p>The cases within a role don’t hold any data, so we used a
     <code>case object</code> in the Scala 2 code.</p>
+    <p>各ロールはデータをひとつも保持しないため、Scala2のコードでは
+    <code>case class</code> ではなく <code>case object</code>
+    を使いました。</p>
     <p>We defined a user as a screen name, an email address, a password,
     and a role. In both Scala 3 and Scala 2 this becomes</p>
+    <p>ユーザは、表示名とメールアドレスとパスワードとロールから構成されると定義しました。これはScala3とScala2のどちらにおいても次のようになります。</p>
     <div class="sourceCode" id="cb23"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">User</span><span class="op">(</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  screenName<span class="op">:</span> <span class="ex">String</span><span class="op">,</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  emailAddress<span class="op">:</span> <span class="ex">String</span><span class="op">,</span></span>
@@ -7981,17 +8002,22 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>I’ve used <code>String</code> to represent most of the data
     within a <code>User</code>, but in real code we might want to define
     distinct types for each field.</p>
-    <h4 data-number="2.2.3.2" id="paths"><span class="header-section-number">2.2.3.2</span> Paths</h4>
+    <p><code>User</code> が保持するデータを主に <code>String</code>
+    型で表現しましたが、実際のコードでは各フィールドに対して個別の型を定義したほうがよいかもしれません。</p>
+    <h4 data-number="2.2.3.2" id="path"><span class="header-section-number">2.2.3.2</span> Path</h4>
     <p>We defined a path as a sequence of actions of a virtual pen. The
     possible actions are straight lines, Bezier curves, or movement that
     doesn’t result in visible output. A straight line has an end point
     (the starting point is implicit), a Bezier curve has two control
     points and an end point, and a move has an end point.</p>
+    <p>私たちは、パスを仮想ペンの動作シーケンスとして定義しました。可能な動作には、直線、ベジエ曲線、または目に見える出力を伴わない移動があります。直線には終点があり（始点は自動的に決まります）、ベジエ曲線には2つの制御点と終点があり、移動には終点があります。</p>
     <p>This has a straightforward translation to Scala. We can represent
     paths as the following in both Scala 3 and Scala 2.</p>
+    <p>これらはストレートにScalaで表現する方法があります。Scala3とScala2、どちらにおいてもパスは次のように表現できます。</p>
     <div class="sourceCode" id="cb24"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">Path</span><span class="op">(</span>actions<span class="op">:</span> <span class="bu">Seq</span><span class="op">[</span><span class="ex">Action</span><span class="op">])</span></span></code></pre></div>
     <p>An action is a logical or, so we have different representations
     in Scala 3 and Scala 2. In Scala 3 we’d write</p>
+    <p>ペンの動作は論理和ですので、Scala3とScala2で表現の仕方はことなります。Scala3では次のように記述できます。</p>
     <div class="sourceCode" id="cb25"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>enum <span class="ex">Action</span> <span class="op">{</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Line</span><span class="op">(</span>end<span class="op">:</span> <span class="ex">Point</span><span class="op">)</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Curve</span><span class="op">(</span>cp1<span class="op">:</span> <span class="ex">Point</span><span class="op">,</span> cp2<span class="op">:</span> <span class="ex">Point</span><span class="op">,</span> end<span class="op">:</span> <span class="ex">Point</span><span class="op">)</span></span>
@@ -7999,25 +8025,33 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>where <code>Point</code> is a suitable representation of a
     two-dimensional point.</p>
+    <p>なお、ここで用いている
+    <code>Point</code>は二次元座標を表現したクラスであるとします。</p>
     <p>In Scala 2 we have to go with the more verbose</p>
+    <p>Scala2ではもっと冗長な表現方法を用いなくてはなりません。</p>
     <div class="sourceCode" id="cb26"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> <span class="ex">Action</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span> </span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="ex">Line</span><span class="op">(</span>end<span class="op">:</span> <span class="ex">Point</span><span class="op">)</span> <span class="kw">extends</span> <span class="ex">Action</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">Curve</span><span class="op">(</span>cp1<span class="op">:</span> <span class="ex">Point</span><span class="op">,</span> cp2<span class="op">:</span> <span class="ex">Point</span><span class="op">,</span> end<span class="op">:</span> <span class="ex">Point</span><span class="op">)</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">extends</span> <span class="ex">Action</span></span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="fu">Move</span><span class="op">(</span>end<span class="op">:</span> <span class="ex">Point</span><span class="op">)</span> <span class="kw">extends</span> <span class="ex">Action</span></span></code></pre></div>
-    <h3 data-number="2.2.4" id="representing-adts-in-scala-3"><span class="header-section-number">2.2.4</span> Representing ADTs in
-    Scala 3</h3>
+    <h3 data-number="2.2.4" id="scala3における代数的データ型の表現"><span class="header-section-number">2.2.4</span>
+    Scala3における代数的データ型の表現</h3>
     <p>We’ve seen that the Scala 3 representation of algebraic data
     types, using <code>enum</code>, is more compact than the Scala 2
     representation. However the Scala 2 representation is still
     available. Should you ever use the Scala 2 representation in Scala
     3? There are a few cases where you may want to:</p>
+    <p>Scala3の <code>enum</code>
+    を使用した代数的データ型の表現が、Scala2のそれよりもコンパクトであることを見てきました。しかし、Scala2の表現は依然として使用可能です。では、Scala3であえてScala2の表現を使うべき場面はあるのかというと、いくつか考慮すべきケースがあります。</p>
     <ul>
     <li><p>Scala 3’s doesn’t currently support nested <code>enums</code>
     (<code>enums</code> within <code>enums</code>). This may change in
     the future, but right now it can be more convenient to use the Scala
     2 representation to express this without having to convert to
     disjunctive normal form.</p></li>
+    <li><p>現在のところ、Scala3ではネストされた
+    <code>enum</code>（<code>enum</code> 内の
+    <code>enum</code>）をサポートしていません。これは今後変更されるかもしれませんが、現時点では、これを選言標準形に変換することなく表現するために、Scala2の方法を使用する方が便利な場合があります。</p></li>
     <li><p>Scala 2’s representation can express things that are almost,
     but not quite, algebraic data types. For example, if you define a
     method on an <code>enum</code> you must be able to define it for all
@@ -8026,67 +8060,99 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     case. To implement this you’ll need to use the Scala 2
     representation instead.</p></li>
     </ul>
-    <h4 class="unnumbered" id="exercise-tree">Exercise: Tree</h4>
+    <p>Scala2の表現方法では、代数的データ型に近いが完全にそうとは言えないものを表現することができます。例えば、<code>enum</code>
+    にメソッドを定義する場合、そのメソッドは <code>enum</code>
+    のすべてのメンバーに対して意味をなさなくてはなりません。ですが、場合によっては、特定のメンバーのみにメソッドを定義したいことがあります。このような場合、Scala2の表現方法を使用する必要があります。</p>
+    <h4 class="unnumbered" id="演習-木構造">演習: 木構造</h4>
     <p>To gain a bit of practice defining algebraic data types, code the
     following description in Scala (your choice of version, or do
     both.)</p>
+    <p>代数的データ型の定義に慣れるために、次の説明をScalaのコードで書いてみましょう（バージョンは自由に選んでください。両方のバージョンで試しても構いません）。</p>
     <p>A <code>Tree</code> with elements of type <code>A</code> is:</p>
+    <p><code>A</code> 型のデータをもつ <code>Tree</code>
+    においては、</p>
     <ul>
-    <li>a <code>Leaf</code> with a value of type <code>A</code>; or</li>
-    <li>a <code>Node</code> with a left and right child, which are both
-    <code>Trees</code> with elements of type <code>A</code>.</li>
+    <li><p>a <code>Leaf</code> with a value of type <code>A</code>;
+    or</p></li>
+    <li><p>a <code>Node</code> with a left and right child, which are
+    both <code>Trees</code> with elements of type
+    <code>A</code>.</p></li>
+    <li><p><code>A</code> 型の値を保持する
+    <code>Leaf</code>、もしくは</p></li>
+    <li><p><code>A</code> 型のデータをもつ <code>Tree</code>
+    を左右の子として保持する <code>Node</code></p></li>
     </ul>
     <div class="solution">
     <p>We can directly translate this binary tree into Scala. Here’s the
     Scala 3 version.</p>
+    <p>このような二分木は機械的にScalaのコードに落とし込むことが可能です。以下はScala3で書いたコードです。</p>
     <div class="sourceCode" id="cb27"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>In the Scala 2 encoding we write</p>
+    <p>Scala2なら次のようになります。</p>
     <div class="sourceCode" id="cb28"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> Tree<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> Leaf<span class="op">[</span>A<span class="op">](</span>value<span class="op">:</span> A<span class="op">)</span> <span class="kw">extends</span> Tree<span class="op">[</span>A<span class="op">]</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="ex">Node</span><span class="op">[</span>A<span class="op">](</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span> <span class="kw">extends</span> Tree<span class="op">[</span>A<span class="op">]</span></span></code></pre></div>
     </div>
-    <h2 data-number="2.3" id="structural-recursion"><span class="header-section-number">2.3</span> Structural Recursion</h2>
+    <h2 data-number="2.3" id="構造的再帰"><span class="header-section-number">2.3</span> 構造的再帰</h2>
     <p>Structural recursion is our second programming strategy.
     Algebraic data types tell us how to create data given a certain
     structure. Structural recursion tells us how to transform an
     algebraic data types into any other type. Given an algebraic data
     type, the transformation can be implemented using structural
     recursion.</p>
+    <p>二つ目のプログラミング戦略は構造的再帰です。代数的データ型は、特定の構造に基づいてデータをどのように作成するかを示してくれました。構造的再帰は代数的データ型を他の任意の型に変換する方法を教えてくれます。代数的データ型が与えられた場合、その変換は構造的再帰を使って実装することができます。</p>
     <p>As with algebraic data types, there is distinction between the
     concept of structural recursion and the implementation in Scala.
     This is more obvious because there are two ways to implement
     structural recursion in Scala: via pattern matching or via dynamic
     dispatch. We’ll look at each in turn.</p>
-    <h3 data-number="2.3.1" id="pattern-matching"><span class="header-section-number">2.3.1</span> Pattern Matching</h3>
+    <p>代数的データ型と同様、構造的再帰の概念とScalaでの実装は区別して考える必要があります。これがより明確になるのは、Scalaには構造的再帰を実装する方法が二つあるためです。それは、パターンマッチングを使う方法と動的ディスパッチを使う方法です。これらを順に見ていきましょう。</p>
+    <h3 data-number="2.3.1" id="パターンマッチング"><span class="header-section-number">2.3.1</span> パターンマッチング</h3>
     <p>I’m assuming you’re familiar with pattern matching in Scala, so
     I’ll only talk about how to implement structural recursion using
     pattern matching. Remember there are two kinds of algebraic data
     types: sum types (logical ors) and product types (logical ands). We
     have corresponding rules for structural recursion implemented using
     pattern matching:</p>
+    <p>Scalaにおけるパターンマッチングに関しては基本的な知識があることを前提としていますので、ここではパターンマッチングを使って構造的再帰をどのように実装するかについてのみ説明します。代数的データ型には和型（論理和）と積型（論理積）の二種類があったことを思い出してください。構造的再帰をパターンマッチングで実装する際には、この二種類それぞれに対応するルールがあります。</p>
     <ol type="1">
-    <li>For each branch in a sum type we have a distinct
-    <code>case</code> in the pattern match; and</li>
-    <li>Each <code>case</code> corresponds to a product type with the
-    pattern written in the usual way.</li>
+    <li><p>For each branch in a sum type we have a distinct
+    <code>case</code> in the pattern match; and</p></li>
+    <li><p>Each <code>case</code> corresponds to a product type with the
+    pattern written in the usual way.</p></li>
+    <li><p>和型の各分岐は、パターンマッチ内で別々の <code>case</code>
+    となります</p></li>
+    <li><p>各 <code>case</code>
+    は積型に対応し、通常の方法でパターンが書かれます</p></li>
     </ol>
     <p>Let’s see this in code, using an example ADT that includes both
     sum and product types:</p>
+    <p>これをコードで見てみましょう。次のような、和型と積型の両方を組み合わせた代数的データ型の例を使います。</p>
     <ul>
-    <li><code>A</code> is <code>B</code> or <code>C</code>; and</li>
-    <li><code>B</code> is <code>D</code> and <code>E</code>; and</li>
-    <li><code>C</code> is <code>F</code> and <code>G</code></li>
+    <li><p><code>A</code> is <code>B</code> or <code>C</code>;
+    and</p></li>
+    <li><p><code>B</code> is <code>D</code> and <code>E</code>;
+    and</p></li>
+    <li><p><code>C</code> is <code>F</code> and <code>G</code></p></li>
+    <li><p><code>A</code> は <code>B</code> または <code>C</code>
+    の和型</p></li>
+    <li><p><code>B</code> は <code>D</code> および <code>E</code>
+    の積型</p></li>
+    <li><p><code>C</code> は <code>F</code> および <code>G</code>
+    の積型</p></li>
     </ul>
     <p>which we represent (in Scala 3) as</p>
+    <p>Scala3ではこれは次のように表現されます。</p>
     <div class="sourceCode" id="cb29"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>enum A <span class="op">{</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">B</span><span class="op">(</span>d<span class="op">:</span> D<span class="op">,</span> e<span class="op">:</span> E<span class="op">)</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">C</span><span class="op">(</span>f<span class="op">:</span> F<span class="op">,</span> g<span class="op">:</span> G<span class="op">)</span></span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>Following the rules above means a structural recursion would look
     like</p>
+    <p>上述したルールにしたがうと、構造的再帰は以下のようになります。</p>
     <div class="sourceCode" id="cb30"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>anA <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">B</span><span class="op">(</span>d<span class="op">,</span> e<span class="op">)</span> <span class="op">=&gt;</span> <span class="op">???</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">C</span><span class="op">(</span>f<span class="op">,</span> g<span class="op">)</span> <span class="op">=&gt;</span> <span class="op">???</span></span>
@@ -8094,25 +8160,37 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>The <code>???</code> bits are problem specific, and we cannot
     give a general solution for them. However we’ll soon see strategies
     to help create them.</p>
-    <h3 data-number="2.3.2" id="the-recursion-in-structural-recursion"><span class="header-section-number">2.3.2</span> The Recursion in
-    Structural Recursion</h3>
+    <p><code>???</code>
+    の部分をどう書くかは何をやりたいか次第であり、一般的な解決策を示すことはできませんが、これらを作成するための戦略はすぐに学ぶことになります。</p>
+    <h3 data-number="2.3.2" id="構造的再帰における再帰"><span class="header-section-number">2.3.2</span>
+    構造的再帰における再帰</h3>
     <p>At this point you might be wondering where the recursion in
     structural recursion comes from. This is an additional rule for
     recursion: whenever the data is recursive the method is recursive in
     the same place.</p>
+    <p>この時点では、構造的再帰における「再帰」という言葉がどこから来ているのか疑問に思うかもしれません。再帰には追加のルールがあります。データが再帰的である場合、そのメソッドも同じ箇所で再帰的になります。</p>
     <p>Let’s see this in action for a real data type.</p>
+    <p>これを実際のデータ型で見てみましょう。</p>
     <p>We can define a list with elements of type <code>A</code> as:</p>
+    <p><code>A</code>
+    型の要素をもつリストは以下のように定義できます。</p>
     <ul>
-    <li>the empty list; or</li>
-    <li>a pair containing an <code>A</code> and a tail, which is a list
-    of <code>A</code>.</li>
+    <li><p>the empty list; or</p></li>
+    <li><p>a pair containing an <code>A</code> and a tail, which is a
+    list of <code>A</code>.</p></li>
+    <li><p>リストは空であるか、もしくは</p></li>
+    <li><p>ひとつの <code>A</code> 型の値と、それ自体が <code>A</code>
+    のリストである残りの部分のペア</p></li>
     </ul>
     <p>This is exactly the definition of <code>List</code> in the
     standard library. Notice it’s an algebraic data type as it consists
     of sums and products. It is also recursive: in the pair case the
     tail is itself a list.</p>
+    <p>これは標準ライブラリにおける <code>List</code>
+    の定義そのものです。和型と積型から構成された代数的データ型である点に注目してください。この構造は再帰的でもあります。ペアのケースでは、末尾の部分自体がひとつのリストになっています。</p>
     <p>We can directly translate this to code, using the strategy for
     algebraic data types we saw previously. In Scala 3 we write</p>
+    <p>先に学んだ代数的データ型の戦略を使って、これを直接コードに翻訳することができます。Scala3では次のようになります。</p>
     <div class="sourceCode" id="cb31"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8120,6 +8198,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>Let’s implement <code>map</code> for <code>MyList</code>. We
     start with the method skeleton specifying just the name and
     types.</p>
+    <p>試しに <code>MyList</code> に <code>map</code>
+    を実装してみましょう。まずは名前と型のみを指定したメソッドの骨組みから始めます。</p>
     <div class="sourceCode" id="cb32"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8132,6 +8212,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     algebraic data type, <code>map</code> is transforming this algebraic
     data type, and therefore structural recursion is applicable. We now
     apply the structural recursion strategy, giving us</p>
+    <p>最初のステップは、<code>map</code>
+    が構造的再帰を使って記述可能であると認識することです。<code>MyList</code>
+    は代数的データ型であり、<code>map</code>
+    はこの代数的データ型を変換しているため、構造的再帰が適用できます。実際に構造的再帰の戦略を適用すると、次のようになります。</p>
     <div class="sourceCode" id="cb33"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8145,6 +8229,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>I forgot the recursion rule! The data is recursive in the
     <code>tail</code> of <code>Pair</code>, so <code>map</code> is
     recursive there as well.</p>
+    <p>再帰のルールについても考慮しておく必要がありました。このデータは
+    <code>Pair</code> の <code>tail</code>
+    の部分で再帰的なので、<code>map</code>
+    もそこで再帰的になります。</p>
     <div class="sourceCode" id="cb34"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8157,22 +8245,34 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>I left the <code>???</code> to indicate that we haven’t finished
     with that case.</p>
+    <p><code>???</code>
+    は、その部分のコードがまだ完成していないことを示しています。</p>
     <p>Now we can move on to the problem specific parts. Here we have
     three strategies to help us:</p>
+    <p>次に、取り組んでいる課題に特有の部分に進むことができます。ここでは、以下の3つの戦略が役立ちます。</p>
     <ol type="1">
-    <li>reasoning independently by case;</li>
-    <li>assuming recursion the is correct; and</li>
-    <li>following the types</li>
+    <li><p>reasoning independently by case;</p></li>
+    <li><p>assuming recursion the is correct; and</p></li>
+    <li><p>following the types</p></li>
+    <li><p>各ケースを独立して考えること</p></li>
+    <li><p>再帰呼び出しの結果が正しいと仮定すること</p></li>
+    <li><p>型に従うこと</p></li>
     </ol>
     <p>The first two are specific to structural recursion, while the
     final one is a general strategy we can use in many situations. Let’s
     briefly discuss each and then see how they apply to our example.</p>
+    <p>最初の二つは構造的再帰に特有のもので、最後の一つは多くの状況で使える一般的な戦略です。それぞれを簡単に説明し、今回の例にどのように適用するかを見ていきましょう。</p>
     <p>The first strategy is relatively simple: when we consider the
     problem specific code on the right hand side of a pattern matching
     <code>case</code>, we can ignore the code in any other pattern match
     cases. So, for example, when considering the case for
     <code>Empty</code> above we don’t need to worry about the case for
     <code>Pair</code>, and vice versa.</p>
+    <p>最初の戦略は比較的シンプルです。パターンマッチングの
+    <code>case</code>
+    の右側にある問題固有のコードを考える際、他のパターンマッチングのケースにあるコードは無視してかまいません。例えば、上の
+    <code>Empty</code> のケースを考えるとき、<code>Pair</code>
+    のケースを気にする必要はありませんし、逆も同様です。</p>
     <p>The next strategy is a little bit more complicated, and has to do
     with recursion. Remember that the structural recursion strategy
     tells us where to place any recursive calls. This means we don’t
@@ -8181,22 +8281,32 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     further process the result of the recursion. The result is
     guaranteed to be correct so long as we get the non-recursive parts
     correct.</p>
+    <p>次の戦略は少し複雑で、再帰に関係しています。構造的再帰の戦略は、再帰呼び出しをどこに配置すればよいか示してくれることを思い出してください。つまり、再帰呼び出しの処理内容について深く考える必要はなく、代わりに、再帰呼び出しが正しく計算されると仮定し、再帰の結果をどう処理するかだけを考えればよいのです。再帰以外の部分さえ正確であれば、結果は保証されます。</p>
     <p>In the example above we have the recursion
     <code>tail.map(f)</code>. We can assume this correctly computes
     <code>map</code> on the tail of the list, and we only need to think
     about what we should do with the remaining data: the
     <code>head</code> and the result of the recursive call.</p>
+    <p>上の例では、<code>tail.map(f)</code>
+    という再帰呼び出しがあります。この再帰呼び出しがリストの
+    <code>tail</code> に対する <code>map</code>
+    を正しく計算すると仮定し、残りのデータ、つまり <code>head</code>
+    と再帰呼び出しの結果をどう扱うかだけを考えればよいのです。</p>
     <p>It’s this property that allows us to consider cases
     independently. Recursive calls are the only thing that connect the
     different cases, and they are given to us by the structural
     recursion strategy.</p>
+    <p>この特性により、各ケースは独立して考えることができます。再帰呼び出しは異なるケースをつなぐ唯一のものであり、その書き方は構造的再帰戦略によって与えられます。</p>
     <p>Our final strategy is <strong>following the types</strong>. It
     can be used in many situations, not just structural recursion, so I
     consider it a separate strategy. The core idea is to use the
     information in the types to restrict the possible implementations.
     We can look at the types of inputs and outputs to help us.</p>
+    <p>最後の戦略は、<strong>型に従うこと</strong>です。これは構造的再帰に限らず、多くの状況で使えるため、別の戦略として扱います。コアとなる考え方は、型情報を使ってありうる実装を限定していくということです。入力と出力の型を見て、その情報を活用するのです。</p>
     <p>Now let’s use these strategies to finish the implementation of
     <code>map</code>. We start with</p>
+    <p>それでは、これらの戦略を使って <code>map</code>
+    の実装を完成させましょう。すでに実装した部分を再掲します。この続きを考えていきます。</p>
     <div class="sourceCode" id="cb35"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8221,6 +8331,16 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Empty</code>. <em>This is the only possible code we can
     write</em>. The types are sufficiently restrictive that we cannot
     write incorrect code for this case.</p>
+    <p>最初の戦略はケースを独立して考えることでした。<code>Empty</code>
+    のケースから始めましょう。このケースには再帰呼び出しがないため、再帰について考える必要はありません。ここでは型情報を使いましょう。<code>Empty</code>
+    ケースにマッチしたということ以外に入力はないため、入力の型を使ってコードを制約することはできません。代わりに出力の型について考えてみると、<code>map</code>
+    は <code>MyList[B]</code>
+    を作成しようとしています。<code>MyList[B]</code>
+    を作成する方法は二通りしかありません。<code>Empty</code> か
+    <code>Pair</code> です。<code>Pair</code>
+    を作成するには、<code>B</code> 型 の <code>head</code>
+    が必要ですが、それは持っていませんし、<code>Empty</code>
+    を使うしかありません。<em>これが書くことのできる唯一のコードです</em>。型が十分に制約を与えているため、このケースで誤ったコードを書くことはできません。</p>
     <div class="sourceCode" id="cb36"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8234,7 +8354,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>Now let’s move to the <code>Pair</code> case. We can apply both
     the structural recursion reasoning strategy and following the types.
     Let’s use each in turn.</p>
-    <p>The case for <code>Pair</code> is</p>
+    <p>次に <code>Pair</code>
+    のケースに移りましょう。構造的再帰の戦略と、型に従うこと、両方が適用できます。</p>
+    <p><code>Pair</code> のケースを再掲します。</p>
     <div class="sourceCode" id="cb37"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">,</span> tail<span class="op">)</span> <span class="op">=&gt;</span> <span class="op">???</span> tail<span class="op">.</span><span class="fu">map</span><span class="op">(</span>f<span class="op">)</span></span></code></pre></div>
     <p>Remember we can consider this independently of the other case. We
     assume the recursion is correct. This means we only need to think
@@ -8242,24 +8364,50 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     should combine this result with <code>tail.map(f)</code>. Let’s now
     follow the types to finish the code. Our goal is to produce a
     <code>MyList[B]</code>. We already the following available:</p>
+    <p>これは他のケースとは独立して考えることができること、そして再帰呼び出しの結果は正しいと仮定することを思い出してください。すると、ここでは
+    <code>head</code> をどう処理し、 <code>tail.map(f)</code>
+    の結果とどう結合するかだけを考えればよい、ということになります。あとは型に従ってコードを完成させましょう。ゴールは
+    <code>MyList[B]</code>
+    型の値を生成することで、そのために以下のものが利用可能です。</p>
     <ul>
-    <li><code>tail.map(f)</code>, which has type
-    <code>MyList[B]</code>;</li>
-    <li><code>head</code>, with type <code>A</code>;</li>
-    <li><code>f</code>, with type <code>A =&gt; B</code>; and</li>
-    <li>the constructors <code>Empty</code> and <code>Pair</code>.</li>
+    <li><p><code>tail.map(f)</code>, which has type
+    <code>MyList[B]</code>;</p></li>
+    <li><p><code>head</code>, with type <code>A</code>;</p></li>
+    <li><p><code>f</code>, with type <code>A =&gt; B</code>;
+    and</p></li>
+    <li><p>the constructors <code>Empty</code> and
+    <code>Pair</code>.</p></li>
+    <li><p><code>tail.map(f)</code>
+    の呼び出し結果（<code>MyList[B]</code> 型）</p></li>
+    <li><p><code>A</code> 型の値 <code>head</code></p></li>
+    <li><p><code>A</code> を受けとり <code>B</code> を返す関数
+    <code>f</code></p></li>
+    <li><p><code>Empty</code> と <code>Pair</code>
+    のコンストラクタ</p></li>
     </ul>
     <p>We could return just <code>Empty</code>, matching the case we’ve
     already written. This has the correct type but we might expect it is
     not the correct answer because it does not use the result of the
     recursion, <code>head</code>, or <code>f</code> in any way.</p>
+    <p>すでに記述した <code>Empty</code> ケースと同じように、単に
+    <code>Empty</code>
+    を返すこともできます。これは型としては正しいですが、再帰呼び出しの結果や
+    <code>head</code>、関数 <code>f</code>
+    をまったく使用していませんし、正しい答えではないかもしれないと考えられます。</p>
     <p>We could return just <code>tail.map(f)</code>. This has the
     correct type but we might expect it is not correct because we don’t
     use <code>head</code> or <code>f</code> in any way.</p>
+    <p>また、単に <code>tail.map(f)</code>
+    を返すこともでき、これも型的には正しいですが、<code>head</code>
+    を使用していないので、やはり正しい答えではなさそうです。</p>
     <p>We can call <code>f</code> on <code>head</code>, producing a
     value of type <code>B</code>, and then combine this value and the
     result of the recursive call using <code>Pair</code> to produce a
     <code>MyList[B]</code>. This is the correct solution.</p>
+    <p><code>head</code> に対して <code>f</code> を呼び出して
+    <code>B</code> 型の値を生成し、その値と再帰呼び出しの結果を
+    <code>Pair</code> を使って組み合わせて <code>MyList[B]</code>
+    型の値を作成することができます。これが正しい解決策です。</p>
     <div class="sourceCode" id="cb38"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8278,23 +8426,30 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     us three possible implementations for the <code>Pair</code> case. In
     this code, and as is usually the case, the solution was the
     implementation that used all of the available inputs.</p>
-    <h3 data-number="2.3.3" id="exhaustivity-checking"><span class="header-section-number">2.3.3</span> Exhaustivity
-    Checking</h3>
+    <p>この例題についてここまで読み進めてきたなら、三つの戦略を使って体系的に正しい実装を見つける方法がわかったはずです。再帰戦略と型に従う戦略を交互に用いることで、<code>Pair</code>
+    ケースの解決策へと導かれたことに注目してください。また、ただ型に従うだけでも
+    <code>Pair</code>
+    のケースに対して三つの実装が考えられた点にも留意してください。今回のコードでは、そして大抵の場合もそうですが、利用できるすべての入力を使用する実装が正しい解決策となりました。</p>
+    <h3 data-number="2.3.3" id="網羅性チェック"><span class="header-section-number">2.3.3</span> 網羅性チェック</h3>
     <p>Remember that algebraic data types are a closed world: they
     cannot be extended once defined. The Scala compiler can use this to
     check that we handle all possible cases in a pattern match, so long
     as we write the pattern match in a way the compiler can work with.
     This is known as exhaustivity checking.</p>
+    <p>代数的データ型は閉じた世界であり、一旦定義されると拡張できないことを思い出してください。Scalaコンパイラはこの性質を利用して、パターンマッチングにおいてすべてのケースが処理されているかどうかをチェックすることができます。ただし、パターンマッチをコンパイラが処理できる形式で記述する必要があります。これは網羅性チェックと呼ばれます。</p>
     <p>Here’s a simple example. We start by defining a straight-forward
     algebraic data type.</p>
+    <p>次にシンプルな例を挙げます。まずは素直に代数的データ型を定義するところから始めましょう。</p>
     <div class="sourceCode" id="cb39"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Some of the possible units for lengths in CSS</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>enum CssLength <span class="op">{</span></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Em</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Rem</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Pt</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co">// CSSにおいて用いられる可能性のある長さの単位</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>enum CssLength <span class="op">{</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Em</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Rem</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Pt</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>If we write a pattern match using the structural recursion
     strategy, the compiler will complain if we’re missing a case.</p>
+    <p>構造的再帰の戦略を使ってパターンマッチを書いていれば、ありうるケースが欠けているときにコンパイラは警告を出します。</p>
     <div class="sourceCode" id="cb40"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> CssLength<span class="op">.*</span></span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>CssLength<span class="op">.</span><span class="fu">Em</span><span class="op">(</span><span class="fl">2.0</span><span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
@@ -8312,27 +8467,38 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>Exhaustivity checking is incredibly useful. For example, if we
     add or remove a case from an algebraic data type, the compiler will
     tell us all the pattern matches that need to be updated.</p>
-    <h3 data-number="2.3.4" id="dynamic-dispatch"><span class="header-section-number">2.3.4</span> Dynamic Dispatch</h3>
+    <p>網羅性チェックは非常に有用です。たとえば、代数的データ型に新しいケースを追加したり、ケースを削除したりすると、コンパイラはどのパターンマッチを更新する必要があるかを教えてくれます。</p>
+    <h3 data-number="2.3.4" id="動的ディスパッチ"><span class="header-section-number">2.3.4</span> 動的ディスパッチ</h3>
     <p>Using dynamic dispatch to implement structural recursion is an
     implementation technique that may feel more natural to people with a
     background in object-oriented programming.</p>
+    <p>構造的再帰の実装として動的ディスパッチを使用する方法は、オブジェクト指向プログラミングの経験がある人にとって、より自然に感じられる実装テクニックかもしれません。</p>
     <p>The dynamic dispatch approach consists of:</p>
+    <p>動的ディスパッチのアプローチは、以下から構成されます。</p>
     <ol type="1">
-    <li>defining an <em>abstract method</em> at the root of the
-    algebraic data types; and</li>
-    <li>implementing that abstract method at every leaf of the algebraic
-    data type.</li>
+    <li><p>defining an <em>abstract method</em> at the root of the
+    algebraic data types; and</p></li>
+    <li><p>implementing that abstract method at every leaf of the
+    algebraic data type.</p></li>
+    <li><p>代数的データ型のルートに<em>抽象メソッド</em>を定義すること</p></li>
+    <li><p>代数的データ型の各リーフでその抽象メソッドを実装すること</p></li>
     </ol>
     <p>This implementation technique is only available if we use the
     Scala 2 encoding of algebraic data types.</p>
+    <p>この実装テクニックは、Scala2における代数的データ型の表現方法を用いている場合にのみ利用可能です。</p>
     <p>Let’s see it in the <code>MyList</code> example we just looked
     at. Our first step is to rewrite the definition of
     <code>MyList</code> to the Scala 2 style.</p>
+    <p>これを、先ほど使った <code>MyList</code>
+    の例で見ていきましょう。最初のステップは <code>MyList</code>
+    の定義をScala2のスタイルに書き換えることです。</p>
     <div class="sourceCode" id="cb41"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> MyList<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> Empty<span class="op">[</span>A<span class="op">]()</span> <span class="kw">extends</span> MyList<span class="op">[</span>A<span class="op">]</span></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="bu">Pair</span><span class="op">[</span>A<span class="op">](</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span> <span class="kw">extends</span> MyList<span class="op">[</span>A<span class="op">]</span></span></code></pre></div>
     <p>Next we define an abstract method for <code>map</code> on
     <code>MyList</code>.</p>
+    <p>次に、<code>MyList</code> に抽象メソッドとして <code>map</code>
+    を定義します。</p>
     <div class="sourceCode" id="cb42"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> MyList<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span> <span class="op">{</span></span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>B<span class="op">](</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> MyList<span class="op">[</span>B<span class="op">]</span></span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
@@ -8340,6 +8506,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="bu">Pair</span><span class="op">[</span>A<span class="op">](</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span> <span class="kw">extends</span> MyList<span class="op">[</span>A<span class="op">]</span></span></code></pre></div>
     <p>Then we implement <code>map</code> on the concrete subtypes
     <code>Empty</code> and <code>Pair</code>.</p>
+    <p>続いて、具象サブタイプである <code>Empty</code> と
+    <code>Pair</code> に、<code>map</code> メソッドを実装します。</p>
     <div class="sourceCode" id="cb43"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> MyList<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span> <span class="op">{</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>B<span class="op">](</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> MyList<span class="op">[</span>B<span class="op">]</span></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
@@ -8354,6 +8522,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>We can use exactly the same strategies we used in the pattern
     matching case to create this code. The implementation technique is
     different but the underlying concept is the same.</p>
+    <p>この <code>map</code>
+    の実装を考えるときには、パターンマッチングの場合とまったく同じ戦略を使用することができます。実装テクニックは違っても、基礎的な概念は同じです。</p>
     <p>Given we have two implementation strategies, which should we use?
     If we’re using <code>enum</code> in Scala 3 we don’t have a choice;
     we must use pattern matching. In other situations we can choose
@@ -8363,36 +8533,58 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     these situations we can use dynamic dispatch instead. We’ll learn
     more about this when we look at generalized algebraic data
     types.</p>
-    <h4 class="unnumbered" id="exercise-methods-for-tree">Exercise:
-    Methods for Tree</h4>
+    <p>構造的再帰の二つの実装戦略のうち、どちらを使うべきでしょうか？　Scala3で
+    <code>enum</code>
+    を使用している場合、選択肢はありません。パターンマッチングを使わなければなりません。他の状況では、どちらを使うか選択できます。私は、可能であればパターンマッチングを使うことを好みます。メソッド定義全体を一か所にまとめられるからです。ですが、特にScala2では、一部のパターンマッチで型推論に問題が生じることがあり、そのような場合には、動的ディスパッチを使用することができます。これについては、一般化された代数的データ型について学ぶ際にさらに詳しく説明します。</p>
+    <h4 class="unnumbered" id="演習-methods-for-tree">演習: Methods for
+    Tree</h4>
     <p>In a previous exercise we created a <code>Tree</code> algebraic
     data type:</p>
+    <p>ひとつ前の演習では代数的データ型 <code>Tree</code>
+    を作成しました。</p>
     <div class="sourceCode" id="cb44"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>Or, in the Scala 2 encoding:</p>
+    <p>もしくはScala2の表現方法であれば、</p>
     <div class="sourceCode" id="cb45"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">abstract</span> <span class="kw">class</span> Tree<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Product <span class="kw">with</span> <span class="ex">Serializable</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> Leaf<span class="op">[</span>A<span class="op">](</span>value<span class="op">:</span> A<span class="op">)</span> <span class="kw">extends</span> Tree<span class="op">[</span>A<span class="op">]</span></span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="kw">final</span> <span class="cf">case</span> <span class="kw">class</span> <span class="ex">Node</span><span class="op">[</span>A<span class="op">](</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span> <span class="kw">extends</span> Tree<span class="op">[</span>A<span class="op">]</span></span></code></pre></div>
     <p>Let’s get some practice with structural recursion and write some
     methods for <code>Tree</code>. Implement</p>
+    <p>構造的再帰の練習として、<code>Tree</code>
+    のメソッドをいくつか実装してみましょう。</p>
     <ul>
-    <li><code>size</code>, which returns the number of values
-    (<code>Leafs</code>) stored in the <code>Tree</code>;</li>
-    <li><code>contains</code>, which returns <code>true</code> if the
+    <li><p><code>size</code>, which returns the number of values
+    (<code>Leafs</code>) stored in the <code>Tree</code>;</p></li>
+    <li><p><code>contains</code>, which returns <code>true</code> if the
     <code>Tree</code> contains a given element of type <code>A</code>,
-    and <code>false</code> otherwise; and</li>
-    <li><code>map</code>, which creates a <code>Tree[B]</code> given a
-    function <code>A =&gt; B</code></li>
+    and <code>false</code> otherwise; and</p></li>
+    <li><p><code>map</code>, which creates a <code>Tree[B]</code> given
+    a function <code>A =&gt; B</code></p></li>
+    <li><p><code>size</code> メソッド: <code>Tree</code>
+    に格納されている値（<code>Leafs</code>）の件数を返す</p></li>
+    <li><p><code>contains</code> メソッド: <code>Tree</code>
+    が指定された要素を含んでいる場合 <code>true</code>
+    を返し、そうでなければ <code>false</code> を返す</p></li>
+    <li><p><code>map</code> メソッド: <code>A</code> を <code>B</code>
+    に変換する関数を受け取って、<code>Tree[B]</code> を返す</p></li>
     </ul>
     <p>Use whichever you prefer of pattern matching or dynamic dispatch
     to implement the methods.</p>
+    <p>実装にはパターンマッチングと動的ディスパッチどちらでも好きな方を使ってくれてかませいません。</p>
     <div class="solution">
+    <!-- 
+    TODO: ここまで "strategy" という言葉を当てていた概念に "reasoning rule" などの別の言葉が使われている。
+    まぎらわしいので統一を検討する。
+    -->
     <p>I chose to use pattern matching to implement these methods. I’m
     using the Scala 3 encoding so I have no choice.</p>
+    <p>私はこれらのメソッドの実装にパターンマッチングを用いることにしました。Scala3の表現方法を使っているので選択肢はありませんでした。</p>
     <p>I start by creating the method declarations with empty
     bodies.</p>
+    <p>まずは、ボディは空のままメソッドを宣言するところから始めます。</p>
     <div class="sourceCode" id="cb46"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8410,6 +8602,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     implement them using structural recursion. I write down the
     structural recursion skeleton for <code>Tree</code>, remembering to
     apply the recursion rule.</p>
+    <p>これらのメソッドはすべて代数的データ型を変換するので、構造的再帰を使って実装することができます。再帰ルールの適用を忘れずに、<code>Tree</code>
+    に対する構造的再帰の骨組みを書きます。</p>
     <div class="sourceCode" id="cb47"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8434,6 +8628,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>Now I can use the other reasoning techniques to complete the
     method declarations. Let’s work through <code>size</code>.</p>
+    <p>これで、再帰ルール以外の推論テクニックを使ってメソッドの宣言を完成させることができます。では
+    <code>size</code> を実装していきましょう。</p>
     <div class="sourceCode" id="cb48"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> size<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> </span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">this</span> <span class="cf">match</span> <span class="op">{</span> </span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">)</span>       <span class="op">=&gt;</span> <span class="dv">1</span></span>
@@ -8441,6 +8637,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
     <p>I can reason independently by case. The size of a
     <code>Leaf</code> is, by definition, 1.</p>
+    <p>ケースはそれぞれ独立して考えることができます。<code>Leaf</code>
+    のサイズは、定義により1です。</p>
     <div class="sourceCode" id="cb49"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> size<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> </span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">this</span> <span class="cf">match</span> <span class="op">{</span> </span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">)</span>       <span class="op">=&gt;</span> <span class="dv">1</span></span>
@@ -8450,6 +8648,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     the recursive calls successfully compute the size of the left and
     right children. What is the size then of the combined tree? It must
     be the sum of the size of the children. With this, I’m done.</p>
+    <p>これで再帰に関する推論ルールを使用できます。再帰呼び出しが左右の子のサイズを正しく計算していると仮定します。では、結合された木のサイズはどうなるでしょうか？　それは子のサイズの合計になるはずです。これで完成です。</p>
     <div class="sourceCode" id="cb50"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> size<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> </span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">this</span> <span class="cf">match</span> <span class="op">{</span> </span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">)</span>       <span class="op">=&gt;</span> <span class="dv">1</span></span>
@@ -8457,6 +8656,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
     <p>I can use the same process to work through the other two methods,
     giving me the complete solution shown below.</p>
+    <p>残りの二つのメソッドも同じプロセスを使って実装できます。以下に、完成した解答を示します。</p>
     <div class="sourceCode" id="cb51"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8480,14 +8680,17 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     </div>
-    <h3 data-number="2.3.5" id="folds-as-structural-recursions"><span class="header-section-number">2.3.5</span> Folds as Structural
-    Recursions</h3>
+    <h3 data-number="2.3.5" id="構造的再帰としての畳み込み"><span class="header-section-number">2.3.5</span>
+    構造的再帰としての畳み込み</h3>
     <p>Let’s finish by looking at the fold method as an abstraction over
     structural recursion. If you did the <code>Tree</code> exercise
     above, you will have noticed that we wrote the same kind of code
     again and again. Here are the methods we wrote. Notice the left-hand
     sides of the pattern matches are all the same, and the right-hand
     sides are very similar.</p>
+    <p>最後に、構造的再帰をさらに抽象化したものとして畳み込みメソッドを見ていきましょう。上述した
+    <code>Tree</code>
+    の演習を行ったなら、同じ種類のコードを何度も書いたことに気付いたはずです。先ほど作成したメソッドを以下に再掲します。パターンマッチの左側はすべて同じで、右側も非常に似ていることに注目してください。</p>
     <div class="sourceCode" id="cb52"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> size<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> </span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">this</span> <span class="cf">match</span> <span class="op">{</span> </span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">)</span>       <span class="op">=&gt;</span> <span class="dv">1</span></span>
@@ -8514,15 +8717,21 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     one method, called a fold, that captures all the parts of structural
     recursion that don’t change and allows the caller to specify all the
     problem specific parts.</p>
+    <p>この類似性を認識し公式化することが、構造的再帰のポイントです。ですが、プログラマとしては、この繰り返しを抽象化したくなるかもしれません。構造的再帰の中で変わらない部分をすべて抽出し、変わる部分については呼び出し側が引数として渡せるようなメソッドを作ることはできるでしょうか？　実はできます。任意の代数的データ型に対して、そういうメソッドを少なくともひとつは定義できます。畳み込みと呼ばれるそのメソッドが構造的再帰の変わらない部分をすべてキャプチャし、個別のやりたいことに特化した部分を呼び出し側が指定できるようにします。</p>
     <p>Let’s see how this is done using the example of
     <code>MyList</code>. Recall the definition of <code>MyList</code>
     is</p>
+    <p>どのように定義されるのか <code>MyList</code>
+    の例を使って見ていきましょう。<code>MyList</code>
+    の定義を再掲します。</p>
     <div class="sourceCode" id="cb53"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>We know the structural recursion skeleton for <code>MyList</code>
     is</p>
+    <p><code>MyList</code>
+    で使われる構造的再帰の骨組みは、すでに理解されているとおり、以下のようになります。</p>
     <div class="sourceCode" id="cb54"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> doSomething<span class="op">[</span>A<span class="op">](</span>list<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span> <span class="op">=</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  list <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span>          <span class="op">=&gt;</span> <span class="op">???</span></span>
@@ -8530,16 +8739,25 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> </span></code></pre></div>
     <p>Implementing fold for <code>MyList</code> means defining a
     method</p>
+    <p><code>MyList</code>
+    に畳み込みを実装するとは、次のようなメソッドを定義するということです。</p>
     <div class="sourceCode" id="cb55"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fold<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>list<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">]):</span> B <span class="op">=</span></span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  list <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span> <span class="op">=&gt;</span> <span class="op">???</span></span>
 <span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">,</span> tail<span class="op">)</span> <span class="op">=&gt;</span> <span class="op">???</span> <span class="fu">fold</span><span class="op">(</span>tail<span class="op">)</span></span>
 <span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
     <p>where <code>B</code> is the type the caller wants to create.</p>
+    <p>ここで <code>B</code> は、呼び出し元が生成したい値の型です。</p>
     <p>To complete <code>fold</code> we add method parameters for the
     problem specific (<code>???</code>) parts. In the case for
     <code>Empty</code>, we need a value of type <code>B</code> (notice
     that I’m following the types here).</p>
+    <p><code>fold</code>
+    メソッドを完成させるには、都度のやりたいことに固有の
+    <code>???</code>
+    の部分を埋めるために引数を加える必要があります。<code>Empty</code>
+    のケースには <code>B</code>
+    型の値が必要です（型に従って考えていることに注目してください）。</p>
     <div class="sourceCode" id="cb56"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fold<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>list<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">],</span> empty<span class="op">:</span> B<span class="op">):</span> B <span class="op">=</span></span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  list <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span> <span class="op">=&gt;</span> empty</span>
@@ -8549,6 +8767,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>A</code> and the recursion producing a value of type
     <code>B</code>. This means we need a function to combine these two
     values.</p>
+    <p><code>Pair</code> のケースでは、 <code>A</code> 型の
+    <code>head</code> と、 <code>B</code>
+    型の値を生成する再帰処理がすでにありますので、必要なのはそれら二つを結合する関数です。</p>
     <div class="sourceCode" id="cb57"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foldRight<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>list<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">],</span> empty<span class="op">:</span> B<span class="op">,</span> f<span class="op">:</span> <span class="op">(</span>A<span class="op">,</span> B<span class="op">)</span> <span class="op">=&gt;</span> B<span class="op">):</span> B <span class="op">=</span></span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  list <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span> <span class="op">=&gt;</span> empty</span>
@@ -8559,6 +8780,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     solution. Both <code>empty</code> and the recursion produce values
     of type <code>B</code>. If we follow the types we can come up
     with</p>
+    <p>これが <code>foldRight</code>
+    メソッドです（この後にお見せするもうひとつの解法と区別できるよう名前を変更しました）。もうひとつの有効な解があることに気付いたかもしれません。
+    <code>empty</code> も再帰呼び出しも <code>B</code>
+    の値を生成します。型に従って考えれば、次のような結論に至ることもできるでしょう。</p>
     <div class="sourceCode" id="cb58"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foldLeft<span class="op">[</span>A<span class="op">,</span>B<span class="op">](</span>list<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">],</span> empty<span class="op">:</span> B<span class="op">,</span> f<span class="op">:</span> <span class="op">(</span>A<span class="op">,</span> B<span class="op">)</span> <span class="op">=&gt;</span> B<span class="op">):</span> B <span class="op">=</span></span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  list <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span> <span class="op">=&gt;</span> empty</span>
@@ -8567,39 +8792,63 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>which is <code>foldLeft</code>, the tail-recursive variant of
     fold for a list. (We’ll talk about tail-recursion in a later
     chapter.)</p>
+    <p>これが <code>foldLeft</code>
+    メソッドで、リストに対する末尾再帰型の畳み込みの変種です（末尾再帰については後の章で解説します）。</p>
     <p>We can follow the same process for any algebraic data type to
     create its folds. The rules are:</p>
+    <p>同じプロセスをたどることで、任意の代数的データ型に対してその畳み込みメソッドを作成することができます。そのルールは次の通りです。</p>
     <ul>
-    <li>a fold is a function from the algebraic data type and additional
-    parameters to some generic type that I’ll call <code>B</code> below
-    for simplicity;</li>
-    <li>the fold has one additional parameter for each case in a logical
-    or;</li>
-    <li>each parameter is a function, with result of type <code>B</code>
-    and parameters that have the same type as the corresponding
-    constructor arguments <em>except</em> recursive values are replaced
-    with <code>B</code>; and</li>
-    <li>if the constructor has no arguments (for example,
+    <li><p>a fold is a function from the algebraic data type and
+    additional parameters to some generic type that I’ll call
+    <code>B</code> below for simplicity;</p></li>
+    <li><p>the fold has one additional parameter for each case in a
+    logical or;</p></li>
+    <li><p>each parameter is a function, with result of type
+    <code>B</code> and parameters that have the same type as the
+    corresponding constructor arguments <em>except</em> recursive values
+    are replaced with <code>B</code>; and</p></li>
+    <li><p>if the constructor has no arguments (for example,
     <code>Empty</code>) we can use a value of type <code>B</code>
-    instead of a function with no arguments.</li>
+    instead of a function with no arguments.</p></li>
+    <li><p>畳み込みは、代数的データ型と追加のパラメータを取り、何らかの汎用型（以下では便宜上
+    <code>B</code> と呼ぶ）に変換する関数である</p></li>
+    <li><p>畳み込みには、論理和の各ケースに対してひとつの追加パラメータがある</p></li>
+    <li><p>各パラメータは関数で、結果の型は
+    <code>B</code>、対応するコンストラクタの引数と同じ型のパラメータを取る。ただし、再帰的な値は
+    <code>B</code> に置き換えられる</p></li>
+    <li><p>コンストラクタに引数がない場合（例えば
+    <code>Empty</code>）、引数のない関数の代わりに、型 <code>B</code>
+    の値を使用できる</p></li>
     </ul>
     <p>Returning to <code>MyList</code>, it has:</p>
+    <p><code>MyList</code> に当てはめると次のようになります。</p>
     <ul>
-    <li>two cases, and hence two parameters to fold (other than the
-    parameter that is the list itself);</li>
-    <li><code>Empty</code> is a constructor with no arguments and hence
-    we use a parameter of type <code>B</code>; and</li>
-    <li><code>Pair</code> is a constructor with one parameter of type
+    <li><p>two cases, and hence two parameters to fold (other than the
+    parameter that is the list itself);</p></li>
+    <li><p><code>Empty</code> is a constructor with no arguments and
+    hence we use a parameter of type <code>B</code>; and</p></li>
+    <li><p><code>Pair</code> is a constructor with one parameter of type
     <code>A</code> and one recursive parameter, and hence the
-    corresponding function has type <code>(A, B) =&gt; B</code>.</li>
+    corresponding function has type
+    <code>(A, B) =&gt; B</code>.</p></li>
+    <li><p>二つのケースがあるので、畳み込みには二つのパラメータが必要（リストそれ自体以外に）</p></li>
+    <li><p><code>Empty</code>
+    は引数なしコンストラクタなので、<code>B</code>
+    型のパラメータをひとつ</p></li>
+    <li><p><code>Pair</code> は <code>A</code>
+    型の引数をひとつと、再帰的な引数をひとつもったコンストラクタなので、対応する関数の型は
+    <code>(A, B) =&gt; B</code> となる</p></li>
     </ul>
-    <h4 class="unnumbered" id="exercise-tree-fold">Exercise: Tree
-    Fold</h4>
+    <h4 class="unnumbered" id="演習-treeの畳み込み">演習:
+    Treeの畳み込み</h4>
     <p>Implement a fold for <code>Tree</code> defined earlier. There are
     several different ways to traverse a tree (pre-order, post-order,
     and in-order). Just choose whichever seems easiest.</p>
+    <p>以前定義した <code>Tree</code>
+    に対して畳み込みを実装してください。二分木の走査には、先行順、後行順、中間順などいくつかの方法がありますが、最も簡単だと思うものを選んで実装してください。</p>
     <div class="solution">
     <p>I start by add the method declaration without a body.</p>
+    <p>まずボディのないメソッド宣言を追加することから始めます。</p>
     <div class="sourceCode" id="cb59"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8608,6 +8857,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">???</span></span>
 <span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>Next step is to add the structural recursion skeleton.</p>
+    <p>次に、構造的再帰の骨組みを追加します。</p>
     <div class="sourceCode" id="cb60"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8621,6 +8871,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>Now I follow the types to add the method parameters. For the
     <code>Leaf</code> case we want a function of type
     <code>A =&gt; B</code>.</p>
+    <p>これで、型に従ってメソッドにパラメータを追加する準備ができました。<code>Leaf</code>
+    のケースには <code>A =&gt; B</code> 型の関数が必要です。</p>
     <div class="sourceCode" id="cb61"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">)</span></span>
 <span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8634,6 +8886,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>For the <code>Node</code> case we want a function that combines
     the two recursive results, and therefore has type
     <code>(B, B) =&gt; B</code>.</p>
+    <p><code>Node</code>
+    のケースには二つの再帰呼び出しの結果を結合する関数が必要なので、追加するパラメータは
+    <code>(B, B) =&gt; B</code> という型をもちます。</p>
     <div class="sourceCode" id="cb62"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
 <span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ex">Node</span><span class="op">(</span>left<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">],</span> right<span class="op">:</span> Tree<span class="op">[</span>A<span class="op">])</span></span>
@@ -8645,12 +8900,15 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     </div>
-    <h4 class="unnumbered" id="exercise-using-fold">Exercise: Using
-    Fold</h4>
+    <h4 class="unnumbered" id="演習-畳み込みを用いる">演習:
+    畳み込みを用いる</h4>
     <p>Prove to yourself that you can replace structural recursion with
     calls to fold, by redefining <code>size</code>,
     <code>contains</code>, and <code>map</code> for <code>Tree</code>
     using only fold.</p>
+    <p>構造的再帰を畳み込みの呼び出しに置き換えられることを確認するために、<code>Tree</code>
+    の <code>size</code>、<code>contains</code>、<code>map</code>
+    を、<code>fold</code> だけを使って再定義してみましょう。</p>
     <div class="solution">
     <div class="sourceCode" id="cb63"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>enum Tree<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Leaf</span><span class="op">(</span>value<span class="op">:</span> A<span class="op">)</span></span>
@@ -8681,8 +8939,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     method or function is an algebraic data type, we can use structural
     corecursion whenever the output of a method or function is an
     algebraic data type.</p>
-    <section id="duality-in-functional-programming" class="unnumbered callout callout-info">
-    <h4 class="unnumbered">Duality in Functional Programming</h4>
+    <p>構造的余再帰は、構造的再帰の反対、もっと正確な用語を使うなら、双対です。構造的再帰が代数的データ型をどのように分解するかを教えてくれるのに対して、構造的余再帰は代数的データ型をどのように構築するかを教えてくれます。構造的再帰は、メソッドや関数の入力が代数的データ型である場合に使用できますが、構造的余再帰はメソッドや関数の出力が代数的データ型である場合に使用できます。</p>
+    <section id="関数型プログラミングにおける双対性" class="unnumbered callout callout-info">
+    <h4 class="unnumbered">関数型プログラミングにおける双対性</h4>
     <p>Two concepts or structures are duals if one can be translated in
     a one-to-one fashion to the other. Duality is one of the main themes
     of this book. By relating concepts as duals we can transfer
@@ -8691,6 +8950,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     the structures or concepts. For example, corecursion is the dual of
     recursion, and sum types, also known as coproducts, are the dual of
     product types.</p>
+    <p>二つの概念や構造が一対一で対応付けられる場合、それらを双対であると言います。双対性は本書の主要なテーマの一つです。概念同士を双対として関連付けることで、ある領域の知識を別の領域に流用することができるようになります。</p>
+    <p>双対性は、しばしば構造や概念に co-
+    という接頭辞を付けることで示されます。たとえば、英語でcorecursionと呼ばれる余再帰は再帰の双対であり、coproduct（余積）は積型の双対です。</p>
     </section>
     <p>Structural recursion works by considering all the possible inputs
     (which we usually represent as patterns), and then working out what
@@ -8698,14 +8960,21 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     considering all the possible outputs, which are the constructors of
     the algebraic data type, and then working out the conditions under
     which we’d call each constructor.</p>
+    <p>構造的再帰は、すべてのありうる入力（通常はパターンとして表現されるもの）を考慮し、それぞれの入力ケースに対して何を行うかを決定することで機能します。一方、構造的余再帰は、すべてのありうる出力、すなわち代数的データ型のコンストラクタについて考慮し、それぞれのコンストラクタを呼び出す条件を決定することで機能します。</p>
     <p>Let’s return to the list with elements of type <code>A</code>,
     defined as:</p>
+    <p><code>A</code>
+    型の要素を持つリストの話に戻りましょう。これは次のように定義できました。</p>
     <ul>
-    <li>the empty list; or</li>
-    <li>a pair containing an <code>A</code> and a tail, which is a list
-    of <code>A</code>.</li>
+    <li><p>the empty list; or</p></li>
+    <li><p>a pair containing an <code>A</code> and a tail, which is a
+    list of <code>A</code>.</p></li>
+    <li><p>リストは空であるか、もしくは</p></li>
+    <li><p>ひとつの <code>A</code> 型の値と、それ自体が <code>A</code>
+    のリストである残りの部分のペア</p></li>
     </ul>
     <p>In Scala 3 we write</p>
+    <p>Scala3では次のように書かれます。</p>
     <div class="sourceCode" id="cb64"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8713,6 +8982,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>We can use structural corecursion if we’re writing a method that
     produces a <code>MyList</code>. A good example is
     <code>map</code>:</p>
+    <p><code>MyList</code>
+    オブジェクトを生成するメソッドを書きたいときに、構造的余再帰が利用できます。<code>map</code>
+    はそのよい例です。</p>
     <div class="sourceCode" id="cb65"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8727,6 +8999,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     constructors and then consider the conditions that will cause us to
     call each constructor. So our starting point is to just write down
     the two constructors, and put in dummy conditions.</p>
+    <p>このメソッドの出力は代数的データ型である <code>MyList</code>
+    です。<code>MyList</code>
+    オブジェクトを構築する必要があるので、構造的余再帰を使用できます。構造的余再帰の戦略によれば、まずすべてのコンストラクタを書き出し、それぞれのコンストラクタを呼び出す条件を考えます。したがって、最初のステップは、二つのコンストラクタを書き出し、仮の条件を入れることです。</p>
     <div class="sourceCode" id="cb66"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8737,6 +9012,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>We can also apply the recursion rule: where the data is recursive
     so is the method.</p>
+    <p>データが再帰的である場所で再帰呼び出しを行うというルールを適用すると、メソッドは以下のようになります。</p>
     <div class="sourceCode" id="cb67"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8747,13 +9023,18 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>To complete the left-hand side we can use the strategies we’ve
     already seen:</p>
+    <p>これまでに見てきた戦略を使って、<code>if</code>
+    式の条件部、あるいは書き方によってはパターンマッチングとなる左側部分を完成させることができます。</p>
     <ul>
-    <li>we can use structural recursion to tell us there are two
-    possible conditions; and</li>
-    <li>we can follow the types to align these conditions with the code
-    we have already written.</li>
+    <li><p>we can use structural recursion to tell us there are two
+    possible conditions; and</p></li>
+    <li><p>we can follow the types to align these conditions with the
+    code we have already written.</p></li>
+    <li><p>構造的再帰を使って、ありうる条件が二つあることを確認する</p></li>
+    <li><p>型に従って、これらの条件を既に書いたコードに合わせる</p></li>
     </ul>
     <p>In short order we arrive at the correct solution</p>
+    <p>短時間で正しい解決策にたどり着くことができます。</p>
     <div class="sourceCode" id="cb68"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
@@ -8764,42 +9045,68 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">,</span> tail<span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Pair</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>head<span class="op">),</span> tail<span class="op">.</span><span class="fu">map</span><span class="op">(</span>f<span class="op">))</span></span>
 <span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-    <p>There are a few interesting points here. Firstly, we should
-    acknowledge that <code>map</code> is both a structural recursion and
-    a structural corecursion. This is not always the case. For example,
-    <code>foldLeft</code> and <code>foldRight</code> are not structural
-    corecursions because they are not constrained to only produce an
-    algebraic data type. Secondly, note that when we walked through the
-    process of creating <code>map</code> as a structural recursion we
-    implicitly used the structural corecursion pattern, as part of
-    following the types. We recognised that we were producing a
-    <code>List</code>, that there were two possibilities for producing a
-    <code>List</code>, and then worked out the correct conditions for
-    each case. Formalizing structural corecursion as a separate strategy
-    allows us to be more conscious of where we apply it. Finally, notice
-    how I switched from an <code>if</code> expression to a pattern match
-    expression as we progressed through defining <code>map</code>. This
-    is perfectly fine. Both kinds of expression achieve the same effect.
-    Pattern matching is a little bit safer due to exhaustivity checking.
-    If we wanted to continue using an <code>if</code> we’d have to
-    define a method (for example, <code>isEmpty</code>) that allows us
-    to distinguish an <code>Empty</code> element from a
-    <code>Pair</code>. This method would have to use pattern matching in
-    its implementation, so avoiding pattern matching directly is just
-    pushing it elsewhere.</p>
-    <h3 data-number="2.4.1" id="unfolds-as-structural-corecursion"><span class="header-section-number">2.4.1</span> Unfolds as Structural
-    Corecursion</h3>
+    <p>There are a few interesting points here.</p>
+    <p>ここにはいくつか興味深いポイントがあります。</p>
+    <p>Firstly, we should acknowledge that <code>map</code> is both a
+    structural recursion and a structural corecursion. This is not
+    always the case. For example, <code>foldLeft</code> and
+    <code>foldRight</code> are not structural corecursions because they
+    are not constrained to only produce an algebraic data type.</p>
+    <p>まず、<code>map</code>
+    は構造的再帰であり、同時に構造的余再帰でもあるということを認識しておく必要があります。これはいつも成り立つわけではありません。たとえば、<code>foldLeft</code>
+    と <code>foldRight</code>
+    は構造的余再帰ではありません。これらは必ずしも代数的データ型を生成するとは限らないからです。</p>
+    <p>Secondly, note that when we walked through the process of
+    creating <code>map</code> as a structural recursion we implicitly
+    used the structural corecursion pattern, as part of following the
+    types. We recognised that we were producing a <code>List</code>,
+    that there were two possibilities for producing a <code>List</code>,
+    and then worked out the correct conditions for each case.
+    Formalizing structural corecursion as a separate strategy allows us
+    to be more conscious of where we apply it.</p>
+    <p>次に、<code>map</code>
+    を構造的再帰として実装するプロセスを進めた際に、型に従う一環として、暗黙的に構造的余再帰のパターンを使用していたことに注目してください。我々は
+    <code>List</code>
+    を生成しようとしていることに気づき、<code>List</code>
+    を生成する二つの可能性を認識し、各ケースに適した条件を見出しました。構造的余再帰を別の戦略として明示的に定義することで、それをどこで適用しているのかをより意識的に把握できるようになります。</p>
+    <p>Finally, notice how I switched from an <code>if</code> expression
+    to a pattern match expression as we progressed through defining
+    <code>map</code>. This is perfectly fine. Both kinds of expression
+    achieve the same effect. Pattern matching is a little bit safer due
+    to exhaustivity checking. If we wanted to continue using an
+    <code>if</code> we’d have to define a method (for example,
+    <code>isEmpty</code>) that allows us to distinguish an
+    <code>Empty</code> element from a <code>Pair</code>. This method
+    would have to use pattern matching in its implementation, so
+    avoiding pattern matching directly is just pushing it elsewhere.</p>
+    <p>最後に、<code>map</code> を定義していく過程で、<code>if</code>
+    式からパターンマッチ式に切り替えたことに注目してください。これはまったく問題ありません。どちらの式も同じ効果を達成します。パターンマッチは網羅性チェックがあるため、少し安全です。もし
+    <code>if</code> 式を使い続けるのであれば、<code>Empty</code> と
+    <code>Pair</code> を区別するためのメソッド（たとえば
+    <code>isEmpty</code>）を定義しなければなりません。このメソッドは実装する際にパターンマッチを使用する必要があるため、パターンマッチの直接的な利用を避けても、それを別の場所に押し込めてしまうだけです。</p>
+    <h3 data-number="2.4.1" id="構造的余再帰としての展開unfold"><span class="header-section-number">2.4.1</span>
+    構造的余再帰としての展開（unfold）</h3>
     <p>Just as we could abstract structural recursion as a fold, for any
     given algebraic data type we can abstract structural corecursion as
     an unfold. Unfolds are much less commonly used than folds, but they
     are still a nice tool to have.</p>
+    <p>構造的再帰を <code>fold</code>
+    として抽象化できたように、任意の代数的データ型に対して構造的余再帰を
+    <code>unfold</code>
+    として抽象化することができます。<code>unfold</code> は
+    <code>fold</code>
+    ほど一般的に使われるものではありませんが、それでも有用なツールです。</p>
     <p>Let’s work through the process of deriving unfold, using
     <code>MyList</code> as our example again.</p>
+    <p>もう一度 <code>MyList</code>
+    を例として使いながら、<code>unfold</code>
+    を導き出すプロセスを見ていきましょう。</p>
     <div class="sourceCode" id="cb69"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>enum MyList<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Pair</span><span class="op">(</span>head<span class="op">:</span> A<span class="op">,</span> tail<span class="op">:</span> MyList<span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
     <p>The corecursion skeleton is</p>
+    <p>構造的余再帰の骨組みは次のとおりでした。</p>
     <div class="sourceCode" id="cb70"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">???</span> then MyList<span class="op">.</span><span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> MyList<span class="op">.</span><span class="bu">Pair</span><span class="op">(???,</span> <span class="fu">recursion</span><span class="op">(???))</span></span></code></pre></div>
     <p>Our starting point is writing the skeleton for
@@ -8807,17 +9114,23 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     parameter <code>seed</code>. This is the information we use to
     create an element. We’ll need this, but we cannot derive it from our
     strategies, so I’ve added it in here as a starting assumption.</p>
+    <p>まず <code>unfold</code>
+    の骨格を書き出すことから始めます。少し変わっているのは、<code>seed</code>
+    というパラメータを追加していることです。これは、要素を作成するための情報です。これが必要になるのですが、戦略から導き出せるものではないため、初期の仮定としてここに追加しています。</p>
     <div class="sourceCode" id="cb71"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> unfold<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>seed<span class="op">:</span> A<span class="op">):</span> MyList<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">???</span></span></code></pre></div>
     <p>Now we start using our strategies to fill in the missing pieces.
     I’m using the corecursion skeleton and I’ve applied the recursion
     rule immediately in the code below, to save a bit of time in the
     derivation.</p>
+    <p>ここからは、これまでの戦略を使って不足部分を埋めていきます。余再帰の骨格を使うと同時に、以下のコードでは再帰のルールまで適用し、導出のステップを省いています。</p>
     <div class="sourceCode" id="cb72"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> unfold<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>seed<span class="op">:</span> A<span class="op">):</span> MyList<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">???</span> then MyList<span class="op">.</span><span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> MyList<span class="op">.</span><span class="bu">Pair</span><span class="op">(???,</span> <span class="fu">unfold</span><span class="op">(</span>seed<span class="op">))</span></span></code></pre></div>
     <p>We can abstract the condition using a function from
     <code>A =&gt; Boolean</code>.</p>
+    <p><code>A =&gt; Boolean</code>
+    型の関数を使って条件を抽象化します。</p>
     <div class="sourceCode" id="cb73"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> unfold<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>seed<span class="op">:</span> A<span class="op">,</span> stop<span class="op">:</span> A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">):</span> MyList<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="fu">stop</span><span class="op">(</span>seed<span class="op">)</span> then MyList<span class="op">.</span><span class="fu">Empty</span><span class="op">()</span></span>
 <span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> MyList<span class="op">.</span><span class="bu">Pair</span><span class="op">(???,</span> <span class="fu">unfold</span><span class="op">(</span>seed<span class="op">,</span> stop<span class="op">))</span></span></code></pre></div>
@@ -9921,19 +10234,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     expect these results to be the same.</p>
     <div class="sourceCode" id="cb128"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>randoms<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res19: List[Double] = List(</span></span>
-<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6433588981573907,</span></span>
-<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.22130346375469734,</span></span>
-<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.1523027217052063,</span></span>
-<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.24917446057113057,</span></span>
-<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9544862045831262</span></span>
+<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7025300169891637,</span></span>
+<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.27408754026979654,</span></span>
+<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9987911093064622,</span></span>
+<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5209379148478935,</span></span>
+<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.07574805760240133</span></span>
 <span id="cb128-8"><a href="#cb128-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb128-9"><a href="#cb128-9" aria-hidden="true" tabindex="-1"></a>randoms<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb128-10"><a href="#cb128-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res20: List[Double] = List(</span></span>
-<span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.1903145275865531,</span></span>
-<span id="cb128-12"><a href="#cb128-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5110365354275223,</span></span>
-<span id="cb128-13"><a href="#cb128-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.39479179758956007,</span></span>
-<span id="cb128-14"><a href="#cb128-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4428951747671639,</span></span>
-<span id="cb128-15"><a href="#cb128-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8811210853509885</span></span>
+<span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6711637594510346,</span></span>
+<span id="cb128-12"><a href="#cb128-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5159951369887319,</span></span>
+<span id="cb128-13"><a href="#cb128-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.24261020453046,</span></span>
+<span id="cb128-14"><a href="#cb128-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8196716543111423,</span></span>
+<span id="cb128-15"><a href="#cb128-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.33767283177936813</span></span>
 <span id="cb128-16"><a href="#cb128-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>Now let’s define the same stream in a call by need style, using
     <code>lazy val</code>.</p>
@@ -9946,19 +10259,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>take</code> a section, and each number is the same.</p>
     <div class="sourceCode" id="cb130"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a>randomsByNeed<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res21: List[Double] = List(</span></span>
-<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144</span></span>
+<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254</span></span>
 <span id="cb130-8"><a href="#cb130-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb130-9"><a href="#cb130-9" aria-hidden="true" tabindex="-1"></a>randomsByNeed<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb130-10"><a href="#cb130-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res22: List[Double] = List(</span></span>
-<span id="cb130-11"><a href="#cb130-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-12"><a href="#cb130-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-13"><a href="#cb130-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-14"><a href="#cb130-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144,</span></span>
-<span id="cb130-15"><a href="#cb130-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6416138562673144</span></span>
+<span id="cb130-11"><a href="#cb130-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-12"><a href="#cb130-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-13"><a href="#cb130-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-14"><a href="#cb130-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254,</span></span>
+<span id="cb130-15"><a href="#cb130-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8390650162261254</span></span>
 <span id="cb130-16"><a href="#cb130-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>If we wanted a stream that had a different random number for each
     element but those numbers were constant, we could redefine
@@ -9978,19 +10291,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>Then check it works.</p>
     <div class="sourceCode" id="cb133"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>randomsByNeed2<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res23: List[Double] = List(</span></span>
-<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.35587377396356457,</span></span>
-<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.07472754309960927,</span></span>
-<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.749249153248292,</span></span>
-<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.846912059133069,</span></span>
-<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.38595293530192765</span></span>
+<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.37409121207058493,</span></span>
+<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.279141188085389,</span></span>
+<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.23117561746563653,</span></span>
+<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7957822811011989,</span></span>
+<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5039077874288026</span></span>
 <span id="cb133-8"><a href="#cb133-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb133-9"><a href="#cb133-9" aria-hidden="true" tabindex="-1"></a>randomsByNeed2<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb133-10"><a href="#cb133-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res24: List[Double] = List(</span></span>
-<span id="cb133-11"><a href="#cb133-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.35587377396356457,</span></span>
-<span id="cb133-12"><a href="#cb133-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.07472754309960927,</span></span>
-<span id="cb133-13"><a href="#cb133-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.749249153248292,</span></span>
-<span id="cb133-14"><a href="#cb133-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.846912059133069,</span></span>
-<span id="cb133-15"><a href="#cb133-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.38595293530192765</span></span>
+<span id="cb133-11"><a href="#cb133-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.37409121207058493,</span></span>
+<span id="cb133-12"><a href="#cb133-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.279141188085389,</span></span>
+<span id="cb133-13"><a href="#cb133-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.23117561746563653,</span></span>
+<span id="cb133-14"><a href="#cb133-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7957822811011989,</span></span>
+<span id="cb133-15"><a href="#cb133-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5039077874288026</span></span>
 <span id="cb133-16"><a href="#cb133-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>These subtleties are one of the reasons that functional
     programmers try to avoid using state as far as possible.</p>
@@ -11107,7 +11420,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     scope. We provide the type we want and <code>summon</code> does the
     rest:</p>
     <div class="sourceCode" id="cb201"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>summon<span class="op">[</span>JsonWriter<span class="op">[</span><span class="ex">String</span><span class="op">]]</span></span>
-<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: JsonWriter[String] = repl.MdocSession$MdocApp3$JsonWriter$$anon$7@2c5e5181</span></span></code></pre></div>
+<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: JsonWriter[String] = repl.MdocSession$MdocApp3$JsonWriter$$anon$7@2adba89e</span></span></code></pre></div>
     <p>Most type classes in Cats provide other means to summon
     instances. However, <code>summon</code> is a good fallback for
     debugging purposes. We can insert a call to <code>summon</code>
@@ -13132,7 +13445,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb308-4"><a href="#cb308-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">show</span><span class="op">(</span>date<span class="op">:</span> <span class="ex">Date</span><span class="op">):</span> <span class="ex">String</span> <span class="op">=</span></span>
 <span id="cb308-5"><a href="#cb308-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">s&quot;${</span>date<span class="op">.</span>getTime<span class="ss">}</span><span class="st">ms since the epoch.</span><span class="ss">&quot;</span></span></code></pre></div>
     <div class="sourceCode" id="cb309"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb309-1"><a href="#cb309-1" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> <span class="ex">Date</span><span class="op">().</span>show</span>
-<span id="cb309-2"><a href="#cb309-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: String = &quot;1726799255431ms since the epoch.&quot;</span></span></code></pre></div>
+<span id="cb309-2"><a href="#cb309-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: String = &quot;1727322756261ms since the epoch.&quot;</span></span></code></pre></div>
     <p>However, Cats also provides a couple of convenient methods to
     simplify the process. There are two construction methods on the
     companion object of <code>Show</code> that we can use to define
@@ -13302,7 +13615,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <div class="sourceCode" id="cb334"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb334-1"><a href="#cb334-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">===</span> x</span>
 <span id="cb334-2"><a href="#cb334-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res12: Boolean = true</span></span>
 <span id="cb334-3"><a href="#cb334-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">===</span> y</span>
-<span id="cb334-4"><a href="#cb334-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Boolean = true</span></span></code></pre></div>
+<span id="cb334-4"><a href="#cb334-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Boolean = false</span></span></code></pre></div>
     <h4 data-number="6.3.4.1" id="exercise-equality-liberty-and-felinity"><span class="header-section-number">6.3.4.1</span> Exercise: Equality,
     Liberty, and Felinity</h4>
     <p>Implement an instance of <code>Eq</code> for our running
@@ -14460,10 +14773,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     operates over a functor and has type
     <code>F[A] =&gt; F[B]</code>:</p>
     <div class="sourceCode" id="cb414"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb414-1"><a href="#cb414-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func <span class="op">=</span> <span class="op">(</span>x<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span> <span class="op">=&gt;</span> x <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb414-2"><a href="#cb414-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func: Function1[Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007f4d4b0f8df8@5158bfb5</span></span>
+<span id="cb414-2"><a href="#cb414-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func: Function1[Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007f7703116a10@1050ce1a</span></span>
 <span id="cb414-3"><a href="#cb414-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb414-4"><a href="#cb414-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> liftedFunc <span class="op">=</span> Functor<span class="op">[</span><span class="ex">Option</span><span class="op">].</span><span class="fu">lift</span><span class="op">(</span>func<span class="op">)</span></span>
-<span id="cb414-5"><a href="#cb414-5" aria-hidden="true" tabindex="-1"></a><span class="co">// liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda/0x00007f4d4b11e2b8@7a11cbab</span></span>
+<span id="cb414-5"><a href="#cb414-5" aria-hidden="true" tabindex="-1"></a><span class="co">// liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda/0x00007f77031091c8@29a314c0</span></span>
 <span id="cb414-6"><a href="#cb414-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb414-7"><a href="#cb414-7" aria-hidden="true" tabindex="-1"></a><span class="fu">liftedFunc</span><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">))</span></span>
 <span id="cb414-8"><a href="#cb414-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Option[Int] = Some(value = 2)</span></span></code></pre></div>
@@ -15166,7 +15479,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb462-4"><a href="#cb462-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func1 <span class="op">=</span> <span class="op">(</span>x<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span>    <span class="op">=&gt;</span> x<span class="op">.</span>toDouble</span>
 <span id="cb462-5"><a href="#cb462-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func2 <span class="op">=</span> <span class="op">(</span>y<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span> <span class="op">=&gt;</span> y <span class="op">*</span> <span class="dv">2</span></span></code></pre></div>
     <div class="sourceCode" id="cb463"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb463-1"><a href="#cb463-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func3 <span class="op">=</span> func1<span class="op">.</span><span class="fu">map</span><span class="op">(</span>func2<span class="op">)</span></span>
-<span id="cb463-2"><a href="#cb463-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda/0x00007f4d4b1202f0@6ce529cd</span></span></code></pre></div>
+<span id="cb463-2"><a href="#cb463-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda/0x00007f770310a060@79d34750</span></span></code></pre></div>
     <p><code>Function1</code> has two type parameters (the function
     argument and the result type):</p>
     <div class="sourceCode" id="cb464"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb464-1"><a href="#cb464-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Function1<span class="op">[-</span>A<span class="op">,</span> <span class="op">+</span>B<span class="op">]</span> <span class="op">{</span></span>
@@ -15332,7 +15645,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     we can call <code>contramap</code> as desired:</p>
     <div class="sourceCode" id="cb478"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb478-1"><a href="#cb478-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func2b<span class="op">:</span> <span class="ex">Double</span> <span class="op">&lt;=</span> <span class="ex">Double</span> <span class="op">=</span> func2</span></code></pre></div>
     <div class="sourceCode" id="cb479"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb479-1"><a href="#cb479-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func3c <span class="op">=</span> func2b<span class="op">.</span><span class="fu">contramap</span><span class="op">(</span>func1<span class="op">)</span></span>
-<span id="cb479-2"><a href="#cb479-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3c: Function1[Int, Double] = scala.Function1$$Lambda/0x00007f4d4b1287b8@3f2a9fbc</span></span></code></pre></div>
+<span id="cb479-2"><a href="#cb479-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3c: Function1[Int, Double] = scala.Function1$$Lambda/0x00007f77030ece30@330a6bbb</span></span></code></pre></div>
     <p>The difference between <code>func2</code> and <code>func2b</code>
     is purely syntactic—both refer to the same value and the type
     aliases are otherwise completely compatible. Incredibly, however,
@@ -15859,7 +16172,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     implicit resolution required to summon the instance:</p>
     <div class="sourceCode" id="cb498"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb498-1"><a href="#cb498-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span></code></pre></div>
     <div class="sourceCode" id="cb499"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb499-1"><a href="#cb499-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> fm <span class="op">=</span> Monad<span class="op">[</span><span class="ex">Future</span><span class="op">]</span></span>
-<span id="cb499-2"><a href="#cb499-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fm: Monad[[T &gt;: Nothing &lt;: Any] =&gt; Future[T]] = cats.instances.FutureInstances$$anon$1@4bc76fc8</span></span></code></pre></div>
+<span id="cb499-2"><a href="#cb499-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fm: Monad[[T &gt;: Nothing &lt;: Any] =&gt; Future[T]] = cats.instances.FutureInstances$$anon$1@ee7bd20</span></span></code></pre></div>
     <p>The <code>Monad</code> instance uses the captured
     <code>ExecutionContext</code> for subsequent calls to
     <code>pure</code> and <code>flatMap</code>:</p>
@@ -16500,12 +16813,12 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb561-3"><a href="#cb561-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb561-4"><a href="#cb561-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb561-5"><a href="#cb561-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing X</span></span>
-<span id="cb561-6"><a href="#cb561-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Double = 0.5044345705788397</span></span>
+<span id="cb561-6"><a href="#cb561-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Double = 0.9413311291897869</span></span>
 <span id="cb561-7"><a href="#cb561-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb561-8"><a href="#cb561-8" aria-hidden="true" tabindex="-1"></a>x <span class="co">// first access</span></span>
-<span id="cb561-9"><a href="#cb561-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res0: Double = 0.5044345705788397</span></span>
+<span id="cb561-9"><a href="#cb561-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res0: Double = 0.9413311291897869</span></span>
 <span id="cb561-10"><a href="#cb561-10" aria-hidden="true" tabindex="-1"></a>x <span class="co">// second access</span></span>
-<span id="cb561-11"><a href="#cb561-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Double = 0.5044345705788397</span></span></code></pre></div>
+<span id="cb561-11"><a href="#cb561-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Double = 0.9413311291897869</span></span></code></pre></div>
     <p>This is an example of call-by-value evaluation:</p>
     <ul>
     <li>the computation is evaluated at point where it is defined
@@ -16522,10 +16835,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb562-5"><a href="#cb562-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb562-6"><a href="#cb562-6" aria-hidden="true" tabindex="-1"></a>y <span class="co">// first access</span></span>
 <span id="cb562-7"><a href="#cb562-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb562-8"><a href="#cb562-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Double = 0.8680778081053251</span></span>
+<span id="cb562-8"><a href="#cb562-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Double = 0.8959063206288104</span></span>
 <span id="cb562-9"><a href="#cb562-9" aria-hidden="true" tabindex="-1"></a>y <span class="co">// second access</span></span>
 <span id="cb562-10"><a href="#cb562-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb562-11"><a href="#cb562-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: Double = 0.04949728628841532</span></span></code></pre></div>
+<span id="cb562-11"><a href="#cb562-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: Double = 0.3820960749639656</span></span></code></pre></div>
     <p>These are the properties of call-by-name evaluation:</p>
     <ul>
     <li>the computation is evaluated at the point of use (lazy);
@@ -16544,9 +16857,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb563-5"><a href="#cb563-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb563-6"><a href="#cb563-6" aria-hidden="true" tabindex="-1"></a>z <span class="co">// first access</span></span>
 <span id="cb563-7"><a href="#cb563-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Z</span></span>
-<span id="cb563-8"><a href="#cb563-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Double = 0.5137694228528954</span></span>
+<span id="cb563-8"><a href="#cb563-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Double = 0.808996444961113</span></span>
 <span id="cb563-9"><a href="#cb563-9" aria-hidden="true" tabindex="-1"></a>z <span class="co">// second access</span></span>
-<span id="cb563-10"><a href="#cb563-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Double = 0.5137694228528954</span></span></code></pre></div>
+<span id="cb563-10"><a href="#cb563-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Double = 0.808996444961113</span></span></code></pre></div>
     <p>Let’s summarize. There are two properties of interest:</p>
     <ul>
     <li>evaluation at the point of definition (eager) versus at the
@@ -16572,19 +16885,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Eval</code>:</p>
     <div class="sourceCode" id="cb564"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb564-1"><a href="#cb564-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Eval</span></code></pre></div>
     <div class="sourceCode" id="cb565"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb565-1"><a href="#cb565-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> now <span class="op">=</span> Eval<span class="op">.</span><span class="fu">now</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1000</span><span class="op">)</span></span>
-<span id="cb565-2"><a href="#cb565-2" aria-hidden="true" tabindex="-1"></a><span class="co">// now: Eval[Double] = Now(value = 1000.0536376972831)</span></span>
+<span id="cb565-2"><a href="#cb565-2" aria-hidden="true" tabindex="-1"></a><span class="co">// now: Eval[Double] = Now(value = 1000.3626862368936)</span></span>
 <span id="cb565-3"><a href="#cb565-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> always <span class="op">=</span> Eval<span class="op">.</span><span class="fu">always</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">3000</span><span class="op">)</span></span>
-<span id="cb565-4"><a href="#cb565-4" aria-hidden="true" tabindex="-1"></a><span class="co">// always: Eval[Double] = cats.Always@4f867230</span></span>
+<span id="cb565-4"><a href="#cb565-4" aria-hidden="true" tabindex="-1"></a><span class="co">// always: Eval[Double] = cats.Always@976a795</span></span>
 <span id="cb565-5"><a href="#cb565-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> later <span class="op">=</span> Eval<span class="op">.</span><span class="fu">later</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">2000</span><span class="op">)</span></span>
-<span id="cb565-6"><a href="#cb565-6" aria-hidden="true" tabindex="-1"></a><span class="co">// later: Eval[Double] = cats.Later@1d5c069d</span></span></code></pre></div>
+<span id="cb565-6"><a href="#cb565-6" aria-hidden="true" tabindex="-1"></a><span class="co">// later: Eval[Double] = cats.Later@627a352b</span></span></code></pre></div>
     <p>We can extract the result of an <code>Eval</code> using its
     <code>value</code> method:</p>
     <div class="sourceCode" id="cb566"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb566-1"><a href="#cb566-1" aria-hidden="true" tabindex="-1"></a>now<span class="op">.</span>value</span>
-<span id="cb566-2"><a href="#cb566-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: Double = 1000.0536376972831</span></span>
+<span id="cb566-2"><a href="#cb566-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: Double = 1000.3626862368936</span></span>
 <span id="cb566-3"><a href="#cb566-3" aria-hidden="true" tabindex="-1"></a>always<span class="op">.</span>value</span>
-<span id="cb566-4"><a href="#cb566-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res7: Double = 3000.5870438148413</span></span>
+<span id="cb566-4"><a href="#cb566-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res7: Double = 3000.446131741364</span></span>
 <span id="cb566-5"><a href="#cb566-5" aria-hidden="true" tabindex="-1"></a>later<span class="op">.</span>value</span>
-<span id="cb566-6"><a href="#cb566-6" aria-hidden="true" tabindex="-1"></a><span class="co">// res8: Double = 2000.141626288006</span></span></code></pre></div>
+<span id="cb566-6"><a href="#cb566-6" aria-hidden="true" tabindex="-1"></a><span class="co">// res8: Double = 2000.3915686227517</span></span></code></pre></div>
     <p>Each type of <code>Eval</code> calculates its result using one of
     the evaluation models defined above. <code>Eval.now</code> captures
     a value <em>right now</em>. Its semantics are similar to a
@@ -16594,39 +16907,39 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb567-3"><a href="#cb567-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb567-4"><a href="#cb567-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb567-5"><a href="#cb567-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing X</span></span>
-<span id="cb567-6"><a href="#cb567-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Eval[Double] = Now(value = 0.34687032418789865)</span></span>
+<span id="cb567-6"><a href="#cb567-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Eval[Double] = Now(value = 0.7477097916158293)</span></span>
 <span id="cb567-7"><a href="#cb567-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb567-8"><a href="#cb567-8" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>value <span class="co">// first access</span></span>
-<span id="cb567-9"><a href="#cb567-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res10: Double = 0.34687032418789865</span></span>
+<span id="cb567-9"><a href="#cb567-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res10: Double = 0.7477097916158293</span></span>
 <span id="cb567-10"><a href="#cb567-10" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>value <span class="co">// second access</span></span>
-<span id="cb567-11"><a href="#cb567-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res11: Double = 0.34687032418789865</span></span></code></pre></div>
+<span id="cb567-11"><a href="#cb567-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res11: Double = 0.7477097916158293</span></span></code></pre></div>
     <p><code>Eval.always</code> captures a lazy computation, similar to
     a <code>def</code>:</p>
     <div class="sourceCode" id="cb568"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb568-1"><a href="#cb568-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> y <span class="op">=</span> Eval<span class="op">.</span>always<span class="op">{</span></span>
 <span id="cb568-2"><a href="#cb568-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Computing Y&quot;</span><span class="op">)</span></span>
 <span id="cb568-3"><a href="#cb568-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb568-4"><a href="#cb568-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb568-5"><a href="#cb568-5" aria-hidden="true" tabindex="-1"></a><span class="co">// y: Eval[Double] = cats.Always@320d4cf4</span></span>
+<span id="cb568-5"><a href="#cb568-5" aria-hidden="true" tabindex="-1"></a><span class="co">// y: Eval[Double] = cats.Always@3f47cc7c</span></span>
 <span id="cb568-6"><a href="#cb568-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb568-7"><a href="#cb568-7" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>value <span class="co">// first access</span></span>
 <span id="cb568-8"><a href="#cb568-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb568-9"><a href="#cb568-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res12: Double = 0.7409065398429119</span></span>
+<span id="cb568-9"><a href="#cb568-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res12: Double = 0.6788785398597359</span></span>
 <span id="cb568-10"><a href="#cb568-10" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>value <span class="co">// second access</span></span>
 <span id="cb568-11"><a href="#cb568-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb568-12"><a href="#cb568-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Double = 0.8165334549322211</span></span></code></pre></div>
+<span id="cb568-12"><a href="#cb568-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Double = 0.4667453999269088</span></span></code></pre></div>
     <p>Finally, <code>Eval.later</code> captures a lazy, memoized
     computation, similar to a <code>lazy val</code>:</p>
     <div class="sourceCode" id="cb569"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb569-1"><a href="#cb569-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> z <span class="op">=</span> Eval<span class="op">.</span>later<span class="op">{</span></span>
 <span id="cb569-2"><a href="#cb569-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Computing Z&quot;</span><span class="op">)</span></span>
 <span id="cb569-3"><a href="#cb569-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb569-4"><a href="#cb569-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb569-5"><a href="#cb569-5" aria-hidden="true" tabindex="-1"></a><span class="co">// z: Eval[Double] = cats.Later@7048c271</span></span>
+<span id="cb569-5"><a href="#cb569-5" aria-hidden="true" tabindex="-1"></a><span class="co">// z: Eval[Double] = cats.Later@1875e828</span></span>
 <span id="cb569-6"><a href="#cb569-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb569-7"><a href="#cb569-7" aria-hidden="true" tabindex="-1"></a>z<span class="op">.</span>value <span class="co">// first access</span></span>
 <span id="cb569-8"><a href="#cb569-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Z</span></span>
-<span id="cb569-9"><a href="#cb569-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: Double = 0.4205954046857311</span></span>
+<span id="cb569-9"><a href="#cb569-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: Double = 0.48767133061110546</span></span>
 <span id="cb569-10"><a href="#cb569-10" aria-hidden="true" tabindex="-1"></a>z<span class="op">.</span>value <span class="co">// second access</span></span>
-<span id="cb569-11"><a href="#cb569-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res15: Double = 0.4205954046857311</span></span></code></pre></div>
+<span id="cb569-11"><a href="#cb569-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res15: Double = 0.48767133061110546</span></span></code></pre></div>
     <p>The three behaviours are summarized below:</p>
     <div class="table-responsive">
     <table>
@@ -16671,7 +16984,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <div class="sourceCode" id="cb570"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb570-1"><a href="#cb570-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> greeting <span class="op">=</span> Eval</span>
 <span id="cb570-2"><a href="#cb570-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>always<span class="op">{</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 1&quot;</span><span class="op">);</span> <span class="st">&quot;Hello&quot;</span> <span class="op">}</span></span>
 <span id="cb570-3"><a href="#cb570-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 2&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> world</span><span class="ss">&quot;</span> <span class="op">}</span></span>
-<span id="cb570-4"><a href="#cb570-4" aria-hidden="true" tabindex="-1"></a><span class="co">// greeting: Eval[String] = cats.Eval$$anon$4@430ff723</span></span>
+<span id="cb570-4"><a href="#cb570-4" aria-hidden="true" tabindex="-1"></a><span class="co">// greeting: Eval[String] = cats.Eval$$anon$4@519f56ab</span></span>
 <span id="cb570-5"><a href="#cb570-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb570-6"><a href="#cb570-6" aria-hidden="true" tabindex="-1"></a>greeting<span class="op">.</span>value</span>
 <span id="cb570-7"><a href="#cb570-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1</span></span>
@@ -16688,7 +17001,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb571-6"><a href="#cb571-6" aria-hidden="true" tabindex="-1"></a>  a <span class="op">+</span> b</span>
 <span id="cb571-7"><a href="#cb571-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb571-8"><a href="#cb571-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Calculating A</span></span>
-<span id="cb571-9"><a href="#cb571-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ans: Eval[Int] = cats.Eval$$anon$4@2701dc14</span></span>
+<span id="cb571-9"><a href="#cb571-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ans: Eval[Int] = cats.Eval$$anon$4@26390888</span></span>
 <span id="cb571-10"><a href="#cb571-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb571-11"><a href="#cb571-11" aria-hidden="true" tabindex="-1"></a>ans<span class="op">.</span>value <span class="co">// first access</span></span>
 <span id="cb571-12"><a href="#cb571-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Calculating B</span></span>
@@ -16707,7 +17020,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb572-3"><a href="#cb572-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 2&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> sat on</span><span class="ss">&quot;</span> <span class="op">}</span></span>
 <span id="cb572-4"><a href="#cb572-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>memoize</span>
 <span id="cb572-5"><a href="#cb572-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 3&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> the mat</span><span class="ss">&quot;</span> <span class="op">}</span></span>
-<span id="cb572-6"><a href="#cb572-6" aria-hidden="true" tabindex="-1"></a><span class="co">// saying: Eval[String] = cats.Eval$$anon$4@1b01f27</span></span>
+<span id="cb572-6"><a href="#cb572-6" aria-hidden="true" tabindex="-1"></a><span class="co">// saying: Eval[String] = cats.Eval$$anon$4@5d530bb0</span></span>
 <span id="cb572-7"><a href="#cb572-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb572-8"><a href="#cb572-8" aria-hidden="true" tabindex="-1"></a>saying<span class="op">.</span>value <span class="co">// first access</span></span>
 <span id="cb572-9"><a href="#cb572-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1</span></span>
@@ -17124,7 +17437,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb611-3"><a href="#cb611-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> catName<span class="op">:</span> <span class="ex">Reader</span><span class="op">[</span>Cat<span class="op">,</span> <span class="ex">String</span><span class="op">]</span> <span class="op">=</span></span>
 <span id="cb611-4"><a href="#cb611-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Reader</span><span class="op">(</span>cat <span class="op">=&gt;</span> cat<span class="op">.</span>name<span class="op">)</span></span>
 <span id="cb611-5"><a href="#cb611-5" aria-hidden="true" tabindex="-1"></a><span class="co">// catName: Kleisli[Id, Cat, String] = Kleisli(</span></span>
-<span id="cb611-6"><a href="#cb611-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   run = repl.MdocSession$MdocApp0$$$Lambda/0x00007f4d4b1d5000@67251429</span></span>
+<span id="cb611-6"><a href="#cb611-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   run = repl.MdocSession$MdocApp0$$$Lambda/0x00007f77031fb000@602012d9</span></span>
 <span id="cb611-7"><a href="#cb611-7" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>We can extract the function again using the <code>Reader&#39;s</code>
     <code>run</code> method and call it using <code>apply</code> as
@@ -17372,27 +17685,27 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     function.</li>
     </ul>
     <div class="sourceCode" id="cb630"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb630-1"><a href="#cb630-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> getDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>get<span class="op">[</span><span class="bu">Int</span><span class="op">]</span></span>
-<span id="cb630-2"><a href="#cb630-2" aria-hidden="true" tabindex="-1"></a><span class="co">// getDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Int] = cats.data.IndexedStateT@31a000cf</span></span>
+<span id="cb630-2"><a href="#cb630-2" aria-hidden="true" tabindex="-1"></a><span class="co">// getDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Int] = cats.data.IndexedStateT@6ca9f39e</span></span>
 <span id="cb630-3"><a href="#cb630-3" aria-hidden="true" tabindex="-1"></a>getDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-4"><a href="#cb630-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Tuple2[Int, Int] = (10, 10)</span></span>
 <span id="cb630-5"><a href="#cb630-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-6"><a href="#cb630-6" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> setDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>set<span class="op">[</span><span class="bu">Int</span><span class="op">](</span><span class="dv">30</span><span class="op">)</span></span>
-<span id="cb630-7"><a href="#cb630-7" aria-hidden="true" tabindex="-1"></a><span class="co">// setDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@2a919f01</span></span>
+<span id="cb630-7"><a href="#cb630-7" aria-hidden="true" tabindex="-1"></a><span class="co">// setDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@1c1b233b</span></span>
 <span id="cb630-8"><a href="#cb630-8" aria-hidden="true" tabindex="-1"></a>setDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-9"><a href="#cb630-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Tuple2[Int, Unit] = (30, ())</span></span>
 <span id="cb630-10"><a href="#cb630-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-11"><a href="#cb630-11" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> pureDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>pure<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">](</span><span class="st">&quot;Result&quot;</span><span class="op">)</span></span>
-<span id="cb630-12"><a href="#cb630-12" aria-hidden="true" tabindex="-1"></a><span class="co">// pureDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@76c9d84b</span></span>
+<span id="cb630-12"><a href="#cb630-12" aria-hidden="true" tabindex="-1"></a><span class="co">// pureDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@3c57f63a</span></span>
 <span id="cb630-13"><a href="#cb630-13" aria-hidden="true" tabindex="-1"></a>pureDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-14"><a href="#cb630-14" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: Tuple2[Int, String] = (10, &quot;Result&quot;)</span></span>
 <span id="cb630-15"><a href="#cb630-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-16"><a href="#cb630-16" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> inspectDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>inspect<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">](</span>x <span class="op">=&gt;</span> <span class="ss">s&quot;${</span>x<span class="ss">}</span><span class="st">!</span><span class="ss">&quot;</span><span class="op">)</span></span>
-<span id="cb630-17"><a href="#cb630-17" aria-hidden="true" tabindex="-1"></a><span class="co">// inspectDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@1d6e9380</span></span>
+<span id="cb630-17"><a href="#cb630-17" aria-hidden="true" tabindex="-1"></a><span class="co">// inspectDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@20b55c3c</span></span>
 <span id="cb630-18"><a href="#cb630-18" aria-hidden="true" tabindex="-1"></a>inspectDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-19"><a href="#cb630-19" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Tuple2[Int, String] = (10, &quot;10!&quot;)</span></span>
 <span id="cb630-20"><a href="#cb630-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-21"><a href="#cb630-21" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> modifyDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>modify<span class="op">[</span><span class="bu">Int</span><span class="op">](</span>_ <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
-<span id="cb630-22"><a href="#cb630-22" aria-hidden="true" tabindex="-1"></a><span class="co">// modifyDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@28bbc79c</span></span>
+<span id="cb630-22"><a href="#cb630-22" aria-hidden="true" tabindex="-1"></a><span class="co">// modifyDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@24c7656c</span></span>
 <span id="cb630-23"><a href="#cb630-23" aria-hidden="true" tabindex="-1"></a>modifyDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-24"><a href="#cb630-24" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Tuple2[Int, Unit] = (11, ())</span></span></code></pre></div>
     <p>We can assemble these building blocks using a for comprehension.
@@ -17407,7 +17720,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb632-5"><a href="#cb632-5" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">&lt;-</span> modify<span class="op">[</span><span class="bu">Int</span><span class="op">](</span>_ <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
 <span id="cb632-6"><a href="#cb632-6" aria-hidden="true" tabindex="-1"></a>  c <span class="op">&lt;-</span> inspect<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span>_ <span class="op">*</span> <span class="dv">1000</span><span class="op">)</span></span>
 <span id="cb632-7"><a href="#cb632-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">,</span> c<span class="op">)</span></span>
-<span id="cb632-8"><a href="#cb632-8" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@159ce38b</span></span>
+<span id="cb632-8"><a href="#cb632-8" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@291f1f59</span></span>
 <span id="cb632-9"><a href="#cb632-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb632-10"><a href="#cb632-10" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="op">(</span>state<span class="op">,</span> result<span class="op">)</span> <span class="op">=</span> program<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">1</span><span class="op">).</span>value</span>
 <span id="cb632-11"><a href="#cb632-11" aria-hidden="true" tabindex="-1"></a><span class="co">// state: Int = 3</span></span>
@@ -17523,7 +17836,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb641-3"><a href="#cb641-3" aria-hidden="true" tabindex="-1"></a>  _   <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;2&quot;</span><span class="op">)</span></span>
 <span id="cb641-4"><a href="#cb641-4" aria-hidden="true" tabindex="-1"></a>  ans <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;+&quot;</span><span class="op">)</span></span>
 <span id="cb641-5"><a href="#cb641-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> ans</span>
-<span id="cb641-6"><a href="#cb641-6" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@2d5a073e</span></span>
+<span id="cb641-6"><a href="#cb641-6" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@379546ca</span></span>
 <span id="cb641-7"><a href="#cb641-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb641-8"><a href="#cb641-8" aria-hidden="true" tabindex="-1"></a>program<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb641-9"><a href="#cb641-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res11: Int = 3</span></span></code></pre></div>
@@ -17550,7 +17863,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>We can use <code>evalAll</code> to conveniently evaluate
     multi-stage expressions:</p>
     <div class="sourceCode" id="cb644"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb644-1"><a href="#cb644-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> multistageProgram <span class="op">=</span> <span class="fu">evalAll</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="st">&quot;1&quot;</span><span class="op">,</span> <span class="st">&quot;2&quot;</span><span class="op">,</span> <span class="st">&quot;+&quot;</span><span class="op">,</span> <span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;*&quot;</span><span class="op">))</span></span>
-<span id="cb644-2"><a href="#cb644-2" aria-hidden="true" tabindex="-1"></a><span class="co">// multistageProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@36400b00</span></span>
+<span id="cb644-2"><a href="#cb644-2" aria-hidden="true" tabindex="-1"></a><span class="co">// multistageProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@27247467</span></span>
 <span id="cb644-3"><a href="#cb644-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb644-4"><a href="#cb644-4" aria-hidden="true" tabindex="-1"></a>multistageProgram<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb644-5"><a href="#cb644-5" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Int = 9</span></span></code></pre></div>
@@ -17565,7 +17878,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb645-3"><a href="#cb645-3" aria-hidden="true" tabindex="-1"></a>  _   <span class="op">&lt;-</span> <span class="fu">evalAll</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;4&quot;</span><span class="op">,</span> <span class="st">&quot;+&quot;</span><span class="op">))</span></span>
 <span id="cb645-4"><a href="#cb645-4" aria-hidden="true" tabindex="-1"></a>  ans <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;*&quot;</span><span class="op">)</span></span>
 <span id="cb645-5"><a href="#cb645-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> ans</span>
-<span id="cb645-6"><a href="#cb645-6" aria-hidden="true" tabindex="-1"></a><span class="co">// biggerProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@26221982</span></span>
+<span id="cb645-6"><a href="#cb645-6" aria-hidden="true" tabindex="-1"></a><span class="co">// biggerProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@68c37731</span></span>
 <span id="cb645-7"><a href="#cb645-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb645-8"><a href="#cb645-8" aria-hidden="true" tabindex="-1"></a>biggerProgram<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb645-9"><a href="#cb645-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: Int = 21</span></span></code></pre></div>
@@ -18536,7 +18849,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     function that accepts the wrong number or types of parameters, we
     get a compile error:</p>
     <div class="sourceCode" id="cb713"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb713-1"><a href="#cb713-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> add<span class="op">:</span> <span class="op">(</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Int</span> <span class="op">=</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">=&gt;</span> a <span class="op">+</span> b</span>
-<span id="cb713-2"><a href="#cb713-2" aria-hidden="true" tabindex="-1"></a><span class="co">// add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007f4d4aefa000@59efb2cc</span></span></code></pre></div>
+<span id="cb713-2"><a href="#cb713-2" aria-hidden="true" tabindex="-1"></a><span class="co">// add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007f7702ef2000@38acba53</span></span></code></pre></div>
     <div class="sourceCode" id="cb714"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb714-1"><a href="#cb714-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">3</span><span class="op">)).</span><span class="fu">mapN</span><span class="op">(</span>add<span class="op">)</span></span>
 <span id="cb714-2"><a href="#cb714-2" aria-hidden="true" tabindex="-1"></a><span class="co">// error: </span></span>
 <span id="cb714-3"><a href="#cb714-3" aria-hidden="true" tabindex="-1"></a><span class="co">// &#39;:&#39; expected, but &#39;(&#39; found</span></span>
