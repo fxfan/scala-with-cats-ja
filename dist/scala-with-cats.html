@@ -7139,13 +7139,14 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         <li><a href="#parallel" id="toc-parallel"><span class="toc-section-number">11.4</span> Parallel</a></li>
         <li><a href="#apply-と-applicative-apply-and-applicative" id="toc-apply-と-applicative-apply-and-applicative"><span class="toc-section-number">11.5</span> <code>Apply</code> と
         <code>Applicative</code> Apply and Applicative</a></li>
-        <li><a href="#summary" id="toc-summary"><span class="toc-section-number">11.6</span> Summary</a></li>
+        <li><a href="#まとめ-summary-4" id="toc-まとめ-summary-4"><span class="toc-section-number">11.6</span> まとめ Summary</a></li>
         </ul></li>
-        <li><a href="#sec:foldable-traverse" id="toc-sec:foldable-traverse"><span class="toc-section-number">12</span> Foldable and Traverse</a>
+        <li><a href="#sec:foldable-traverse" id="toc-sec:foldable-traverse"><span class="toc-section-number">12</span> <code>Foldable</code> と
+        <code>Traverse</code> Foldable and Traverse</a>
         <ul>
         <li><a href="#sec:foldable" id="toc-sec:foldable"><span class="toc-section-number">12.1</span> Foldable</a></li>
         <li><a href="#sec:traverse" id="toc-sec:traverse"><span class="toc-section-number">12.2</span> Traverse</a></li>
-        <li><a href="#summary-1" id="toc-summary-1"><span class="toc-section-number">12.3</span> Summary</a></li>
+        <li><a href="#summary" id="toc-summary"><span class="toc-section-number">12.3</span> Summary</a></li>
         </ul></li>
         <li><a href="#indexed-types" id="toc-indexed-types"><span class="toc-section-number">13</span> Indexed Types</a>
         <ul>
@@ -7176,7 +7177,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         Constructors</a></li>
         <li><a href="#abstracting-over-monads" id="toc-abstracting-over-monads"><span class="toc-section-number">16.2</span> Abstracting over
         Monads</a></li>
-        <li><a href="#summary-2" id="toc-summary-2"><span class="toc-section-number">16.3</span> Summary</a></li>
+        <li><a href="#summary-1" id="toc-summary-1"><span class="toc-section-number">16.3</span> Summary</a></li>
         </ul></li>
         <li><a href="#sec:map-reduce" id="toc-sec:map-reduce"><span class="toc-section-number">17</span> Case Study: Map-Reduce</a>
         <ul>
@@ -7186,7 +7187,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         <em>foldMap</em></a></li>
         <li><a href="#parallelising-foldmap" id="toc-parallelising-foldmap"><span class="toc-section-number">17.3</span> Parallelising
         <em>foldMap</em></a></li>
-        <li><a href="#summary-3" id="toc-summary-3"><span class="toc-section-number">17.4</span> Summary</a></li>
+        <li><a href="#summary-2" id="toc-summary-2"><span class="toc-section-number">17.4</span> Summary</a></li>
         </ul></li>
         <li><a href="#case-study-data-validation" id="toc-case-study-data-validation"><span class="toc-section-number">18</span> Case Study: Data
         Validation</a>
@@ -7200,7 +7201,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         <li><a href="#transforming-data" id="toc-transforming-data"><span class="toc-section-number">18.4</span> Transforming
         Data</a></li>
         <li><a href="#kleislis" id="toc-kleislis"><span class="toc-section-number">18.5</span> Kleislis</a></li>
-        <li><a href="#summary-4" id="toc-summary-4"><span class="toc-section-number">18.6</span> Summary</a></li>
+        <li><a href="#summary-3" id="toc-summary-3"><span class="toc-section-number">18.6</span> Summary</a></li>
         </ul></li>
         <li><a href="#case-study-crdts" id="toc-case-study-crdts"><span class="toc-section-number">19</span> Case Study: CRDTs</a>
         <ul>
@@ -7212,7 +7213,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         Type Class</a></li>
         <li><a href="#abstracting-a-key-value-store" id="toc-abstracting-a-key-value-store"><span class="toc-section-number">19.5</span> Abstracting a Key Value
         Store</a></li>
-        <li><a href="#summary-5" id="toc-summary-5"><span class="toc-section-number">19.6</span> Summary</a></li>
+        <li><a href="#summary-4" id="toc-summary-4"><span class="toc-section-number">19.6</span> Summary</a></li>
         </ul></li>
         <li><a href="#acknowledgements" id="toc-acknowledgements"><span class="toc-section-number">20</span> Acknowledgements</a>
         <ul>
@@ -10668,19 +10669,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     するたびに、<em>異なる</em>結果が得られることに注目してほしい。これらの結果は本来同じであることが期待される。</p>
     <div class="sourceCode" id="cb128"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>randoms<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res19: List[Double] = List(</span></span>
-<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.08854811054264877,</span></span>
-<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5716573466293936,</span></span>
-<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.09543411433625237,</span></span>
-<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4237632260147909,</span></span>
-<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.2969376729603349</span></span>
+<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.40418868037380584,</span></span>
+<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.33454689054865616,</span></span>
+<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.024216478357078963,</span></span>
+<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.2729899885585624,</span></span>
+<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.37147755234516866</span></span>
 <span id="cb128-8"><a href="#cb128-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb128-9"><a href="#cb128-9" aria-hidden="true" tabindex="-1"></a>randoms<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb128-10"><a href="#cb128-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res20: List[Double] = List(</span></span>
-<span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.607704695972218,</span></span>
-<span id="cb128-12"><a href="#cb128-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.39584774167272385,</span></span>
-<span id="cb128-13"><a href="#cb128-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9591416271729698,</span></span>
-<span id="cb128-14"><a href="#cb128-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.2661158684785482,</span></span>
-<span id="cb128-15"><a href="#cb128-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.023463056375651492</span></span>
+<span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8684016152467723,</span></span>
+<span id="cb128-12"><a href="#cb128-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.944896769979695,</span></span>
+<span id="cb128-13"><a href="#cb128-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6990356622992515,</span></span>
+<span id="cb128-14"><a href="#cb128-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.3115539131204691,</span></span>
+<span id="cb128-15"><a href="#cb128-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8402595312064736</span></span>
 <span id="cb128-16"><a href="#cb128-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>Now let’s define the same stream in a call by need style, using
     <code>lazy val</code>.</p>
@@ -10697,19 +10698,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     したときに得られる結果は同じになる。また、得られる数はどれも同じである。</p>
     <div class="sourceCode" id="cb130"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a>randomsByNeed<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res21: List[Double] = List(</span></span>
-<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493</span></span>
+<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781</span></span>
 <span id="cb130-8"><a href="#cb130-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb130-9"><a href="#cb130-9" aria-hidden="true" tabindex="-1"></a>randomsByNeed<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb130-10"><a href="#cb130-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res22: List[Double] = List(</span></span>
-<span id="cb130-11"><a href="#cb130-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-12"><a href="#cb130-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-13"><a href="#cb130-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-14"><a href="#cb130-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493,</span></span>
-<span id="cb130-15"><a href="#cb130-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.34437855132029493</span></span>
+<span id="cb130-11"><a href="#cb130-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-12"><a href="#cb130-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-13"><a href="#cb130-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-14"><a href="#cb130-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781,</span></span>
+<span id="cb130-15"><a href="#cb130-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7676080623406781</span></span>
 <span id="cb130-16"><a href="#cb130-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>If we wanted a stream that had a different random number for each
     element but those numbers were constant, we could redefine
@@ -10729,19 +10730,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>Then check it works.</p>
     <div class="sourceCode" id="cb133"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>randomsByNeed2<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res23: List[Double] = List(</span></span>
-<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7265484196364634,</span></span>
-<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.894545530241702,</span></span>
-<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.48491260075468257,</span></span>
-<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6983820989531804,</span></span>
-<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8089121726107239</span></span>
+<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8351896836245394,</span></span>
+<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8617002486354326,</span></span>
+<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.38914652138933203,</span></span>
+<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8649861909575721,</span></span>
+<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5516928605983029</span></span>
 <span id="cb133-8"><a href="#cb133-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb133-9"><a href="#cb133-9" aria-hidden="true" tabindex="-1"></a>randomsByNeed2<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb133-10"><a href="#cb133-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res24: List[Double] = List(</span></span>
-<span id="cb133-11"><a href="#cb133-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7265484196364634,</span></span>
-<span id="cb133-12"><a href="#cb133-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.894545530241702,</span></span>
-<span id="cb133-13"><a href="#cb133-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.48491260075468257,</span></span>
-<span id="cb133-14"><a href="#cb133-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6983820989531804,</span></span>
-<span id="cb133-15"><a href="#cb133-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8089121726107239</span></span>
+<span id="cb133-11"><a href="#cb133-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8351896836245394,</span></span>
+<span id="cb133-12"><a href="#cb133-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8617002486354326,</span></span>
+<span id="cb133-13"><a href="#cb133-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.38914652138933203,</span></span>
+<span id="cb133-14"><a href="#cb133-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8649861909575721,</span></span>
+<span id="cb133-15"><a href="#cb133-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5516928605983029</span></span>
 <span id="cb133-16"><a href="#cb133-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>These subtleties are one of the reasons that functional
     programmers try to avoid using state as far as possible.</p>
@@ -12039,7 +12040,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     を使えば、givenスコープに存在する任意の値を呼び出すことができる。必要なのは、求めている値の型を指定することだけで、あとは
     <code>summon</code> に任せればよい。</p>
     <div class="sourceCode" id="cb201"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>summon<span class="op">[</span>JsonWriter<span class="op">[</span><span class="ex">String</span><span class="op">]]</span></span>
-<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: JsonWriter[String] = repl.MdocSession$MdocApp3$JsonWriter$$anon$7@3d8a4a70</span></span></code></pre></div>
+<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: JsonWriter[String] = repl.MdocSession$MdocApp3$JsonWriter$$anon$7@6e058b8d</span></span></code></pre></div>
     <p>Most type classes in Cats provide other means to summon
     instances. However, <code>summon</code> is a good fallback for
     debugging purposes. We can insert a call to <code>summon</code>
@@ -14566,7 +14567,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb308-4"><a href="#cb308-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">show</span><span class="op">(</span>date<span class="op">:</span> <span class="ex">Date</span><span class="op">):</span> <span class="ex">String</span> <span class="op">=</span></span>
 <span id="cb308-5"><a href="#cb308-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">s&quot;${</span>date<span class="op">.</span>getTime<span class="ss">}</span><span class="st">ms since the epoch.</span><span class="ss">&quot;</span></span></code></pre></div>
     <div class="sourceCode" id="cb309"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb309-1"><a href="#cb309-1" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> <span class="ex">Date</span><span class="op">().</span>show</span>
-<span id="cb309-2"><a href="#cb309-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: String = &quot;1730300945982ms since the epoch.&quot;</span></span></code></pre></div>
+<span id="cb309-2"><a href="#cb309-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: String = &quot;1730383963466ms since the epoch.&quot;</span></span></code></pre></div>
     <p>However, Cats also provides a couple of convenient methods to
     simplify the process. There are two construction methods on the
     companion object of <code>Show</code> that we can use to define
@@ -14962,13 +14963,11 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     same with other types of sequence, using concatenation as the binary
     operator and the empty sequence as our identity.</p>
     <p>ここでは、シーケンス（順序付きコレクション、つまり
-    <code>Seq</code>）との類似性を示すために、通常の <code>+</code>
-    ではなく <code>++</code>
+    <code>Seq</code>
+    のことを指す。以下同じ）との類似性を示すために、通常の
+    <code>+</code> ではなく <code>++</code>
     を使っている。連結処理を二項演算とし、空のシーケンスを単位元とすれば、他のシーケンス型についても
     <code>String</code> と同じことが言える。</p>
-    <!--
-    TODO: シーケンス・順序付きコレクション・Seq。カッコじゃなく訳註にするか？
-    -->
     <h2 data-number="7.1" id="モノイドの定義-definition-of-a-monoid"><span class="header-section-number">7.1</span> モノイドの定義 Definition
     of a Monoid</h2>
     <p>We’ve seen a number of “addition” scenarios above each with an
@@ -16312,10 +16311,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     型の関数を、ファンクター内の値を操作する
     <code>F[A] =&gt; F[B]</code> 型関数に変換する。</p>
     <div class="sourceCode" id="cb414"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb414-1"><a href="#cb414-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func <span class="op">=</span> <span class="op">(</span>x<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span> <span class="op">=&gt;</span> x <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb414-2"><a href="#cb414-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func: Function1[Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007fae460557f8@5c30a251</span></span>
+<span id="cb414-2"><a href="#cb414-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func: Function1[Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007fd4e20757f8@2d0269c3</span></span>
 <span id="cb414-3"><a href="#cb414-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb414-4"><a href="#cb414-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> liftedFunc <span class="op">=</span> Functor<span class="op">[</span><span class="ex">Option</span><span class="op">].</span><span class="fu">lift</span><span class="op">(</span>func<span class="op">)</span></span>
-<span id="cb414-5"><a href="#cb414-5" aria-hidden="true" tabindex="-1"></a><span class="co">// liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda/0x00007fae46050c20@4d83c93a</span></span>
+<span id="cb414-5"><a href="#cb414-5" aria-hidden="true" tabindex="-1"></a><span class="co">// liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda/0x00007fd4e2071078@744a6b4a</span></span>
 <span id="cb414-6"><a href="#cb414-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb414-7"><a href="#cb414-7" aria-hidden="true" tabindex="-1"></a><span class="fu">liftedFunc</span><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">))</span></span>
 <span id="cb414-8"><a href="#cb414-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Option[Int] = Some(value = 2)</span></span></code></pre></div>
@@ -17262,7 +17261,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb462-4"><a href="#cb462-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func1 <span class="op">=</span> <span class="op">(</span>x<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span>    <span class="op">=&gt;</span> x<span class="op">.</span>toDouble</span>
 <span id="cb462-5"><a href="#cb462-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func2 <span class="op">=</span> <span class="op">(</span>y<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span> <span class="op">=&gt;</span> y <span class="op">*</span> <span class="dv">2</span></span></code></pre></div>
     <div class="sourceCode" id="cb463"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb463-1"><a href="#cb463-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func3 <span class="op">=</span> func1<span class="op">.</span><span class="fu">map</span><span class="op">(</span>func2<span class="op">)</span></span>
-<span id="cb463-2"><a href="#cb463-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda/0x00007fae46051ab8@5e11f09e</span></span></code></pre></div>
+<span id="cb463-2"><a href="#cb463-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda/0x00007fd4e2071f10@14d3f489</span></span></code></pre></div>
     <p><code>Function1</code> has two type parameters (the function
     argument and the result type):</p>
     <p><code>Function1</code>
@@ -17471,7 +17470,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>contramap</code> を呼び出すことが可能となる。</p>
     <div class="sourceCode" id="cb478"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb478-1"><a href="#cb478-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func2b<span class="op">:</span> <span class="ex">Double</span> <span class="op">&lt;=</span> <span class="ex">Double</span> <span class="op">=</span> func2</span></code></pre></div>
     <div class="sourceCode" id="cb479"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb479-1"><a href="#cb479-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func3c <span class="op">=</span> func2b<span class="op">.</span><span class="fu">contramap</span><span class="op">(</span>func1<span class="op">)</span></span>
-<span id="cb479-2"><a href="#cb479-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3c: Function1[Int, Double] = scala.Function1$$Lambda/0x00007fae45e867b0@1b5f17ee</span></span></code></pre></div>
+<span id="cb479-2"><a href="#cb479-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3c: Function1[Int, Double] = scala.Function1$$Lambda/0x00007fd4e207ec08@237f3fc4</span></span></code></pre></div>
     <p>The difference between <code>func2</code> and <code>func2b</code>
     is purely syntactic—both refer to the same value and the type
     aliases are otherwise completely compatible. Incredibly, however,
@@ -18180,7 +18179,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     をスコープに含めれば、インスタンスを取得するために必要な暗黙の解決が行われる。</p>
     <div class="sourceCode" id="cb498"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb498-1"><a href="#cb498-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span></code></pre></div>
     <div class="sourceCode" id="cb499"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb499-1"><a href="#cb499-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> fm <span class="op">=</span> Monad<span class="op">[</span><span class="ex">Future</span><span class="op">]</span></span>
-<span id="cb499-2"><a href="#cb499-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fm: Monad[[T &gt;: Nothing &lt;: Any] =&gt; Future[T]] = cats.instances.FutureInstances$$anon$1@6d0d216f</span></span></code></pre></div>
+<span id="cb499-2"><a href="#cb499-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fm: Monad[[T &gt;: Nothing &lt;: Any] =&gt; Future[T]] = cats.instances.FutureInstances$$anon$1@78f3fb42</span></span></code></pre></div>
     <p>The <code>Monad</code> instance uses the captured
     <code>ExecutionContext</code> for subsequent calls to
     <code>pure</code> and <code>flatMap</code>:</p>
@@ -19070,12 +19069,12 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb561-3"><a href="#cb561-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb561-4"><a href="#cb561-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb561-5"><a href="#cb561-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing X</span></span>
-<span id="cb561-6"><a href="#cb561-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Double = 0.8022068298952854</span></span>
+<span id="cb561-6"><a href="#cb561-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Double = 0.5889019507182826</span></span>
 <span id="cb561-7"><a href="#cb561-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb561-8"><a href="#cb561-8" aria-hidden="true" tabindex="-1"></a>x <span class="co">// 最初のアクセス</span></span>
-<span id="cb561-9"><a href="#cb561-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res0: Double = 0.8022068298952854</span></span>
+<span id="cb561-9"><a href="#cb561-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res0: Double = 0.5889019507182826</span></span>
 <span id="cb561-10"><a href="#cb561-10" aria-hidden="true" tabindex="-1"></a>x <span class="co">// 二回目のアクセス</span></span>
-<span id="cb561-11"><a href="#cb561-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Double = 0.8022068298952854</span></span></code></pre></div>
+<span id="cb561-11"><a href="#cb561-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Double = 0.5889019507182826</span></span></code></pre></div>
     <p>This is an example of call-by-value evaluation:</p>
     <ul>
     <li>the computation is evaluated at point where it is defined
@@ -19100,10 +19099,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb562-5"><a href="#cb562-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb562-6"><a href="#cb562-6" aria-hidden="true" tabindex="-1"></a>y <span class="co">// 最初のアクセス</span></span>
 <span id="cb562-7"><a href="#cb562-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb562-8"><a href="#cb562-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Double = 0.7052198533528334</span></span>
+<span id="cb562-8"><a href="#cb562-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Double = 0.9412236244262655</span></span>
 <span id="cb562-9"><a href="#cb562-9" aria-hidden="true" tabindex="-1"></a>y <span class="co">// 二度目のアクセス</span></span>
 <span id="cb562-10"><a href="#cb562-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb562-11"><a href="#cb562-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: Double = 0.01388337332255174</span></span></code></pre></div>
+<span id="cb562-11"><a href="#cb562-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: Double = 0.15576019547050612</span></span></code></pre></div>
     <p>These are the properties of call-by-name evaluation:</p>
     <ul>
     <li>the computation is evaluated at the point of use (lazy);
@@ -19130,9 +19129,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb563-5"><a href="#cb563-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb563-6"><a href="#cb563-6" aria-hidden="true" tabindex="-1"></a>z <span class="co">// 最初のアクセス</span></span>
 <span id="cb563-7"><a href="#cb563-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Z</span></span>
-<span id="cb563-8"><a href="#cb563-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Double = 0.5069135983554208</span></span>
+<span id="cb563-8"><a href="#cb563-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Double = 0.01222612037265558</span></span>
 <span id="cb563-9"><a href="#cb563-9" aria-hidden="true" tabindex="-1"></a>z <span class="co">// 二度目のアクセス</span></span>
-<span id="cb563-10"><a href="#cb563-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Double = 0.5069135983554208</span></span></code></pre></div>
+<span id="cb563-10"><a href="#cb563-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Double = 0.01222612037265558</span></span></code></pre></div>
     <p>Let’s summarize. There are two properties of interest:</p>
     <ul>
     <li>evaluation at the point of definition (eager) versus at the
@@ -19174,21 +19173,21 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Eval</code> 型として返される。</p>
     <div class="sourceCode" id="cb564"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb564-1"><a href="#cb564-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Eval</span></code></pre></div>
     <div class="sourceCode" id="cb565"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb565-1"><a href="#cb565-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> now <span class="op">=</span> Eval<span class="op">.</span><span class="fu">now</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1000</span><span class="op">)</span></span>
-<span id="cb565-2"><a href="#cb565-2" aria-hidden="true" tabindex="-1"></a><span class="co">// now: Eval[Double] = Now(value = 1000.9535882205098)</span></span>
+<span id="cb565-2"><a href="#cb565-2" aria-hidden="true" tabindex="-1"></a><span class="co">// now: Eval[Double] = Now(value = 1000.6027077172166)</span></span>
 <span id="cb565-3"><a href="#cb565-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> always <span class="op">=</span> Eval<span class="op">.</span><span class="fu">always</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">3000</span><span class="op">)</span></span>
-<span id="cb565-4"><a href="#cb565-4" aria-hidden="true" tabindex="-1"></a><span class="co">// always: Eval[Double] = cats.Always@2de67233</span></span>
+<span id="cb565-4"><a href="#cb565-4" aria-hidden="true" tabindex="-1"></a><span class="co">// always: Eval[Double] = cats.Always@4631d478</span></span>
 <span id="cb565-5"><a href="#cb565-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> later <span class="op">=</span> Eval<span class="op">.</span><span class="fu">later</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">2000</span><span class="op">)</span></span>
-<span id="cb565-6"><a href="#cb565-6" aria-hidden="true" tabindex="-1"></a><span class="co">// later: Eval[Double] = cats.Later@6cb06feb</span></span></code></pre></div>
+<span id="cb565-6"><a href="#cb565-6" aria-hidden="true" tabindex="-1"></a><span class="co">// later: Eval[Double] = cats.Later@400b9eb</span></span></code></pre></div>
     <p>We can extract the result of an <code>Eval</code> using its
     <code>value</code> method:</p>
     <p><code>Eval</code> インスタンスがもつ結果は <code>value</code>
     メソッドを使って展開できる。</p>
     <div class="sourceCode" id="cb566"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb566-1"><a href="#cb566-1" aria-hidden="true" tabindex="-1"></a>now<span class="op">.</span>value</span>
-<span id="cb566-2"><a href="#cb566-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: Double = 1000.9535882205098</span></span>
+<span id="cb566-2"><a href="#cb566-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: Double = 1000.6027077172166</span></span>
 <span id="cb566-3"><a href="#cb566-3" aria-hidden="true" tabindex="-1"></a>always<span class="op">.</span>value</span>
-<span id="cb566-4"><a href="#cb566-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res7: Double = 3000.6117616551555</span></span>
+<span id="cb566-4"><a href="#cb566-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res7: Double = 3000.865793027496</span></span>
 <span id="cb566-5"><a href="#cb566-5" aria-hidden="true" tabindex="-1"></a>later<span class="op">.</span>value</span>
-<span id="cb566-6"><a href="#cb566-6" aria-hidden="true" tabindex="-1"></a><span class="co">// res8: Double = 2000.758670829636</span></span></code></pre></div>
+<span id="cb566-6"><a href="#cb566-6" aria-hidden="true" tabindex="-1"></a><span class="co">// res8: Double = 2000.9738344542063</span></span></code></pre></div>
     <p>Each type of <code>Eval</code> calculates its result using one of
     the evaluation models defined above. <code>Eval.now</code> captures
     a value <em>right now</em>. Its semantics are similar to a
@@ -19203,12 +19202,12 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb567-3"><a href="#cb567-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb567-4"><a href="#cb567-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb567-5"><a href="#cb567-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing X</span></span>
-<span id="cb567-6"><a href="#cb567-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Eval[Double] = Now(value = 0.10803957951095389)</span></span>
+<span id="cb567-6"><a href="#cb567-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Eval[Double] = Now(value = 0.09551839155686626)</span></span>
 <span id="cb567-7"><a href="#cb567-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb567-8"><a href="#cb567-8" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
-<span id="cb567-9"><a href="#cb567-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res10: Double = 0.10803957951095389</span></span>
+<span id="cb567-9"><a href="#cb567-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res10: Double = 0.09551839155686626</span></span>
 <span id="cb567-10"><a href="#cb567-10" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>value <span class="co">// 二度目のアクセス</span></span>
-<span id="cb567-11"><a href="#cb567-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res11: Double = 0.10803957951095389</span></span></code></pre></div>
+<span id="cb567-11"><a href="#cb567-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res11: Double = 0.09551839155686626</span></span></code></pre></div>
     <p><code>Eval.always</code> captures a lazy computation, similar to
     a <code>def</code>:</p>
     <p><code>Eval.always</code>
@@ -19218,14 +19217,14 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb568-2"><a href="#cb568-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Computing Y&quot;</span><span class="op">)</span></span>
 <span id="cb568-3"><a href="#cb568-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb568-4"><a href="#cb568-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb568-5"><a href="#cb568-5" aria-hidden="true" tabindex="-1"></a><span class="co">// y: Eval[Double] = cats.Always@7ae4e3ea</span></span>
+<span id="cb568-5"><a href="#cb568-5" aria-hidden="true" tabindex="-1"></a><span class="co">// y: Eval[Double] = cats.Always@46bbd9a</span></span>
 <span id="cb568-6"><a href="#cb568-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb568-7"><a href="#cb568-7" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb568-8"><a href="#cb568-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb568-9"><a href="#cb568-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res12: Double = 0.41111602159144156</span></span>
+<span id="cb568-9"><a href="#cb568-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res12: Double = 0.6713407776109113</span></span>
 <span id="cb568-10"><a href="#cb568-10" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>value <span class="co">// 二度目のアクセス</span></span>
 <span id="cb568-11"><a href="#cb568-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb568-12"><a href="#cb568-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Double = 0.8565848383359428</span></span></code></pre></div>
+<span id="cb568-12"><a href="#cb568-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Double = 0.915183415441349</span></span></code></pre></div>
     <p>Finally, <code>Eval.later</code> captures a lazy, memoized
     computation, similar to a <code>lazy val</code>:</p>
     <p>最後に、<code>Eval.later</code>
@@ -19235,13 +19234,13 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb569-2"><a href="#cb569-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Computing Z&quot;</span><span class="op">)</span></span>
 <span id="cb569-3"><a href="#cb569-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb569-4"><a href="#cb569-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb569-5"><a href="#cb569-5" aria-hidden="true" tabindex="-1"></a><span class="co">// z: Eval[Double] = cats.Later@67f7a18e</span></span>
+<span id="cb569-5"><a href="#cb569-5" aria-hidden="true" tabindex="-1"></a><span class="co">// z: Eval[Double] = cats.Later@31f95184</span></span>
 <span id="cb569-6"><a href="#cb569-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb569-7"><a href="#cb569-7" aria-hidden="true" tabindex="-1"></a>z<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb569-8"><a href="#cb569-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Z</span></span>
-<span id="cb569-9"><a href="#cb569-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: Double = 0.9751163318747254</span></span>
+<span id="cb569-9"><a href="#cb569-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: Double = 0.436136428265679</span></span>
 <span id="cb569-10"><a href="#cb569-10" aria-hidden="true" tabindex="-1"></a>z<span class="op">.</span>value <span class="co">// 二度目のアクセス</span></span>
-<span id="cb569-11"><a href="#cb569-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res15: Double = 0.9751163318747254</span></span></code></pre></div>
+<span id="cb569-11"><a href="#cb569-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res15: Double = 0.436136428265679</span></span></code></pre></div>
     <p>The three behaviours are summarized below:</p>
     <div class="table-responsive">
     <table>
@@ -19318,7 +19317,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <div class="sourceCode" id="cb570"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb570-1"><a href="#cb570-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> greeting <span class="op">=</span> Eval</span>
 <span id="cb570-2"><a href="#cb570-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>always<span class="op">{</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 1&quot;</span><span class="op">);</span> <span class="st">&quot;Hello&quot;</span> <span class="op">}</span></span>
 <span id="cb570-3"><a href="#cb570-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 2&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> world</span><span class="ss">&quot;</span> <span class="op">}</span></span>
-<span id="cb570-4"><a href="#cb570-4" aria-hidden="true" tabindex="-1"></a><span class="co">// greeting: Eval[String] = cats.Eval$$anon$4@4d042f54</span></span>
+<span id="cb570-4"><a href="#cb570-4" aria-hidden="true" tabindex="-1"></a><span class="co">// greeting: Eval[String] = cats.Eval$$anon$4@5df87076</span></span>
 <span id="cb570-5"><a href="#cb570-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb570-6"><a href="#cb570-6" aria-hidden="true" tabindex="-1"></a>greeting<span class="op">.</span>value</span>
 <span id="cb570-7"><a href="#cb570-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1</span></span>
@@ -19340,7 +19339,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb571-6"><a href="#cb571-6" aria-hidden="true" tabindex="-1"></a>  a <span class="op">+</span> b</span>
 <span id="cb571-7"><a href="#cb571-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb571-8"><a href="#cb571-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Calculating A</span></span>
-<span id="cb571-9"><a href="#cb571-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ans: Eval[Int] = cats.Eval$$anon$4@43be7489</span></span>
+<span id="cb571-9"><a href="#cb571-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ans: Eval[Int] = cats.Eval$$anon$4@55dac6b0</span></span>
 <span id="cb571-10"><a href="#cb571-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb571-11"><a href="#cb571-11" aria-hidden="true" tabindex="-1"></a>ans<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb571-12"><a href="#cb571-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Calculating B</span></span>
@@ -19362,7 +19361,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb572-3"><a href="#cb572-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 2&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> sat on</span><span class="ss">&quot;</span> <span class="op">}</span></span>
 <span id="cb572-4"><a href="#cb572-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>memoize</span>
 <span id="cb572-5"><a href="#cb572-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 3&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> the mat</span><span class="ss">&quot;</span> <span class="op">}</span></span>
-<span id="cb572-6"><a href="#cb572-6" aria-hidden="true" tabindex="-1"></a><span class="co">// saying: Eval[String] = cats.Eval$$anon$4@71f88d77</span></span>
+<span id="cb572-6"><a href="#cb572-6" aria-hidden="true" tabindex="-1"></a><span class="co">// saying: Eval[String] = cats.Eval$$anon$4@280d78db</span></span>
 <span id="cb572-7"><a href="#cb572-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb572-8"><a href="#cb572-8" aria-hidden="true" tabindex="-1"></a>saying<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb572-9"><a href="#cb572-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1</span></span>
@@ -19901,7 +19900,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb611-3"><a href="#cb611-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> catName<span class="op">:</span> <span class="ex">Reader</span><span class="op">[</span>Cat<span class="op">,</span> <span class="ex">String</span><span class="op">]</span> <span class="op">=</span></span>
 <span id="cb611-4"><a href="#cb611-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Reader</span><span class="op">(</span>cat <span class="op">=&gt;</span> cat<span class="op">.</span>name<span class="op">)</span></span>
 <span id="cb611-5"><a href="#cb611-5" aria-hidden="true" tabindex="-1"></a><span class="co">// catName: Kleisli[Id, Cat, String] = Kleisli(</span></span>
-<span id="cb611-6"><a href="#cb611-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   run = repl.MdocSession$MdocApp0$$$Lambda/0x00007fae45fb5670@5676996e</span></span>
+<span id="cb611-6"><a href="#cb611-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   run = repl.MdocSession$MdocApp0$$$Lambda/0x00007fd4e203a000@2bb08ec3</span></span>
 <span id="cb611-7"><a href="#cb611-7" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>We can extract the function again using the <code>Reader&#39;s</code>
     <code>run</code> method and call it using <code>apply</code> as
@@ -20259,27 +20258,27 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <li><code>modify</code>: 更新関数を使用して状態を更新する</li>
     </ul>
     <div class="sourceCode" id="cb630"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb630-1"><a href="#cb630-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> getDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>get<span class="op">[</span><span class="bu">Int</span><span class="op">]</span></span>
-<span id="cb630-2"><a href="#cb630-2" aria-hidden="true" tabindex="-1"></a><span class="co">// getDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Int] = cats.data.IndexedStateT@657b9f84</span></span>
+<span id="cb630-2"><a href="#cb630-2" aria-hidden="true" tabindex="-1"></a><span class="co">// getDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Int] = cats.data.IndexedStateT@94c2d38</span></span>
 <span id="cb630-3"><a href="#cb630-3" aria-hidden="true" tabindex="-1"></a>getDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-4"><a href="#cb630-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res1: Tuple2[Int, Int] = (10, 10)</span></span>
 <span id="cb630-5"><a href="#cb630-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-6"><a href="#cb630-6" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> setDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>set<span class="op">[</span><span class="bu">Int</span><span class="op">](</span><span class="dv">30</span><span class="op">)</span></span>
-<span id="cb630-7"><a href="#cb630-7" aria-hidden="true" tabindex="-1"></a><span class="co">// setDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@7ce2e3d5</span></span>
+<span id="cb630-7"><a href="#cb630-7" aria-hidden="true" tabindex="-1"></a><span class="co">// setDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@4aa447c5</span></span>
 <span id="cb630-8"><a href="#cb630-8" aria-hidden="true" tabindex="-1"></a>setDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-9"><a href="#cb630-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Tuple2[Int, Unit] = (30, ())</span></span>
 <span id="cb630-10"><a href="#cb630-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-11"><a href="#cb630-11" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> pureDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>pure<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">](</span><span class="st">&quot;Result&quot;</span><span class="op">)</span></span>
-<span id="cb630-12"><a href="#cb630-12" aria-hidden="true" tabindex="-1"></a><span class="co">// pureDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@7884527b</span></span>
+<span id="cb630-12"><a href="#cb630-12" aria-hidden="true" tabindex="-1"></a><span class="co">// pureDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@4baf5873</span></span>
 <span id="cb630-13"><a href="#cb630-13" aria-hidden="true" tabindex="-1"></a>pureDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-14"><a href="#cb630-14" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: Tuple2[Int, String] = (10, &quot;Result&quot;)</span></span>
 <span id="cb630-15"><a href="#cb630-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-16"><a href="#cb630-16" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> inspectDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>inspect<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">](</span>x <span class="op">=&gt;</span> <span class="ss">s&quot;${</span>x<span class="ss">}</span><span class="st">!</span><span class="ss">&quot;</span><span class="op">)</span></span>
-<span id="cb630-17"><a href="#cb630-17" aria-hidden="true" tabindex="-1"></a><span class="co">// inspectDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@f4cebb6</span></span>
+<span id="cb630-17"><a href="#cb630-17" aria-hidden="true" tabindex="-1"></a><span class="co">// inspectDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@55c0e7c5</span></span>
 <span id="cb630-18"><a href="#cb630-18" aria-hidden="true" tabindex="-1"></a>inspectDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-19"><a href="#cb630-19" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Tuple2[Int, String] = (10, &quot;10!&quot;)</span></span>
 <span id="cb630-20"><a href="#cb630-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-21"><a href="#cb630-21" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> modifyDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>modify<span class="op">[</span><span class="bu">Int</span><span class="op">](</span>_ <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
-<span id="cb630-22"><a href="#cb630-22" aria-hidden="true" tabindex="-1"></a><span class="co">// modifyDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@6b925060</span></span>
+<span id="cb630-22"><a href="#cb630-22" aria-hidden="true" tabindex="-1"></a><span class="co">// modifyDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@36587426</span></span>
 <span id="cb630-23"><a href="#cb630-23" aria-hidden="true" tabindex="-1"></a>modifyDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb630-24"><a href="#cb630-24" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Tuple2[Int, Unit] = (11, ())</span></span></code></pre></div>
     <p>We can assemble these building blocks using a for comprehension.
@@ -20295,7 +20294,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb632-5"><a href="#cb632-5" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">&lt;-</span> modify<span class="op">[</span><span class="bu">Int</span><span class="op">](</span>_ <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
 <span id="cb632-6"><a href="#cb632-6" aria-hidden="true" tabindex="-1"></a>  c <span class="op">&lt;-</span> inspect<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span>_ <span class="op">*</span> <span class="dv">1000</span><span class="op">)</span></span>
 <span id="cb632-7"><a href="#cb632-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">,</span> c<span class="op">)</span></span>
-<span id="cb632-8"><a href="#cb632-8" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@575e8f1b</span></span>
+<span id="cb632-8"><a href="#cb632-8" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@2c468050</span></span>
 <span id="cb632-9"><a href="#cb632-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb632-10"><a href="#cb632-10" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="op">(</span>state<span class="op">,</span> result<span class="op">)</span> <span class="op">=</span> program<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">1</span><span class="op">).</span>value</span>
 <span id="cb632-11"><a href="#cb632-11" aria-hidden="true" tabindex="-1"></a><span class="co">// state: Int = 3</span></span>
@@ -20457,7 +20456,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb642-3"><a href="#cb642-3" aria-hidden="true" tabindex="-1"></a>  _   <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;2&quot;</span><span class="op">)</span></span>
 <span id="cb642-4"><a href="#cb642-4" aria-hidden="true" tabindex="-1"></a>  ans <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;+&quot;</span><span class="op">)</span></span>
 <span id="cb642-5"><a href="#cb642-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> ans</span>
-<span id="cb642-6"><a href="#cb642-6" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@45f3d6cf</span></span>
+<span id="cb642-6"><a href="#cb642-6" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@797a8ddf</span></span>
 <span id="cb642-7"><a href="#cb642-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb642-8"><a href="#cb642-8" aria-hidden="true" tabindex="-1"></a>program<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb642-9"><a href="#cb642-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res11: Int = 3</span></span></code></pre></div>
@@ -20498,7 +20497,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p><code>evalAll</code>
     を使えば、複数ステップからなる式を手軽に評価できる。</p>
     <div class="sourceCode" id="cb645"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb645-1"><a href="#cb645-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> multistageProgram <span class="op">=</span> <span class="fu">evalAll</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="st">&quot;1&quot;</span><span class="op">,</span> <span class="st">&quot;2&quot;</span><span class="op">,</span> <span class="st">&quot;+&quot;</span><span class="op">,</span> <span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;*&quot;</span><span class="op">))</span></span>
-<span id="cb645-2"><a href="#cb645-2" aria-hidden="true" tabindex="-1"></a><span class="co">// multistageProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@14ad2605</span></span>
+<span id="cb645-2"><a href="#cb645-2" aria-hidden="true" tabindex="-1"></a><span class="co">// multistageProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@29985bdd</span></span>
 <span id="cb645-3"><a href="#cb645-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb645-4"><a href="#cb645-4" aria-hidden="true" tabindex="-1"></a>multistageProgram<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb645-5"><a href="#cb645-5" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Int = 9</span></span></code></pre></div>
@@ -20518,7 +20517,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb646-3"><a href="#cb646-3" aria-hidden="true" tabindex="-1"></a>  _   <span class="op">&lt;-</span> <span class="fu">evalAll</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;4&quot;</span><span class="op">,</span> <span class="st">&quot;+&quot;</span><span class="op">))</span></span>
 <span id="cb646-4"><a href="#cb646-4" aria-hidden="true" tabindex="-1"></a>  ans <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;*&quot;</span><span class="op">)</span></span>
 <span id="cb646-5"><a href="#cb646-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> ans</span>
-<span id="cb646-6"><a href="#cb646-6" aria-hidden="true" tabindex="-1"></a><span class="co">// biggerProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@67c20e02</span></span>
+<span id="cb646-6"><a href="#cb646-6" aria-hidden="true" tabindex="-1"></a><span class="co">// biggerProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@2dd5a902</span></span>
 <span id="cb646-7"><a href="#cb646-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb646-8"><a href="#cb646-8" aria-hidden="true" tabindex="-1"></a>biggerProgram<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb646-9"><a href="#cb646-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: Int = 21</span></span></code></pre></div>
@@ -20895,13 +20894,13 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Either[Error, Option[User]]</code>.</p>
     <p>データベースとやり取りをする場面を想像してみよう。ユーザのレコードを取得したいが、そのユーザが存在するかどうかはわからない。そのため、結果は
     <code>Option[User]</code>
-    として返すことになる。さらに、データベースとの通信はネットワークの問題や認証のトラブルなど、さまざまな理由で失敗する可能性があるため、この結果は
+    として返すことになる。さらに、データベースとの通信はネットワークの問題や認証のトラブルなど、さまざまな理由で失敗する可能性があるため、その結果は
     <code>Either</code> に包まれる。最終的に得られる結果は
     <code>Either[Error, Option[User]]</code> という形になる。</p>
     <p>To use this value we must nest <code>flatMap</code> calls (or
     equivalently, for-comprehensions):</p>
     <p>この値を使うには <code>flatMap</code>
-    の呼び出しを入れ子にするか、それと同じことをfor内包表記で行わなければならない。</p>
+    呼び出しを入れ子にするか、それと同じことをfor内包表記で行わなければならない。</p>
     <div class="sourceCode" id="cb663"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb663-1"><a href="#cb663-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">lookupUserName</span><span class="op">(</span>id<span class="op">:</span> <span class="ex">Long</span><span class="op">):</span> Either<span class="op">[</span><span class="ex">Error</span><span class="op">,</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]]</span> <span class="op">=</span></span>
 <span id="cb663-2"><a href="#cb663-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
 <span id="cb663-3"><a href="#cb663-3" aria-hidden="true" tabindex="-1"></a>    optUser <span class="op">&lt;-</span> <span class="fu">lookupUser</span><span class="op">(</span>id<span class="op">)</span></span>
@@ -20944,7 +20943,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>flatMap</code>
     の一般的な定義を書くのは不可能である。しかし、どちらか一方のモナドについて知識があれば、コードを完成させることができる場合が多い。たとえば、上記の
     <code>M2</code> を <code>Option</code>
-    に固定すると、<code>flatMap</code> の定義が明らかになる。</p>
+    に固定すると、<code>flatMap</code> の定義は明らかになる。</p>
     <div class="sourceCode" id="cb666"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb666-1"><a href="#cb666-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flatMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> Composed<span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb666-2"><a href="#cb666-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> Composed<span class="op">[</span>B<span class="op">]):</span> Composed<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb666-3"><a href="#cb666-3" aria-hidden="true" tabindex="-1"></a>  fa<span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span>_<span class="op">.</span>fold<span class="op">[</span>Composed<span class="op">[</span>B<span class="op">]](</span><span class="bu">None</span><span class="op">.</span>pure<span class="op">[</span>M1<span class="op">])(</span>f<span class="op">))</span></span></code></pre></div>
@@ -20961,10 +20960,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     を使用していることに注意してほしい。これは <code>Option</code>
     固有の概念であり、一般的な <code>Monad</code>
     インターフェースには現れない。<code>Option</code>
-    を他のモナドと組み合わせるには、このような追加の詳細が必要である。他のモナドについても同様で、それらを組み合わせた
+    を他のモナドと組み合わせるには、このような詳細情報が必要である。他のモナドについても同様で、それらを組み合わせた
     <code>flatMap</code>
-    メソッドを書くのに役立つ特有の情報が存在する。これがモナド変換子（monad
-    transformer）の背後にあるアイデアである。Catsはさまざまなモナドのための変換子を定義しており、それぞれがそのモナドを他と組み合わせるのに必要な付加知識を提供してくれる。いくつかの例を見てみよう。</p>
+    メソッドを書くのに役立つ固有の情報が存在する。これがモナド変換子（monad
+    transformer）の背後にあるアイデアである。Catsはさまざまなモナドのための変換子を定義しており、それぞれがそのモナドを他と組み合わせるのに必要な付加知識を提供してくれる。いくつか例を見てみよう。</p>
     <h2 data-number="10.2" id="変換の例-a-transformative-example"><span class="header-section-number">10.2</span> 変換の例 A Transformative
     Example</h2>
     <p>Cats provides transformers for many monads, each named with a
@@ -20973,9 +20972,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Option</code>, and so on.</p>
     <p>Catsは多くのモナド用に変換子を提供しており、その名称にはそれぞれ
     <code>T</code>
-    が接尾語として付けられている。たとえば、<code>EitherT</code> は
+    が接尾辞として付けられている。たとえば、<code>EitherT</code> は
     <code>Either</code> を他のモナドと組み合わせ、<code>OptionT</code>
-    は <code>Option</code> を他と組み合わせる、といった具合である。</p>
+    は <code>Option</code> を他と組み合わせる。</p>
     <p>Here’s an example that uses <code>OptionT</code> to compose
     <code>List</code> and <code>Option</code>. We can use
     <code>OptionT[List, A]</code>, aliased to <code>ListOption[A]</code>
@@ -20993,17 +20992,16 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     pass <code>List</code>, the type of the outer monad, as a parameter
     to <code>OptionT</code>, the transformer for the inner monad.</p>
     <p>ここで注目してほしいのは、<code>ListOption</code>
-    を内側から外側に向かって作っている点である。<code>OptionT</code>
+    を内側から外側に向かって組み立てている点である。<code>OptionT</code>
     は内側のモナドである <code>Option</code>
     用の変換子であり、外側のモナドの型である <code>List</code>
     をパラメータとしてそこに渡している。</p>
     <p>We can create instances of <code>ListOption</code> using the
     <code>OptionT</code> constructor, or more conveniently using
     <code>pure</code>:</p>
-    <p><code>ListOption</code>
-    のインスタンスを作成するには、<code>OptionT</code>
-    のコンストラクタを使うか、あるいは <code>pure</code>
-    を使うと便利である。</p>
+    <p><code>ListOption</code> のインスタンスを作成するには
+    <code>OptionT</code> のコンストラクタを使う。もしくは
+    <code>pure</code> を使うとより便利である。</p>
     <div class="sourceCode" id="cb668"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb668-1"><a href="#cb668-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>list<span class="op">.</span>_     <span class="co">// for Monad</span></span>
 <span id="cb668-2"><a href="#cb668-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>applicative<span class="op">.</span>_ <span class="co">// for pure</span></span></code></pre></div>
     <div class="sourceCode" id="cb669"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb669-1"><a href="#cb669-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> result1<span class="op">:</span> ListOption<span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">OptionT</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">10</span><span class="op">)))</span></span>
@@ -21030,7 +21028,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     the API in more depth.</p>
     <p>これはすべてのモナド変換子の基礎である。組み合わされた
     <code>map</code> や <code>flatMap</code>
-    メソッドによって、計算の各段階で値を再帰的に取り出して包み直すことなく、両方のモナドを扱うことが可能となる。では、APIをより詳しく見ていこう。</p>
+    メソッドのおかげで、計算の各段階で値を再帰的に取り出して包み直すようなことをしなくても、両方のモナドを扱うことができる。次に、APIをさらに詳しく見ていこう。</p>
     <div class="callout callout-warning">
     <p><em>インポートの複雑さについて Complexity of Imports</em></p>
     <p>The imports in the code samples above hint at how everything
@@ -21072,7 +21070,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     をインポートしていないことにも注目してほしい。これは、<code>OptionT</code>
     が具体的なデータ型であり、独自の <code>map</code> や
     <code>flatMap</code>
-    メソッドを持っているためである。これらの構文をインポートしても問題は生じないが、コンパイラは明示的なメソッドを優先するので、インポートされた構文は無視される。</p>
+    メソッドをもっているためである。これらの構文をインポートしても問題は生じないが、コンパイラは明示的なメソッドを優先するので、インポートされた構文は無視される。</p>
     <p>Remember that we’re subjecting ourselves to these shenanigans
     because we’re stubbornly refusing to use the universal Cats import,
     <a href="http://typelevel.org/cats/api/cats/implicits$.html"><code>cats.implicits</code></a>.
@@ -21146,7 +21144,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     was a specialisation of a more general concept called a “kleisli
     arrow”, represented in Cats as <a href="http://typelevel.org/cats/api/cats/data/Kleisli.html"><code>cats.data.Kleisli</code></a>.</p>
     <p>9.8節で、<code>Reader</code>
-    モナドが「クライスリ射」というより一般的な概念を特殊化したものであると述べた。クライスリ射はCatsでは
+    モナドが「クライスリ射」というさらに一般的な概念を特殊化したものであると述べた。クライスリ射はCatsでは
     <a href="http://typelevel.org/cats/api/cats/data/Kleisli.html"><code>cats.data.Kleisli</code></a>
     として表されている。</p>
     <p>We can now reveal that <code>Kleisli</code> and
@@ -21155,7 +21153,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Kleisli</code>. Hence, we were creating <code>Readers</code>
     last chapter and seeing <code>Kleislis</code> on the console.</p>
     <p>ようやく、<code>Kleisli</code> と <code>ReaderT</code>
-    が実は同じものであるということを明かすことができる。<code>ReaderT</code>
+    が実は同じものであると明かすことができる。<code>ReaderT</code>
     は実際には <code>Kleisli</code>
     の型エイリアスとして定義されている。そのため、前の章で
     <code>Reader</code> を作成したときに、コンソールには
@@ -21176,12 +21174,12 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>たとえば、先ほどの <code>ListOption</code> 型は
     <code>OptionT[List, A]</code> のエイリアスだが、これは
     <code>List[Option[A]]</code>
-    と同じ意味をもつ。言い換えると、モナドスタックは内側から外側に向かって構築されている。</p>
+    と同じ意味をもつ。言い換えると、モナドスタックは内側から外側に向かって構築される。</p>
     <div class="sourceCode" id="cb671"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb671-1"><a href="#cb671-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ListOption<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> OptionT<span class="op">[</span><span class="ex">List</span><span class="op">,</span> A<span class="op">]</span></span></code></pre></div>
     <p>Many monads and all transformers have at least two type
     parameters, so we often have to define type aliases for intermediate
     stages.</p>
-    <p>多くのモナドやすべての変換子は少なくとも二つの型パラメータを持っているため、中間段階に対して型エイリアスを定義しなければならない場合がよくある。</p>
+    <p>多くのモナドやすべての変換子は少なくとも二つの型パラメータをもっているため、中間段階に対して型エイリアスを定義しなければならない場合がよくある。</p>
     <p>For example, suppose we want to wrap <code>Either</code> around
     <code>Option</code>. <code>Option</code> is the innermost type so we
     want to use the <code>OptionT</code> monad transformer. We need to
@@ -21232,7 +21230,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     を作りたいとする。ここでも内側から外側へと組み立てを行う。<code>OptionT</code>
     を <code>EitherT</code> で包み、それをさらに <code>Future</code>
     包む。しかし、<code>EitherT</code>
-    は型パラメータを三つ持っているため、これを一行で定義することはできない。</p>
+    は型パラメータを三つもっているため、これを一行で定義することはできない。</p>
     <div class="sourceCode" id="cb675"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb675-1"><a href="#cb675-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> EitherT<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> E<span class="op">,</span> A<span class="op">](</span>stack<span class="op">:</span> F<span class="op">[</span>Either<span class="op">[</span>E<span class="op">,</span> A<span class="op">]])</span> <span class="op">{</span></span>
 <span id="cb675-2"><a href="#cb675-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// etc...</span></span>
 <span id="cb675-3"><a href="#cb675-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
@@ -21421,7 +21419,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     operate on them locally, and untransform them before passing them
     on. This allows each module of code to make its own decisions about
     which transformers to use:</p>
-    <p>この手法は、コードベースが大規模で、部分ごとの技術的特性の違いが大きい場合にはうまく機能しなくなる。コンテキストごとに異なるスタックが適していることが多いためだ。このような場合に適しているもうひとつのデザインパターンが、モナド変換子を局所的な「接着コード」として使うアプローチである。モジュールの境界では変換されていないスタックを公開し、モジュール内部での操作のためにそれらを一時的に変換し、処理が終わったら再び変換を解除して次に渡す。この方法であれば、各モジュールはどのモナド変換子を使用するかを独自に決定できるようになる。</p>
+    <p>この手法は、コードベースが大規模で、部分ごとの技術的特性の違いが大きい場合にはうまく機能しなくなる。コンテキストごとに適しているスタックが異なることが多いためだ。このような場合に適しているもうひとつのデザインパターンが、モナド変換子を局所的な「接着コード」として使うアプローチである。モジュールの境界では変換されていないスタックを公開し、モジュール内部での操作のためにそれらを一時的に変換し、処理が終わったら再び変換を解除して次に渡す。この方法であれば、各モジュールはどのモナド変換子を使用するかを独自に決定できるようになる。</p>
     <div class="sourceCode" id="cb685"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb685-1"><a href="#cb685-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>data<span class="op">.</span><span class="ex">Writer</span></span>
 <span id="cb685-2"><a href="#cb685-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb685-3"><a href="#cb685-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Logged<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="ex">Writer</span><span class="op">[</span><span class="ex">List</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span> A<span class="op">]</span></span>
@@ -21435,7 +21433,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb685-11"><a href="#cb685-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
 <span id="cb685-12"><a href="#cb685-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb685-13"><a href="#cb685-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Consumers use monad transformers locally to simplify composition:</span></span>
-<span id="cb685-14"><a href="#cb685-14" aria-hidden="true" tabindex="-1"></a><span class="co">// 合成を単純化したい処理では内部的にモナド変換子を用いる</span></span>
+<span id="cb685-14"><a href="#cb685-14" aria-hidden="true" tabindex="-1"></a><span class="co">// 合成を単純化するため内部的にはモナド変換子を用いる</span></span>
 <span id="cb685-15"><a href="#cb685-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">addAll</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> b<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> c<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Logged<span class="op">[</span><span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb685-16"><a href="#cb685-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> cats<span class="op">.</span>data<span class="op">.</span>OptionT</span>
 <span id="cb685-17"><a href="#cb685-17" aria-hidden="true" tabindex="-1"></a></span>
@@ -21636,8 +21634,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Semigroupal</code> and <code>Applicative</code>, that support
     new kinds of operation such as <code>zipping</code> independent
     values within a context.</p>
-    <p>モナド変換子について見てきたことで、モナドと <code>flatMap</code>
-    を用いた計算の連結について必要なことはすべてカバーした。次の章では話題を変え、<code>Semigroupal</code>
+    <p>モナド変換子について見たことで、モナドと <code>flatMap</code>
+    を用いた計算の順序付けについて必要なことはすべてカバーした。次の章では話題を変え、<code>Semigroupal</code>
     と <code>Applicative</code>
     という二つの型クラスについて新たに議論する。これらの型クラスは、コンテキストに包まれている互いに独立した値を
     <code>zipping</code>
@@ -21651,7 +21649,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     represent.</p>
     <p>これまでの章では、ファンクターやモナド、そして <code>map</code>
     や <code>flatMap</code>
-    を使用して操作を順序付けて連結する方法について見てきた。ファンクターとモナドはどちらも極めて有用な抽象化だが、これらでは表現できない種類のプログラムフローも存在する。</p>
+    を使用して操作を順序付けて連結する方法について見てきた。ファンクターとモナドはどちらも極めて有用な抽象概念だが、これらでは表現できない種類のプログラムフローも存在する。</p>
     <p>One such example is form validation. When we validate a form we
     want to return <em>all</em> the errors to the user, not stop on the
     first error we encounter. If we model this with a monad like
@@ -21660,7 +21658,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     doesn’t go any further:</p>
     <p>その一例がフォームのバリデーションである。フォームのバリデーションにおいては、最初に見つかったエラーで処理を中断するのではなく、<em>すべての</em>エラーをユーザに返したい。これを
     <code>Either</code>
-    のようなモナドでモデル化すると、最初のエラーが発生した時点で処理が終了してしまい、他のエラーは失われる。たとえば、以下のコードは最初の
+    のようなモナドでモデリングすると、最初のエラーが発生した時点で処理が終了してしまい、他のエラーは失われる。たとえば、以下のコードは最初の
     <code>parseInt</code>
     の呼び出しで失敗し、それ以降の処理が行われない。</p>
     <div class="sourceCode" id="cb698"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb698-1"><a href="#cb698-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>either<span class="op">.</span>_ <span class="co">// for catchOnly</span></span>
@@ -21711,20 +21709,20 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>上記の <code>parseInt</code> や <code>Future.apply</code>
     呼び出しは互いに独立しているが、<code>map</code> と
     <code>flatMap</code>
-    はその事実を活用できない。ここで必要なのは順序を保証しないもっと弱い構造である。この章では、このパターンをサポートする三つの型クラスを紹介する。</p>
+    はその事実を活用できない。ここで必要なのは順序を保証しないもっと制約の弱い構造である。この章では、このパターンをサポートする三つの型クラスを紹介する。</p>
     <ul>
     <li><code>Semigroupal</code>
-    は、コンテキストのペアを組み合わせる概念を包括する。Catsは <a href="http://typelevel.org/cats/api/cats/syntax/package$$semigroupal$"><code>cats.syntax.apply</code></a>
-    モジュールを提供しており、これにより <code>Semigroupal</code> と
-    <code>Functor</code>
+    は、コンテキストのペアを組み合わせる概念を包括する。Catsが提供している
+    <a href="http://typelevel.org/cats/api/cats/syntax/package$$semigroupal$"><code>cats.syntax.apply</code></a>
+    モジュールは、<code>Semigroupal</code> と <code>Functor</code>
     を利用して複数の引数をもつ関数をシーケンスすることができる。</li>
     <li><code>Parallel</code> は、<code>Monad</code>
-    インスタンスをもつ型を <code>Semigroupal</code>
-    インスタンスをもつ関連型に変換する。</li>
+    インスタンスをもつ型を、それに対応する <code>Semigroupal</code>
+    インスタンスをもつ型に変換する。</li>
     <li><code>Applicative</code> は <code>Semigroupal</code> と
     <code>Functor</code>
     を拡張し、コンテキストの中で関数をパラメータに適用する方法を提供する。<code>Applicative</code>
-    は、第9章で紹介した <code>pure</code> メソッドの起源である。</li>
+    は、9章で紹介した <code>pure</code> メソッドの起源である。</li>
     </ul>
     <!-- TOOD: Semigroupal と Parallel の説明は後で見直す -->
     <p>Applicatives are often formulated in terms of function
@@ -21769,9 +21767,6 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     インスタンスを定義する時よりも、<code>Semigroupal</code>
     のインスタンスを定義する時のほうが自由度が高い。</p>
     <!-- TODO: 「`product` に渡す前に」という限定の意図がよくわからない  -->
-    <p>is also the winner of Underscore’s 2017 award for the most
-    difficult functional programming term to work into a coherent
-    English sentence.</p>
     <h3 data-number="11.1.1" id="二つのコンテキストの結合-joining-two-contexts"><span class="header-section-number">11.1.1</span> 二つのコンテキストの結合
     Joining Two Contexts</h3>
     <p>While <code>Semigroup</code> allows us to join values,
@@ -21804,9 +21799,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>product</code> to different arities:</p>
     <p><code>Semigroupal</code> のコンパニオンオブジェクトには
     <code>product</code>
-    を元にした一連のメソッドが定義されている。たとえば、<code>tuple2</code>
-    から <code>tuple22</code> までのメソッドは、<code>product</code>
-    をさまざまな引数の数に対応させたものである。</p>
+    を元にした一連のメソッドが定義されている。たとえば、メソッド
+    <code>tuple2</code> 〜 <code>tuple22</code> は、<code>product</code>
+    をさまざまな引数の個数に対応させたものである。</p>
     <div class="sourceCode" id="cb705"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb705-1"><a href="#cb705-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>option<span class="op">.</span>_ <span class="co">// for Semigroupal</span></span></code></pre></div>
     <div class="sourceCode" id="cb706"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb706-1"><a href="#cb706-1" aria-hidden="true" tabindex="-1"></a>Semigroupal<span class="op">.</span><span class="fu">tuple3</span><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">3</span><span class="op">))</span></span>
 <span id="cb706-2"><a href="#cb706-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Option[Tuple3[Int, Int, Int]] = Some(value = (1, 2, 3))</span></span>
@@ -21814,8 +21809,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb706-4"><a href="#cb706-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Option[Tuple3[Int, Int, Int]] = None</span></span></code></pre></div>
     <p>The methods <code>map2</code> through <code>map22</code> apply a
     user-specified function to the values inside 2 to 22 contexts:</p>
-    <p>メソッド <code>map2</code> から <code>map22</code>
-    は、コンテキストに包まれた値をそれぞれ2から22個受け取り、それに指定の関数を適用する。</p>
+    <p>メソッド <code>map2</code> 〜 <code>map22</code>
+    は、コンテキストに包まれた値をそれぞれ2〜22個受け取り、それに指定の関数を適用する。</p>
     <div class="sourceCode" id="cb707"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb707-1"><a href="#cb707-1" aria-hidden="true" tabindex="-1"></a>Semigroupal<span class="op">.</span><span class="fu">map3</span><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">3</span><span class="op">))(</span>_ <span class="op">+</span> _ <span class="op">+</span> _<span class="op">)</span></span>
 <span id="cb707-2"><a href="#cb707-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: Option[Int] = Some(value = 6)</span></span>
 <span id="cb707-3"><a href="#cb707-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -21826,11 +21821,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>imap22</code>, that require instances of
     <code>Contravariant</code> and <code>Invariant</code>
     respectively.</p>
-    <p><code>contramap2</code> から <code>contramap22</code> および
-    <code>imap2</code> から <code>imap22</code>
-    というメソッドも存在する。これらはそれぞれ
-    <code>Contravariant</code> や <code>Invariant</code>
-    のインスタンスを必要とする。</p>
+    <p>メソッド <code>contramap2</code> 〜 <code>contramap22</code>
+    および <code>imap2</code> 〜 <code>imap22</code>
+    も存在する。これらはそれぞれ <code>Contravariant</code> と
+    <code>Invariant</code> のインスタンスを必要とする。</p>
     <h3 data-number="11.1.3" id="semigroupal-則-semigroupal-laws"><span class="header-section-number">11.1.3</span> <code>Semigroupal</code>
     則 Semigroupal Laws</h3>
     <p>There is only one law for <code>Semigroupal</code>: the
@@ -21902,7 +21896,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     get a compile error:</p>
     <p>この構文が型安全である点も魅力的である。指定した関数の引数の個数や型が誤っている場合、コンパイルエラーが発生する。</p>
     <div class="sourceCode" id="cb714"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb714-1"><a href="#cb714-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> add<span class="op">:</span> <span class="op">(</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Int</span> <span class="op">=</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">=&gt;</span> a <span class="op">+</span> b</span>
-<span id="cb714-2"><a href="#cb714-2" aria-hidden="true" tabindex="-1"></a><span class="co">// add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007fae45f8ab00@5a5d45c4</span></span></code></pre></div>
+<span id="cb714-2"><a href="#cb714-2" aria-hidden="true" tabindex="-1"></a><span class="co">// add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp0$$$Lambda/0x00007fd4e1f963d0@44530f23</span></span></code></pre></div>
     <div class="sourceCode" id="cb715"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb715-1"><a href="#cb715-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">3</span><span class="op">)).</span><span class="fu">mapN</span><span class="op">(</span>add<span class="op">)</span></span>
 <span id="cb715-2"><a href="#cb715-2" aria-hidden="true" tabindex="-1"></a><span class="co">// error: </span></span>
 <span id="cb715-3"><a href="#cb715-3" aria-hidden="true" tabindex="-1"></a><span class="co">// &#39;:&#39; expected, but &#39;(&#39; found</span></span>
@@ -21929,17 +21923,17 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb716-12"><a href="#cb716-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Required: (String, Boolean) =&gt; Any</span></span>
 <span id="cb716-13"><a href="#cb716-13" aria-hidden="true" tabindex="-1"></a><span class="co">// (Option(&quot;cats&quot;), Option(true)).mapN(add)</span></span>
 <span id="cb716-14"><a href="#cb716-14" aria-hidden="true" tabindex="-1"></a><span class="co">//                                     ^^^</span></span></code></pre></div>
-    <h3 data-number="11.2.1" id="ファンシーなファンクタとapply構文-fancy-functors-and-apply-syntax"><span class="header-section-number">11.2.1</span>
-    ファンシーなファンクタとApply構文 Fancy Functors and Apply
+    <h3 data-number="11.2.1" id="ファンシーなファンクターとapply構文-fancy-functors-and-apply-syntax"><span class="header-section-number">11.2.1</span>
+    ファンシーなファンクターとApply構文 Fancy Functors and Apply
     Syntax</h3>
     <p>Apply syntax also has <code>contramapN</code> and
     <code>imapN</code> methods that accept Contravariant and Invariant
     functors (Section 8.6). For example, we can combine
     <code>Monoids</code> using <code>Invariant</code>. Here’s an
     example:</p>
-    <p>Apply構文は、反変ファンクタを受け取る <code>contramapN</code>
-    と、非変ファンクタを受け取る <code>imapN</code>
-    メソッドも提供している（これらのファンクタについては8.6節を参照）。たとえば
+    <p>Apply構文は、反変ファンクターを受け取る <code>contramapN</code>
+    と、非変ファンクターを受け取る <code>imapN</code>
+    メソッドも提供している（これらのファンクターについては8.6節を参照）。たとえば
     <code>Invariant</code> を使って <code>Monoid</code>
     を結合することができる。以下に例を示す。</p>
     <div class="sourceCode" id="cb717"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb717-1"><a href="#cb717-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Monoid</span>
@@ -21991,9 +21985,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     examples for other types.</p>
     <p><code>Semigroupal</code>
     はいつも期待通りの動作をしてくれるわけではない。特に、<code>Monad</code>
-    インスタンスも同時に定義されている場合、 これまでに
+    インスタンスも同時に定義されている場合の挙動はそうである。すでに
     <code>Option</code> に対する <code>Semigroupal</code>
-    の動作を見てきたが、他の型に対する例も見てみよう。</p>
+    の挙動を見てきたが、ここで他の型に対する例も見てみよう。</p>
     <p><strong>Future</strong></p>
     <p>The semantics for <code>Future</code> provide parallel as opposed
     to sequential execution:</p>
@@ -22041,8 +22035,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     like the following to <em>zip</em> the lists, but we actually get
     the cartesian product of their elements:</p>
     <p><code>Semigroupal</code> で <code>List</code>
-    を結合して得られる結果は予想したものとは異なるかもしれない。<code>zip</code>
-    メソッドと同じような結果を期待するかもしれないが、実際には要素のデカルト積が得られる。</p>
+    を結合して得られる結果は予想とは異なるかもしれない。<code>zip</code>
+    メソッドと同じような結果を期待するかもしれないが、実際には要素同士のデカルト積が得られる。</p>
     <div class="sourceCode" id="cb724"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb724-1"><a href="#cb724-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Semigroupal</span>
 <span id="cb724-2"><a href="#cb724-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>list<span class="op">.</span>_ <span class="co">// for Semigroupal</span></span></code></pre></div>
     <div class="sourceCode" id="cb725"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb725-1"><a href="#cb725-1" aria-hidden="true" tabindex="-1"></a>Semigroupal<span class="op">[</span><span class="ex">List</span><span class="op">].</span><span class="fu">product</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">),</span> <span class="ex">List</span><span class="op">(</span><span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">))</span></span>
@@ -22057,11 +22051,11 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     applied to <code>Either</code> to accumulate errors instead of fail
     fast. Again, perhaps surprisingly, we find that <code>product</code>
     implements the same fail-fast behaviour as <code>flatMap</code>:</p>
-    <p>この章の冒頭では、フェイルファストと蓄積型のエラーハンドリングについて比較し、議論した。<code>Either</code>
+    <p>この章の冒頭では、フェイルファストと蓄積型エラーハンドリングについて比較した。<code>Either</code>
     に <code>product</code>
-    を適用するとエラーがひとつにまとめられることを期待するかもしれない。しかし、再び驚くかもしれないが、<code>product</code>
+    を適用すると複数のエラーがひとつにまとめられることを期待するかもしれない。しかし、再び驚くかもしれないが、<code>product</code>
     は <code>flatMap</code>
-    と同じくフェイルファストの動作を実装していることがわかる。</p>
+    と同じくフェイルファストな振る舞いを実装している。</p>
     <div class="sourceCode" id="cb726"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb726-1"><a href="#cb726-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>either<span class="op">.</span>_ <span class="co">// for Semigroupal</span></span>
 <span id="cb726-2"><a href="#cb726-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb726-3"><a href="#cb726-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ErrorOr<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> Either<span class="op">[</span><span class="ex">Vector</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span> A<span class="op">]</span></span></code></pre></div>
@@ -22076,7 +22070,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     stops, even though it is possible to examine the second parameter
     and see that it is also a failure.</p>
     <p>この例では、<code>product</code>
-    は最初の失敗を検出した時点で処理を中断する。二つ目のパラメータを調べ、そちらも失敗であると確認することは可能だが、それが実行されることはない。</p>
+    は最初の失敗を検出した時点で処理を中断する。二つ目のパラメータを調べ、そちらも失敗であると確認することは可能なはずだが、それが実行されることはない。</p>
     <h3 data-number="11.3.1" id="モナドに適用された-semigroupal-semigroupal-applied-to-monads"><span class="header-section-number">11.3.1</span> モナドに適用された
     <code>Semigroupal</code> Semigroupal Applied to Monads</h3>
     <p>The reason for the surprising results for <code>List</code> and
@@ -22102,7 +22096,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>product</code> in terms of <code>map</code> and
     <code>flatMap</code> as we showed above.</p>
     <p>実装方法によって <code>product</code>
-    セマンティクスが異なるというのはおかしな話である。そこで、一貫したセマンティクスを保証するために、Catsの
+    のセマンティクスが異なるとしたらおかしな話である。そこで、一貫したセマンティクスを保証するために、Catsの
     <code>Monad</code>（<code>Semigroupal</code>
     を拡張している）は、上記のように <code>map</code> と
     <code>flatMap</code> を用いて標準的な <code>product</code>
@@ -22136,7 +22130,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>では、なぜ <code>Semigroupal</code>
     にこだわる必要があるのだろうか。その答えは、<code>Semigroupal</code>（および
     <code>Applicative</code>）のインスタンスをもつが <code>Monad</code>
-    インスタンスをもたない有用なデータ型を作成できる点にある。そのデータ型がモナドでなければ
+    インスタンスをもたない有用なデータ型を作成できる点にある。データ型がモナドでなければ
     <code>product</code>
     を異なる方法で実装するのも自由である。この点については、エラーハンドリングの代替データ型を見ていく際にさらに詳しく説明する。</p>
     <h4 data-number="11.3.1.1" id="演習-list-の-product-the-product-of-lists"><span class="header-section-number">11.3.1.1</span> 演習:
@@ -22188,13 +22182,13 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>map</code>. However it’s not always what we want. The
     <code>Parallel</code> type class, and its associated syntax, allows
     us to access alternate semantics for certain monads.</p>
-    <p>前節では <code>Monad</code> インスタンスをもつ型に対して
+    <p>前節では、<code>Monad</code> インスタンスをもつ型に対して
     <code>product</code>
     を呼び出すと、逐次的なセマンティクスが得られることを見た。これは
     <code>flatMap</code> と <code>map</code> を用いた
     <code>product</code>
     の実装と一貫性を保つという観点からは理にかなっている。しかし、この動作が常に望ましいわけではない。<code>Parallel</code>
-    型クラスとその関連構文を使用すれば、特定のモナドに対して別のセマンティクスにアクセスできるようになる。</p>
+    型クラスとその関連構文を使用すれば、特定のモナドについて、別のセマンティクスにアクセスできるようになる。</p>
     <p>We’ve seen how the <code>product</code> method on
     <code>Either</code> stops at the first error.</p>
     <p><code>Either</code> における <code>product</code>
@@ -22301,16 +22295,18 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>M[A]</code> to a value with type <code>F[A]</code>. Let’s see
     a quick example by defining a <code>FunctionK</code> that converts
     an <code>Option</code> to a <code>List</code>.</p>
-    <p><code>~&gt;</code> はこれまで見たことがないが、これは <a href="http://typelevel.org/cats/api/cats/arrow/FunctionK.html"><code>FunctionK</code></a>
+    <p><code>~&gt;</code> について本書ではまだ紹介していないが、これは
+    <a href="http://typelevel.org/cats/api/cats/arrow/FunctionK.html"><code>FunctionK</code></a>
     の型エイリアスで、<code>M</code> から <code>F</code>
-    への変換を表す。通常の関数 <code>A =&gt; B</code> は型
-    <code>A</code> の値を型 <code>B</code>
-    の値に変換するが、<code>M</code> と <code>F</code>
+    への変換を表す。通常の関数 <code>A =&gt; B</code> は <code>A</code>
+    型の値を <code>B</code> 型の値に変換するが、<code>M</code> と
+    <code>F</code>
     は型そのものではなく型コンストラクタであることを思い出そう。<code>M ~&gt; F</code>
     という <code>FunctionK</code> は、<code>M[A]</code> 型の値を
-    <code>F[A]</code> 型の値に変換する関数である。<code>Option</code> を
+    <code>F[A]</code>
+    型の値に変換する関数である。簡単な例として、<code>Option</code> を
     <code>List</code> に変換する <code>FunctionK</code>
-    を定義する簡単な例を見てみよう。</p>
+    定義を見てみよう。</p>
     <div class="sourceCode" id="cb747"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb747-1"><a href="#cb747-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>arrow<span class="op">.</span>FunctionK</span>
 <span id="cb747-2"><a href="#cb747-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb747-3"><a href="#cb747-3" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> optionToList <span class="kw">extends</span> FunctionK<span class="op">[</span><span class="ex">Option</span><span class="op">,</span> <span class="ex">List</span><span class="op">]</span> <span class="op">{</span></span>
@@ -22345,7 +22341,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     for accumulation of errors instead of fail-fast semantics.</p>
     <p>まとめると、<code>Parallel</code> は、<code>Monad</code>
     インスタンスをもつ型を、代わりに <code>Applicative</code>（または
-    <code>Semigroupal</code>）インスタンスをもつ何らかの関連型へと変換可能にしてくれる。変換後の型はモナドとは別の有用なセマンティクスを提供してくれる。上記の例では、<code>Either</code>
+    <code>Semigroupal</code>）インスタンスをもつ何らかの関連型へと変換可能にしてくれる。変換後の型はモナドとは別の有用なセマンティクスを提供してくれる。先述の例では、<code>Either</code>
     の関連するアプリカティブが、フェイルファストではなく、エラーの蓄積を可能にするケースを見た。</p>
     <p>Now we’ve seen <code>Parallel</code> it’s time to finally learn
     about <code>Applicative</code>.</p>
@@ -22441,18 +22437,19 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     である。ラップされていない値からアプリカティブ型のコンテキストに包まれた値を新しく構築する。この意味で、<code>Applicative</code>
     と <code>Apply</code> の関係は、<code>Monoid</code> と
     <code>Semigroup</code> の関係に似ている。</p>
-    <h3 data-number="11.5.1" id="the-hierarchy-of-sequencing-type-classes"><span class="header-section-number">11.5.1</span> The Hierarchy of
-    Sequencing Type Classes</h3>
+    <h3 data-number="11.5.1" id="計算を連結する型クラスの階層構造-the-hierarchy-of-sequencing-type-classes"><span class="header-section-number">11.5.1</span>
+    計算を連結する型クラスの階層構造 The Hierarchy of Sequencing Type
+    Classes</h3>
     <p>With the introduction of <code>Apply</code> and
     <code>Applicative</code>, we can zoom out and see a whole family of
     type classes that concern themselves with sequencing computations in
     different ways. Figure 10 shows the relationship between the type
     classes covered in this book<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a>.</p>
     <p><code>Apply</code> と <code>Applicative</code>
-    を紹介したことで、計算をそれぞれの方法で連結する一連の型クラスについて全体像を見渡すことができるようになる。図10は、本書で扱った型クラス同士の関係を示している<a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a>。</p>
+    を紹介したことで、計算をそれぞれの方法で連結する一連の型クラスについて全体像を見渡すことができるようになった。図10は、本書で扱った型クラス同士の関係を示している<a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a>。</p>
     <figure id="fig:applicatives:hierarchy">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAApQAAAEYCAYAAADiVWYCAAAAAXNSR0IArs4c6QAANj9JREFUeAHt3QeYFEXawPF3YQkKcgKCYgIVBATFAJjgQ0XBhKdiRjxUPDkDBlQQPeTwRFHPeJwgJjCgCIcYzjOgYEBQFEWPaCKLEgSBBYStr966m3FmZ3ZnZmdntsO/n2eZDtXdVb+3XV6qqscCYUEAgXwKmHzejHulFChIWSKzAsQ3M69cl67o+Oa6vlwfAd8KFPq25lQcAZ8KGEPO4YXQFRTkJtcgvl6Irkiu4uuN1lELBLwnUMV7VaJGCCCAAAIIIIAAAn4SIKH0U7SoKwIIIIAAAggg4EEBEkoPBoUqIYAAAggggAACfhIgofRTtKgrAggggAACCCDgQQESSg8GhSohgAACCCCAAAJ+EiCh9FO0qCsCCCCAAAIIIOBBARJKDwaFKiGAAAIIIIAAAn4SIKH0U7SoKwIIIIAAAggg4EEBEkoPBoUqIYAAAggggAACfhIgofRTtKgrAggggAACCCDgQQH+14seDApVQiCZwLp169z/Tq5OnTrJDme9b/Xq1e4a9evXz/pa+bzAZ599JlWqVJGDDz44n7et9Htt375dtm3bllAP/V8OVq9ePWE/OxBAAIFcCtBDmUtdro1ABQgsXLhQjjzySNl5553ld7/7nbRu3VqmTJlSAVeOv8RJJ50knTt3jt/pg637779fhg8f7oOaVmwVR48eLTVr1kz4Ofrooyv2Rkmu9sILLyTZyy4EEAizAD2UYY4+bfeFwHnnnScHHHCAvPbaa1K1alV56qmnZNmyZRVe9wEDBkhxcXGFX5cL5k5AeyKXL18ed4PCwtz+Wtde0R49esi5554bd182EEAg3AL0UIY7/rTe4wI6zK1DuldddZXUq1fP9VBec8017i/02Kr/+uuvMn/+fNm0aVPsblmzZo3b3rhxo6xcuTJ67KeffhLt+YxNII8//njp0qVLtIyuLFmyRObOnSs6vBq7rFq1ym1u3rxZFixYEHvInVMy4S0qKpLIkHqk8Nq1a0XrpYteJ1L3X375xdXNGBMp6j51+5tvvslJMh13Ix9t6PC2TlGI/dFebLXSeMfGLTYGsd4rVqxwriW9lUGfP31OYq+zePHiuO1YLn1eSsZej5f1vMSezzoCCCCAAAIIpCdg/95Of7EJn7HJgjnnnHOMTQ6Tnvi3v/3N7LjjjqZt27amUaNGRrd1sT1Jxs4tNIMGDTL77LOPqVGjhhk6dKgZNmyYadKkiTunTZs25ueff3blL730UtOzZ0+3vmHDBnPccceZPffc0xx00EHuunaOoru2Xtc21YwbN87stNNOxg7Fu3M++eQTs//++7tr165d2xx44IHmq6++csfskLRp1aqVW4/80bFjR3P77be7zbFjxxo7VGv69etn9t13X2OTZ3PIIYcYmxS54xMmTDC77767ad68ubE9cEbrGlkuvPBC07t378hm2p/ahvRCllGptO+fbcHHH3/cxTTZdX788UcXozlz5kQPP/TQQy6WukO9Dz/8cHPRRReZvffe29ieTnPEEUcYm9S78vpMnHHGGaZu3bpG4672dpqFefPNN9262u22227uR5+VsmJf2vMSrViOVnIU34weBgojECYBeijDFG3a6jsB7YF68sknxf5FLnvssYcbZnzvvfei7dD9t9xyi3z++edi/1KXL7/8Uu677z6ZNWuWK6M9kPrz7bffyhdffCFDhgyRDz74QL7++ms3VKq9SU888UT0epGVxx57zPVuam+UnnfWWWdJixYt5Prrr48UkYcfflhswuiuo71f3bt3l169esl3333neiltgitnn3120hdHoheJWZkxY4abK6q9kIsWLRLtdbXJryuhbdC2zps3T2bPni02mXLtjTk9lKvac6jzR2N/Ij29qUD0GdGYqbX2LOqz8+yzz7rTbr75Zvnhhx9E46/lPvroI7H/IJATTjhBbDLqymjPpv7oC1HpxD72eUlVN44jgID/BEgo/RczahwygW7durm/2EeMGOGSvE6dOsmDDz7oFJ5//nn3drMmdhMnThRNNm1vZNxLO5FhbNu7J7ZXSXRoW+di6tCo7SV0Q5olSXWe3H777efeKtdjzZo1c8PSseVuvPFGsb1bssMOO8i0adNcAmJ7GF0RfYGob9++brhcE9J0Fh221cREF9vDKeeff360HZrQakKjS8uWLV0bNbkM+6KJ9ltvvRX3s3Xr1rRYbO+jnHbaaa5sw4YNRV/m0WkTumjSeN1117k46LbGeZdddtHVhCXd2Mc+LwkXYQcCCPheILezt33PQwMQ8IaAHVoWOzzpfrSX8IEHHhCdS6nz5Oxwt+txjNRUk4QOHTpENuM+9a3gatWqRfdp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8ZgxY2TIkCHSuHFjtx5bdT2+adMmt0t7mxYuXBj3l/+6deukuLjYHV+yZIn8+OOPsafHrWtyctlll0m1atXi9msv2A8//BC3Tzc0uZk3b17cUOjixYvjtrWcJpJXXnmlVKlSRVavXu2GbnV/ZNFkZeXKlXH11nvqPpbfBHbaaSepX79+3I+aJluSxUbLxfZOxp53/PHHyw033BC7y62PHTtWVqxYIS1btow7pjH75ptvZNmyZXH7M3ne4k5kAwEEEEAAAQRKFbB/72a32F4p06BBA7N161YzbNgwc8ABB8Rd0P6Fb44++mhje5HMvvvua+rVq2cOOeQQY5MxV+7MM880N998syvTvHlzU716dXPttddGr3HhhRea3r17u+033njD2KHN6LGPP/7Y7LfffsYmhKZZs2bmqKOOMmvXrjVff/216dixo9ljjz3c/Vq0aGFsYmHefPNN06hRI+3KMrvttlv0Z5dddjF2KN1d9/LLLzenn3569B668sgjjxg7JO72TZ8+3bVD26L1PeWUU4xNlOPKl2dD61RqlMp/oDxVyfic9evXO9NJkyYlPTc2hqXFxs6BNK1btzY2ATU777yzi40+O5FrT5s2zdiE1cUwchP7jxVj/xFjHnvsMfdMPf744+7QhAkTzO677+7iU1hYaC699NLIKSbV8xYtWMErOYpv+Z8MzkQAAQQQQKACBbL+a1MTN00WdbE9RUb/An///fej19WkQPfZ4XC3T5MvTRyuv/56t61/wWsyaHv83PaMGTNMQUGB+eijj9x2bDISm1AWFRWZvfbay/zlL39x5fSPTz/91K3PmTPHjBs3ztieT6NJx2GHHWZs75Y7ZufbueTHbfzvD62jJpq6zJo1y9VXE9DIcvDBB5t//OMfZsOGDS5Rue+++9y19fpav4EDB0aKlvvTxtT3CaUm43bqQPRn9uzZziM2hmXFRgs3bNjQxS4CGUkoNRG94447XGJvX/5yh+3wuLFTLYydxhCXUL744ovmq6++cmX0fmqr//jQJdXz5grl4I8cxbcCfxVwKQSCJZB8bCRYbaQ1CARGQOe02eRRLrnkEtcm2+snJ598suicythFh0G7d+/udtWuXVvOP/98mTJlSrTIiSeeKJG5du3bt5c2bdqIvmhR1vLBBx+44fEBAwZEix166KFuXYc/zz77bLGJqXtZQ4dL58+f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MmVKqbe5+uqrpWbNmvLLL7+UWiZXBwYPHizPPPNMri7PdRFAAIG8C5BQ5p2cGyKAQD4EjDFy/fXXS3FxccLt5s+fLyNGjEjYzw4EEEAAgfIJkFCWz42zEEDA4wKtWrWSn376SZ5++umEmvbv3186deqUsF93LFmyRJYtW5ZwbM2aNW7fxo0bZc6cObJ58+aEMqtWrZJ58+aJDrmXXDZs2OCGubdt21byENsIIIAAAggggAACZQjYjsL8L48//rg59NBDjR36NnvssYexSWC0Eu+9956pVauW0U9bb7N+/Xp37JNPPjH777+/adKkialdu7Y58MADzVdffeWO2STQVKlSxdx1113ueg0aNDD16tUzdi6kO/7111+bjh07umO6v0WLFsYmpdF7DhkyxFStWtU0bdrUtG7d2n0OHDgwejwfK9rWMuLEIQQQQCArAXoos+LjZAQQ8LJAz549Zdddd5V77rnHVdMmbnLDDTdIv379ZPfdd49WvaioSLp37y69evWS7777zvVStm3bVs4++2yJ9Cjq0Lke0x/twbQJpAwaNMhdY+vWraJzMrV3c/ny5WITVrn//vvdsXfffVduu+02efXVV2XhwoVlzuuMVogVBBBAAAEEEEAAgahAPjrfEu4R6aHUA++8847rkdQew+eff97YBNPYF3GM9iraWroeyrfffttUr17d2Le+o9eaNWuWOz5z5kyjPZRaVns1I8uoUaNM48aNI5txn3ZI3XTr1s3t69Onj2nTpk3c8S5duhh6KKPPCCsIIBAAgcIAtIEmIIAAAqUKHHvssXLccce53kR961vfsLZD2rJy5croOUuXLpU6deqITSqj++zQtNhhatFjBx98cHR/ZGWHHXaIfjWR9mLaBFMmTJggmzZtksWLF8tBBx3kimpv5uGHHx45jU8EEEAgkAIMeQcyrDQKAQRiBe6++24ZM2aMVKtWTXr37h17yK3beZOiL9TokHRk+eyzz9zLNXos1XLllVfK66+/7l4AmjZtWtw9dMhdr82CAAIIBFmAhDLI0aVtCCDgBOxLMi7Ze+6556SwMHFg5qijjhItY1+ecfMjFy1aJPYFHGnXrl20p7EsyhkzZkjXrl2lUaNGsm7dOpk6dWq0+EknneSSzS+++MJ9hdHEiRNFk04WBBBAIEgCJJRBiiZtQQCBUgXOPfdcOeSQQ5Ie157Ll19+2b1U06xZM2nZsqUbuh4/frwUFBQkPSd2p37f5S233CLt27eXs846S0455ZTo4TPOOEMuvfRSd0wTTjsP021HC7CCAAIIBEAg9W/KADSSJiCAQKUJ6MsolXbz8txY/3eMmkTGzqdM5zp6ns6frFu3btLi+ia4zsnUn8pY/pcY8zu/MvC5JwIhEOCXSwiCTBMRqEQB3yWUlWiV01uTUOaUl4sjEHoBhrxD/wgAgAACCCCAAAIIZCdAQpmdH2cjgAACCCCAAAKhFyChDP0jAAACCCCAAAIIIJCdAAlldn6cjQACCCCAAAIIhF6AhDL0jwAACCCAAAIIIIBAdgIklNn5cTYCCCCAAAIIIBB6ARLK0D8CACCAAAIIIIAAAtkJkFBm58fZCCCAAAIIIIBA6AVIKEP/CACAAAIIIIAAAghkJ0BCmZ0fZyOAAAIIIIAAAqEXIKEM/SMAAAIIIIAAAgggkJ0ACWV2fpyNAAIIIIAAAgiEXoCEMvSPAAAIIIAAAggggEB2AiSU2flxNgIIIIAAAgggEHqBgtALAIAAArkUMLm8ONfOWIDf+RmTcQICCKQj8P++vpXz3Cr6ewAAAABJRU5ErkJggg==" alt="Monad type class hierarchy" />
-    <figcaption>Figure 10: Monad type class hierarchy</figcaption>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAApQAAAEYCAYAAADiVWYCAAAAAXNSR0IArs4c6QAANj9JREFUeAHt3QeYFEXawPF3YQkKcgKCYgIVBATFAJjgQ0XBhKdiRjxUPDkDBlQQPeTwRFHPeJwgJjCgCIcYzjOgYEBQFEWPaCKLEgSBBYStr966m3FmZ3ZnZmdntsO/n2eZDtXdVb+3XV6qqscCYUEAgXwKmHzejHulFChIWSKzAsQ3M69cl67o+Oa6vlwfAd8KFPq25lQcAZ8KGEPO4YXQFRTkJtcgvl6Irkiu4uuN1lELBLwnUMV7VaJGCCCAAAIIIIAAAn4SIKH0U7SoKwIIIIAAAggg4EEBEkoPBoUqIYAAAggggAACfhIgofRTtKgrAggggAACCCDgQQESSg8GhSohgAACCCCAAAJ+EiCh9FO0qCsCCCCAAAIIIOBBARJKDwaFKiGAAAIIIIAAAn4SIKH0U7SoKwIIIIAAAggg4EEBEkoPBoUqIYAAAggggAACfhIgofRTtKgrAggggAACCCDgQQH+14seDApVQiCZwLp169z/Tq5OnTrJDme9b/Xq1e4a9evXz/pa+bzAZ599JlWqVJGDDz44n7et9Htt375dtm3bllAP/V8OVq9ePWE/OxBAAIFcCtBDmUtdro1ABQgsXLhQjjzySNl5553ld7/7nbRu3VqmTJlSAVeOv8RJJ50knTt3jt/pg637779fhg8f7oOaVmwVR48eLTVr1kz4Ofrooyv2Rkmu9sILLyTZyy4EEAizAD2UYY4+bfeFwHnnnScHHHCAvPbaa1K1alV56qmnZNmyZRVe9wEDBkhxcXGFX5cL5k5AeyKXL18ed4PCwtz+Wtde0R49esi5554bd182EEAg3AL0UIY7/rTe4wI6zK1DuldddZXUq1fP9VBec8017i/02Kr/+uuvMn/+fNm0aVPsblmzZo3b3rhxo6xcuTJ67KeffhLt+YxNII8//njp0qVLtIyuLFmyRObOnSs6vBq7rFq1ym1u3rxZFixYEHvInVMy4S0qKpLIkHqk8Nq1a0XrpYteJ1L3X375xdXNGBMp6j51+5tvvslJMh13Ix9t6PC2TlGI/dFebLXSeMfGLTYGsd4rVqxwriW9lUGfP31OYq+zePHiuO1YLn1eSsZej5f1vMSezzoCCCCAAAIIpCdg/95Of7EJn7HJgjnnnHOMTQ6Tnvi3v/3N7LjjjqZt27amUaNGRrd1sT1Jxs4tNIMGDTL77LOPqVGjhhk6dKgZNmyYadKkiTunTZs25ueff3blL730UtOzZ0+3vmHDBnPccceZPffc0xx00EHuunaOoru2Xtc21YwbN87stNNOxg7Fu3M++eQTs//++7tr165d2xx44IHmq6++csfskLRp1aqVW4/80bFjR3P77be7zbFjxxo7VGv69etn9t13X2OTZ3PIIYcYmxS54xMmTDC77767ad68ubE9cEbrGlkuvPBC07t378hm2p/ahvRCllGptO+fbcHHH3/cxTTZdX788UcXozlz5kQPP/TQQy6WukO9Dz/8cHPRRReZvffe29ieTnPEEUcYm9S78vpMnHHGGaZu3bpG4672dpqFefPNN9262u22227uR5+VsmJf2vMSrViOVnIU34weBgojECYBeijDFG3a6jsB7YF68sknxf5FLnvssYcbZnzvvfei7dD9t9xyi3z++edi/1KXL7/8Uu677z6ZNWuWK6M9kPrz7bffyhdffCFDhgyRDz74QL7++ms3VKq9SU888UT0epGVxx57zPVuam+UnnfWWWdJixYt5Prrr48UkYcfflhswuiuo71f3bt3l169esl3333neiltgitnn3120hdHoheJWZkxY4abK6q9kIsWLRLtdbXJryuhbdC2zps3T2bPni02mXLtjTk9lKvac6jzR2N/Ij29qUD0GdGYqbX2LOqz8+yzz7rTbr75Zvnhhx9E46/lPvroI7H/IJATTjhBbDLqymjPpv7oC1HpxD72eUlVN44jgID/BEgo/RczahwygW7durm/2EeMGOGSvE6dOsmDDz7oFJ5//nn3drMmdhMnThRNNm1vZNxLO5FhbNu7J7ZXSXRoW+di6tCo7SV0Q5olSXWe3H777efeKtdjzZo1c8PSseVuvPFGsb1bssMOO8i0adNcAmJ7GF0RfYGob9++brhcE9J0Fh221cREF9vDKeeff360HZrQakKjS8uWLV0bNbkM+6KJ9ltvvRX3s3Xr1rRYbO+jnHbaaa5sw4YNRV/m0WkTumjSeN1117k46LbGeZdddtHVhCXd2Mc+LwkXYQcCCPheILezt33PQwMQ8IaAHVoWOzzpfrSX8IEHHhCdS6nz5Oxwt+txjNRUk4QOHTpENuM+9a3gatWqRfdp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8ZgxY2TIkCHSuHFjtx5bdT2+adMmt0t7mxYuXBj3l/+6deukuLjYHV+yZIn8+OOPsafHrWtyctlll0m1atXi9msv2A8//BC3Tzc0uZk3b17cUOjixYvjtrWcJpJXXnmlVKlSRVavXu2GbnV/ZNFkZeXKlXH11nvqPpbfBHbaaSepX79+3I+aJluSxUbLxfZOxp53/PHHyw033BC7y62PHTtWVqxYIS1btow7pjH75ptvZNmyZXH7M3ne4k5kAwEEEEAAAQRKFbB/72a32F4p06BBA7N161YzbNgwc8ABB8Rd0P6Fb44++mhje5HMvvvua+rVq2cOOeQQY5MxV+7MM880N998syvTvHlzU716dXPttddGr3HhhRea3r17u+033njD2KHN6LGPP/7Y7LfffsYmhKZZs2bmqKOOMmvXrjVff/216dixo9ljjz3c/Vq0aGFsYmHefPNN06hRI+3KMrvttlv0Z5dddjF2KN1d9/LLLzenn3569B668sgjjxg7JO72TZ8+3bVD26L1PeWUU4xNlOPKl2dD61RqlMp/oDxVyfic9evXO9NJkyYlPTc2hqXFxs6BNK1btzY2ATU777yzi40+O5FrT5s2zdiE1cUwchP7jxVj/xFjHnvsMfdMPf744+7QhAkTzO677+7iU1hYaC699NLIKSbV8xYtWMErOYpv+Z8MzkQAAQQQQKACBbL+a1MTN00WdbE9RUb/An///fej19WkQPfZ4XC3T5MvTRyuv/56t61/wWsyaHv83PaMGTNMQUGB+eijj9x2bDISm1AWFRWZvfbay/zlL39x5fSPTz/91K3PmTPHjBs3ztieT6NJx2GHHWZs75Y7ZufbueTHbfzvD62jJpq6zJo1y9VXE9DIcvDBB5t//OMfZsOGDS5Rue+++9y19fpav4EDB0aKlvvTxtT3CaUm43bqQPRn9uzZziM2hmXFRgs3bNjQxS4CGUkoNRG94447XGJvX/5yh+3wuLFTLYydxhCXUL744ovmq6++cmX0fmqr//jQJdXz5grl4I8cxbcCfxVwKQSCJZB8bCRYbaQ1CARGQOe02eRRLrnkEtcm2+snJ598suicythFh0G7d+/udtWuXVvOP/98mTJlSrTIiSeeKJG5du3bt5c2bdqIvmhR1vLBBx+44fEBAwZEix166KFuXYc/zz77bLGJqXtZQ4dL58+f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MmVKqbe5+uqrpWbNmvLLL7+UWiZXBwYPHizPPPNMri7PdRFAAIG8C5BQ5p2cGyKAQD4EjDFy/fXXS3FxccLt5s+fLyNGjEjYzw4EEEAAgfIJkFCWz42zEEDA4wKtWrWSn376SZ5++umEmvbv3186deqUsF93LFmyRJYtW5ZwbM2aNW7fxo0bZc6cObJ58+aEMqtWrZJ58+aJDrmXXDZs2OCGubdt21byENsIIIAAAggggAACZQjYjsL8L48//rg59NBDjR36NnvssYexSWC0Eu+9956pVauW0U9bb7N+/Xp37JNPPjH777+/adKkialdu7Y58MADzVdffeWO2STQVKlSxdx1113ueg0aNDD16tUzdi6kO/7111+bjh07umO6v0WLFsYmpdF7DhkyxFStWtU0bdrUtG7d2n0OHDgwejwfK9rWMuLEIQQQQCArAXoos+LjZAQQ8LJAz549Zdddd5V77rnHVdMmbnLDDTdIv379ZPfdd49WvaioSLp37y69evWS7777zvVStm3bVs4++2yJ9Cjq0Lke0x/twbQJpAwaNMhdY+vWraJzMrV3c/ny5WITVrn//vvdsXfffVduu+02efXVV2XhwoVlzuuMVogVBBBAAAEEEEAAgahAPjrfEu4R6aHUA++8847rkdQew+eff97YBNPYF3GM9iraWroeyrfffttUr17d2Le+o9eaNWuWOz5z5kyjPZRaVns1I8uoUaNM48aNI5txn3ZI3XTr1s3t69Onj2nTpk3c8S5duhh6KKPPCCsIIBAAgcIAtIEmIIAAAqUKHHvssXLccce53kR961vfsLZD2rJy5croOUuXLpU6deqITSqj++zQtNhhatFjBx98cHR/ZGWHHXaIfjWR9mLaBFMmTJggmzZtksWLF8tBBx3kimpv5uGHHx45jU8EEEAgkAIMeQcyrDQKAQRiBe6++24ZM2aMVKtWTXr37h17yK3beZOiL9TokHRk+eyzz9zLNXos1XLllVfK66+/7l4AmjZtWtw9dMhdr82CAAIIBFmAhDLI0aVtCCDgBOxLMi7Ze+6556SwMHFg5qijjhItY1+ecfMjFy1aJPYFHGnXrl20p7EsyhkzZkjXrl2lUaNGsm7dOpk6dWq0+EknneSSzS+++MJ9hdHEiRNFk04WBBBAIEgCJJRBiiZtQQCBUgXOPfdcOeSQQ5Ie157Ll19+2b1U06xZM2nZsqUbuh4/frwUFBQkPSd2p37f5S233CLt27eXs846S0455ZTo4TPOOEMuvfRSd0wTTjsP021HC7CCAAIIBEAg9W/KADSSJiCAQKUJ6MsolXbz8txY/3eMmkTGzqdM5zp6ns6frFu3btLi+ia4zsnUn8pY/pcY8zu/MvC5JwIhEOCXSwiCTBMRqEQB3yWUlWiV01uTUOaUl4sjEHoBhrxD/wgAgAACCCCAAAIIZCdAQpmdH2cjgAACCCCAAAKhFyChDP0jAAACCCCAAAIIIJCdAAlldn6cjQACCCCAAAIIhF6AhDL0jwAACCCAAAIIIIBAdgIklNn5cTYCCCCAAAIIIBB6ARLK0D8CACCAAAIIIIAAAtkJkFBm58fZCCCAAAIIIIBA6AVIKEP/CACAAAIIIIAAAghkJ0BCmZ0fZyOAAAIIIIAAAqEXIKEM/SMAAAIIIIAAAgggkJ0ACWV2fpyNAAIIIIAAAgiEXoCEMvSPAAAIIIAAAggggEB2AiSU2flxNgIIIIAAAgggEHqBgtALAIAAArkUMLm8ONfOWIDf+RmTcQICCKQj8P++vpXz3Cr6ewAAAABJRU5ErkJggg==" alt="モナド型クラスの階層図" />
+    <figcaption>Figure 10: モナド型クラスの階層図</figcaption>
     </figure>
     <p>Each type class in the hierarchy represents a particular set of
     sequencing semantics, introduces a set of characteristic methods,
@@ -22476,7 +22473,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>map</code>; <code>Monad</code> defines <code>product</code>,
     <code>ap</code>, and <code>map</code>, in terms of <code>pure</code>
     and <code>flatMap</code>.</p>
-    <p>型クラス間の関係には厳密なルールが存在するので、継承関係はすべての型クラスのインスタンス間で一定である。たとえば、<code>Apply</code>
+    <p>型クラス間の関係には厳密なルールが存在するので、ある型クラスについて、継承関係はすべてのインスタンス間で一定である。たとえば、<code>Apply</code>
     は <code>ap</code> と <code>map</code> を使って <code>product</code>
     を定義するし、<code>Monad</code> は <code>pure</code> と
     <code>flatMap</code> を使って
@@ -22539,39 +22536,49 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     enough to give strong guarantees about those behaviours. However,
     there are situations where monads aren’t the right tool for the job.
     Sometimes we want Thai food, and burritos just won’t satisfy.</p>
-    <p>モナドはこのトレードオフの中で絶妙な位置にある。幅広い振る舞いをモデリングできる柔軟性がありながら、それらの振る舞いに強い保証を与える制約をもち合わせている。しかし、モナドが課題解決の正しい選択肢とは言えない場面も存在する。タイ料理が食べたい時にブリトーで満足することはできないのである。</p>
+    <p>モナドはこのトレードオフの中で絶妙な位置にある。幅広い振る舞いをモデリングできる柔軟性をもちながら、それらの振る舞いに強い保証を与える制約も、同時にもち合わせている。しかし、モナドが課題解決の正しい選択肢とは言えない場面も存在する。タイ料理が食べたい時にブリトーで満足することはできないのである。</p>
     <p>Whereas monads impose a strict <em>sequencing</em> on the
     computations they model, applicatives and semigroupals impose no
     such restriction. This puts them in a different sweet spot in the
     hierarchy. We can use them to represent classes of parallel /
     independent computations that monads cannot.</p>
-    <p>モナドが計算に厳密な順序付けを課す一方で、アプリカティブやSemigroupalにはそのような制約がない。そういった特性の違いから、これらの型クラスは階層の中におけるそれぞれに適したポジションをもっている。アプリカティブやSemigroupalには、モナドが扱うことのできない並列的で独立した計算を表現することができるのである。</p>
+    <p>モナドが計算に厳密な順序付けを課す一方で、アプリカティブやSemigroupalにはそのような制約がない。そういった特性の違いから、これらの型クラスはそれぞれ、階層の中に適したポジションをもっている。アプリカティブやSemigroupalには、モナドが扱うことのできない並列的で独立した計算を表現することができるのである。</p>
     <p>We choose our semantics by choosing our data structures. If we
     choose a monad, we get strict sequencing. If we choose an
     applicative, we lose the ability to <code>flatMap</code>. This is
     the trade-off enforced by the consistency laws. So choose your types
     carefully!</p>
     <p>データ構造を選べばセマンティクスも決まる。モナドを選べば、厳密な順序付けが得られる。アプリカティブを選べば、<code>flatMap</code>
-    は使えなくなる。このトレードオフは、一貫性の法則によって強制されている。だから、型は慎重に選択してほしい。</p>
-    <h2 data-number="11.6" id="summary"><span class="header-section-number">11.6</span> Summary</h2>
+    は使えなくなる。このトレードオフは、一貫性の法則によって強制されている。だから、型の選択は慎重に行ってほしい。</p>
+    <h2 data-number="11.6" id="まとめ-summary-4"><span class="header-section-number">11.6</span> まとめ Summary</h2>
     <p>While monads and functors are the most widely used sequencing
     data types we’ve covered in this book, semigroupals and applicatives
     are the most general. These type classes provide a generic mechanism
     to combine values and apply functions within a context, from which
     we can fashion monads and a variety of other combinators.</p>
+    <p>本書で扱った連結可能なデータ型のうちモナドとファンクターはもっとも広く使用されるが、Semigroupalとアプリカティブがもっとも汎用的である。これらの型クラスは、値同士を結合しコンテキスト内で関数を適用するための汎用的なメカニズムを提供する。また、そこからモナドや他のさまざまなコンビネータを作り出すことができる。</p>
     <p><code>Semigroupal</code> and <code>Applicative</code> are most
     commonly used as a means of combining independent values such as the
     results of validation rules. Cats provides the
     <code>Validated</code> type for this specific purpose, along with
     apply syntax as a convenient way to express the combination of
     rules.</p>
+    <p><code>Semigroupal</code> と <code>Applicative</code>
+    は、バリデーションの結果など互いに独立した値同士を結合する手段として、もっとも一般的に使用される。Catsライブラリは、特にこの目的のために
+    <code>Validated</code>
+    型を提供し、バリデーションルールの結合を表現する便利な方法として
+    <code>apply</code> 構文も用意している。</p>
     <p>We have almost covered all of the functional programming concepts
     on our agenda for this book. The next chapter covers
     <code>Traverse</code> and <code>Foldable</code>, two powerful type
     classes for converting between data types. After that we’ll look at
     several case studies that bring together all of the concepts from
     Part I.</p>
-    <h1 data-number="12" id="sec:foldable-traverse"><span class="header-section-number">12</span> Foldable and Traverse</h1>
+    <p>本書のテーマに掲げた関数型プログラミングの概念はほぼ網羅した。次の章では、データ型間の変換を行う強力な型クラスである
+    <code>Traverse</code> と <code>Foldable</code>
+    について説明する。その後、第1部で紹介したすべての概念を活用したいくつかのケーススタディを扱う。</p>
+    <h1 data-number="12" id="sec:foldable-traverse"><span class="header-section-number">12</span> <code>Foldable</code> と
+    <code>Traverse</code> Foldable and Traverse</h1>
     <p>In this chapter we’ll look at two type classes that capture
     iteration over collections:</p>
     <ul>
@@ -22581,9 +22588,20 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Applicatives</code> to iterate with less pain than
     folding.</li>
     </ul>
+    <p>この章ではコレクション走査を抽象化する二つの型クラスについて説明する。</p>
+    <ul>
+    <li><code>Foldable</code> は、本書ではすでにおなじみの
+    <code>foldLeft</code> および <code>foldRight</code>
+    を抽象化する。</li>
+    <li><code>Traverse</code>
+    は、アプリカティブを利用し、畳み込みの煩雑さを軽減しながら走査を行う高次の抽象化である。</li>
+    </ul>
     <p>We’ll start by looking at <code>Foldable</code>, and then examine
     cases where folding becomes complex and <code>Traverse</code>
     becomes convenient.</p>
+    <p>まずは <code>Foldable</code>
+    を見ていく。その後、畳み込みが複雑になり <code>Traverse</code>
+    がその力を発揮するケースについて考察する。</p>
     <h2 data-number="12.1" id="sec:foldable"><span class="header-section-number">12.1</span> Foldable</h2>
     <p>The <code>Foldable</code> type class captures the
     <code>foldLeft</code> and <code>foldRight</code> methods we’re used
@@ -22593,10 +22611,20 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     also invent new sequences and plug them into our code.
     <code>Foldable</code> gives us great use cases for
     <code>Monoids</code> and the <code>Eval</code> monad.</p>
-    <h3 data-number="12.1.1" id="folds-and-folding"><span class="header-section-number">12.1.1</span> Folds and Folding</h3>
+    <p><code>Foldable</code> 型クラスは、<code>List</code> や
+    <code>Vector</code> や <code>Stream</code>
+    といったシーケンス（順序付きコレクションのことを指す。以下同じ）で使われる
+    <code>foldLeft</code> や <code>foldRight</code>
+    メソッドの特徴を捉えたものである。<code>Foldable</code>
+    を使えば、さまざまなシーケンス型に対応する汎用的な畳み込み処理を書くことができる。また、新しいシーケンス型を作成してコードに組み込むことも可能である。<code>Foldable</code>
+    は、<code>Monoid</code> や <code>Eval</code>
+    モナドの実用的なユースケースを示してくれる。</p>
+    <h3 data-number="12.1.1" id="fold-関数と畳み込み処理-folds-and-folding"><span class="header-section-number">12.1.1</span> <code>fold</code>
+    関数と畳み込み処理 Folds and Folding</h3>
     <p>Let’s start with a quick recap of the general concept of folding.
     We supply an <em>accumulator</em> value and a <em>binary
     function</em> to combine it with each item in the sequence:</p>
+    <p>まず、畳み込みの一般的な概念を簡単におさらいしよう。畳み込み処理では<em>蓄積変数</em>と<em>二項関数</em>を提供し、その二項関数を蓄積変数とシーケンス内の各要素に順次適用していく。</p>
     <div class="sourceCode" id="cb752"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb752-1"><a href="#cb752-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show<span class="op">[</span>A<span class="op">](</span>list<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">]):</span> <span class="ex">String</span> <span class="op">=</span></span>
 <span id="cb752-2"><a href="#cb752-2" aria-hidden="true" tabindex="-1"></a>  list<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="st">&quot;nil&quot;</span><span class="op">)((</span>accum<span class="op">,</span> item<span class="op">)</span> <span class="op">=&gt;</span> <span class="ss">s&quot;$item</span><span class="st"> then </span><span class="ss">$accum&quot;</span><span class="op">)</span></span></code></pre></div>
     <div class="sourceCode" id="cb753"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb753-1"><a href="#cb753-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show</span><span class="op">(</span>Nil<span class="op">)</span></span>
@@ -22609,6 +22637,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     the result of each call becoming the accumulator for the next. When
     we reach the end of the sequence, the final accumulator becomes our
     final result.</p>
+    <p><code>foldLeft</code>
+    メソッドは、シーケンスをたどりながら再帰的に動作する。二項関数は各要素に対して繰り返し呼び出され、その結果が次の繰り返しで使用される蓄積変数となる。シーケンスの終端に到達したときの最終的な蓄積変数が最終結果となる。</p>
     <p>Depending on the operation we’re performing, the order in which
     we fold may be important. Because of this there are two standard
     variants of fold:</p>
@@ -22618,9 +22648,16 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <li><code>foldRight</code> traverses from “right” to “left” (finish
     to start).</li>
     </ul>
-    <p>Figure 11 illustrates each direction.</p>
+    <p>実行する操作によっては、どちらの方向で畳み込みを行うかが重要になる場合がある。そのため、畳み込みには二つの標準的なバリエーションがある。</p>
+    <ul>
+    <li><code>foldLeft</code>
+    は、シーケンスを左から右（先頭から末尾）へ走査する</li>
+    <li><code>foldRight</code>
+    は、シーケンスを右から左（末尾から先頭）へ走査する</li>
+    </ul>
+    <p>図11に各方向の畳み込みの動作を示す。</p>
     <figure id="fig:foldable-traverse:fold">
-    <svg id="svg_8efac6e679948e0aee33" alt="Illustration of foldLeft and foldRight" width="2200px" height="800px" viewBox="0 0 2200 800">
+    <svg id="svg_8efac6e679948e0aee33" alt="foldLeft と foldRight の処理イメージ" width="2200px" height="800px" viewBox="0 0 2200 800">
     <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
     <title>fold</title>
     <desc>Created with Sketch.</desc>
@@ -22754,13 +22791,18 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
         </g>
     </g>
 </svg>
-    <figcaption>Figure 11: Illustration of foldLeft and
-    foldRight</figcaption>
+    <figcaption>Figure 11: foldLeft と foldRight
+    の処理イメージ</figcaption>
     </figure>
     <p><code>foldLeft</code> and <code>foldRight</code> are equivalent
     if our binary operation is associative. For example, we can sum a
     <code>List[Int]</code> by folding in either direction, using
     <code>0</code> as our accumulator and addition as our operation:</p>
+    <p>二項演算が結合律を満たす場合、<code>foldLeft</code> と
+    <code>foldRight</code>
+    は同じ結果を返す。たとえば、蓄積変数の初期値を <code>0</code>
+    とし、加算を行う二項関数を用いれば、どちらの方向から畳み込んでも
+    <code>List[Int]</code> の合計を求めることができる。</p>
     <div class="sourceCode" id="cb754"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb754-1"><a href="#cb754-1" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldLeft</span><span class="op">(</span><span class="dv">0</span><span class="op">)(</span>_ <span class="op">+</span> _<span class="op">)</span></span>
 <span id="cb754-2"><a href="#cb754-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Int = 6</span></span>
 <span id="cb754-3"><a href="#cb754-3" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldRight</span><span class="op">(</span><span class="dv">0</span><span class="op">)(</span>_ <span class="op">+</span> _<span class="op">)</span></span>
@@ -22768,27 +22810,36 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>If we provide a non-associative operator the order of evaluation
     makes a difference. For example, if we fold using subtraction, we
     get different results in each direction:</p>
+    <p>結合的でない演算を用いた場合、評価順序によって結果は異なってくる。たとえば、減算を用いて畳み込みを行えば、処理の方向ごとに異なる結果が得られる。</p>
     <div class="sourceCode" id="cb755"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb755-1"><a href="#cb755-1" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldLeft</span><span class="op">(</span><span class="dv">0</span><span class="op">)(</span>_ <span class="op">-</span> _<span class="op">)</span></span>
 <span id="cb755-2"><a href="#cb755-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res4: Int = -6</span></span>
 <span id="cb755-3"><a href="#cb755-3" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldRight</span><span class="op">(</span><span class="dv">0</span><span class="op">)(</span>_ <span class="op">-</span> _<span class="op">)</span></span>
 <span id="cb755-4"><a href="#cb755-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res5: Int = 2</span></span></code></pre></div>
-    <h3 data-number="12.1.2" id="exercise-reflecting-on-folds"><span class="header-section-number">12.1.2</span> Exercise: Reflecting on
-    Folds</h3>
+    <h3 data-number="12.1.2" id="演習-畳み込み処理の振り返り-reflecting-on-folds"><span class="header-section-number">12.1.2</span> 演習:
+    畳み込み処理の振り返り Reflecting on Folds</h3>
     <p>Try using <code>foldLeft</code> and <code>foldRight</code> with
     an empty list as the accumulator and <code>::</code> as the binary
     operator. What results do you get in each case?</p>
+    <p>蓄積変数の初期値に空のリストを、二項演算に <code>::</code>
+    を用いて <code>foldLeft</code> と <code>foldRight</code>
+    を試せ。それぞれの場合でどのような結果が得られるだろうか。</p>
     <div class="solution">
     <p>Folding from left to right reverses the list:</p>
+    <p>左から右への畳み込みはリストを逆順にする。</p>
     <div class="sourceCode" id="cb756"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb756-1"><a href="#cb756-1" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldLeft</span><span class="op">(</span><span class="ex">List</span><span class="op">.</span>empty<span class="op">[</span><span class="bu">Int</span><span class="op">])((</span>a<span class="op">,</span> i<span class="op">)</span> <span class="op">=&gt;</span> i <span class="op">::</span> a<span class="op">)</span></span>
 <span id="cb756-2"><a href="#cb756-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res6: List[Int] = List(3, 2, 1)</span></span></code></pre></div>
     <p>Folding right to left copies the list, leaving the order
     intact:</p>
+    <p>右から左への畳み込みはリストの順序を保ったまま複製する。</p>
     <div class="sourceCode" id="cb757"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb757-1"><a href="#cb757-1" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldRight</span><span class="op">(</span><span class="ex">List</span><span class="op">.</span>empty<span class="op">[</span><span class="bu">Int</span><span class="op">])((</span>i<span class="op">,</span> a<span class="op">)</span> <span class="op">=&gt;</span> i <span class="op">::</span> a<span class="op">)</span></span>
 <span id="cb757-2"><a href="#cb757-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res7: List[Int] = List(1, 2, 3)</span></span></code></pre></div>
     <p>Note that we have to carefully specify the type of the
     accumulator to avoid a type error. We use
     <code>List.empty[Int]</code> to avoid inferring the accumulator type
     as <code>Nil.type</code> or <code>List[Nothing]</code>:</p>
+    <p>蓄積変数の型を正しく指定しないと型エラーになる点に注意が必要である。<code>List.empty[Int]</code>
+    を使用することで、蓄積変数の型が <code>Nil.type</code> や
+    <code>List[Nothing]</code> と推論されるのを避けている。</p>
     <div class="sourceCode" id="cb758"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb758-1"><a href="#cb758-1" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">).</span><span class="fu">foldRight</span><span class="op">(</span>Nil<span class="op">)(</span>_ <span class="op">::</span> _<span class="op">)</span></span>
 <span id="cb758-2"><a href="#cb758-2" aria-hidden="true" tabindex="-1"></a><span class="co">// error:</span></span>
 <span id="cb758-3"><a href="#cb758-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Found:    List[Int]</span></span>
@@ -22796,16 +22847,24 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb758-5"><a href="#cb758-5" aria-hidden="true" tabindex="-1"></a><span class="co">// List(1, 2, 3).foldRight(Nil)(_ :: _)</span></span>
 <span id="cb758-6"><a href="#cb758-6" aria-hidden="true" tabindex="-1"></a><span class="co">//                              ^^^^^^</span></span></code></pre></div>
     </div>
-    <h3 data-number="12.1.3" id="exercise-scaf-fold-ing-other-methods"><span class="header-section-number">12.1.3</span> Exercise: Scaf-fold-ing
-    Other Methods</h3>
+    <h3 data-number="12.1.3" id="演習-fold-で他のメソッドを実装する"><span class="header-section-number">12.1.3</span> 演習: <code>fold</code>
+    で他のメソッドを実装する</h3>
     <p><code>foldLeft</code> and <code>foldRight</code> are very general
     methods. We can use them to implement many of the other high-level
     sequence operations we know. Prove this to yourself by implementing
     substitutes for <code>List&#39;s</code> <code>map</code>,
     <code>flatMap</code>, <code>filter</code>, and <code>sum</code>
     methods in terms of <code>foldRight</code>.</p>
+    <p><code>foldLeft</code> と <code>foldRight</code>
+    は非常に汎用的なメソッドであり、これらを使って他の多くのシーケンス操作を実装することができる。<code>foldRight</code>
+    を利用して、<code>List</code> の
+    <code>map</code>、<code>flatMap</code>、<code>filter</code>、および
+    <code>sum</code> メソッドを再実装し、このことを確かめよ。</p>
+    <!-- 
+    TODO: high-level は抽象度の高さを言っている？ foldで実装できる操作の抽象度はピンキリだと思うが
+    -->
     <div class="solution">
-    <p>Here are the solutions:</p>
+    <p>解答例は以下の通りである。</p>
     <div class="sourceCode" id="cb759"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb759-1"><a href="#cb759-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>list<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">])(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">List</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb759-2"><a href="#cb759-2" aria-hidden="true" tabindex="-1"></a>  list<span class="op">.</span><span class="fu">foldRight</span><span class="op">(</span><span class="ex">List</span><span class="op">.</span>empty<span class="op">[</span>B<span class="op">])</span> <span class="op">{</span> <span class="op">(</span>item<span class="op">,</span> accum<span class="op">)</span> <span class="op">=&gt;</span></span>
 <span id="cb759-3"><a href="#cb759-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">func</span><span class="op">(</span>item<span class="op">)</span> <span class="op">::</span> accum</span>
@@ -22827,6 +22886,9 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <p>We’ve provided two definitions of <code>sum</code>, one using
     <code>scala.math.Numeric</code> (which recreates the built-in
     functionality accurately)…</p>
+    <p><code>sum</code> の定義には二つの方法がある。まずは
+    <code>scala.math.Numeric</code>
+    を使った方法を以下に示す。この方法はScala組み込みの機能を正確に再現している。</p>
     <div class="sourceCode" id="cb765"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb765-1"><a href="#cb765-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>math<span class="op">.</span>Numeric</span>
 <span id="cb765-2"><a href="#cb765-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb765-3"><a href="#cb765-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sumWithNumeric<span class="op">[</span>A<span class="op">](</span>list<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">])</span></span>
@@ -22836,6 +22898,8 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb766-2"><a href="#cb766-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res12: Int = 6</span></span></code></pre></div>
     <p>and one using <code>cats.Monoid</code> (which is more appropriate
     to the content of this book):</p>
+    <p>もうひとつの方法は <code>cats.Monoid</code>
+    を使う。本書の内容としてはこちらのほうが適しているだろう。</p>
     <div class="sourceCode" id="cb767"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb767-1"><a href="#cb767-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Monoid</span>
 <span id="cb767-2"><a href="#cb767-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb767-3"><a href="#cb767-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sumWithMonoid<span class="op">[</span>A<span class="op">](</span>list<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">])</span></span>
@@ -22854,10 +22918,20 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>Foldable</code> for a handful of Scala data types:
     <code>List</code>, <code>Vector</code>, <code>LazyList</code>, and
     <code>Option</code>.</p>
+    <p>Catsの <code>Foldable</code> は、<code>foldLeft</code> と
+    <code>foldRight</code>
+    を型クラスとして抽象化している。<code>Foldable</code>
+    インスタンスはこれら二つのメソッドを定義し、多くの派生メソッドを継承する。Catsでは、<code>List</code>、<code>Vector</code>、<code>LazyList</code>、<code>Option</code>
+    といったいくつかのScala組み込みデータ型に対する
+    <code>Foldable</code> インスタンスが、はじめから用意されている。</p>
     <p>We can summon instances as usual using
     <code>Foldable.apply</code> and call their implementations of
     <code>foldLeft</code> directly. Here is an example using
     <code>List</code>:</p>
+    <p>通常どおり <code>Foldable.apply</code>
+    を使ってインスタンスを入手し、その <code>foldLeft</code>
+    実装を直接呼び出すことができる。以下に <code>List</code>
+    を用いた例を示す。</p>
     <div class="sourceCode" id="cb769"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb769-1"><a href="#cb769-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Foldable</span>
 <span id="cb769-2"><a href="#cb769-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>list<span class="op">.</span>_ <span class="co">// for Foldable</span></span>
 <span id="cb769-3"><a href="#cb769-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -22868,6 +22942,10 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     <code>LazyList</code> work in the same way. Here is an example using
     <code>Option</code>, which is treated like a sequence of zero or one
     elements:</p>
+    <p><code>Vector</code> や <code>LazyList</code>
+    のような他のシーケンスでも同じように動作する。以下は
+    <code>Option</code> を使用する例である。<code>Option</code>
+    はゼロ個またはひとつの要素をもったシーケンスとして扱われる。</p>
     <div class="sourceCode" id="cb771"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb771-1"><a href="#cb771-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>option<span class="op">.</span>_ <span class="co">// for Foldable</span></span>
 <span id="cb771-2"><a href="#cb771-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb771-3"><a href="#cb771-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> maybeInt <span class="op">=</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">123</span><span class="op">)</span></span></code></pre></div>
@@ -23295,7 +23373,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb822-9"><a href="#cb822-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res3: List[Int] = List(1, 2, 3)</span></span></code></pre></div>
     <p>As you can see, this is much more compact and readable than the
     <code>foldLeft</code> code we started with earlier this chapter!</p>
-    <h2 data-number="12.3" id="summary-1"><span class="header-section-number">12.3</span> Summary</h2>
+    <h2 data-number="12.3" id="summary"><span class="header-section-number">12.3</span> Summary</h2>
     <p>In this chapter we were introduced to <code>Foldable</code> and
     <code>Traverse</code>, two type classes for iterating over
     sequences.</p>
@@ -25318,7 +25396,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
 <span id="cb897-8"><a href="#cb897-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb897-9"><a href="#cb897-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb897-10"><a href="#cb897-10" aria-hidden="true" tabindex="-1"></a><span class="fu">testTotalUptime</span><span class="op">()</span></span></code></pre></div>
-    <h2 data-number="16.3" id="summary-2"><span class="header-section-number">16.3</span> Summary</h2>
+    <h2 data-number="16.3" id="summary-1"><span class="header-section-number">16.3</span> Summary</h2>
     <p>This case study provides an example of how Cats can help us
     abstract over different computational scenarios. We used the
     <code>Applicative</code> type class to abstract over asynchronous
@@ -26814,7 +26892,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     combines the <code>match</code> using the <code>combineAll</code>
     method from <code>Foldable</code>.</p>
     </div>
-    <h2 data-number="17.4" id="summary-3"><span class="header-section-number">17.4</span> Summary</h2>
+    <h2 data-number="17.4" id="summary-2"><span class="header-section-number">17.4</span> Summary</h2>
     <p>In this case study we implemented a system that imitates
     map-reduce as performed on a cluster. Our algorithm followed three
     steps:</p>
@@ -28572,7 +28650,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     library. There’s still plenty more to do, but we have a
     sophisticated building block from Cats to work with. We’ll leave
     further improvements up to the reader.</p>
-    <h2 data-number="18.6" id="summary-4"><span class="header-section-number">18.6</span> Summary</h2>
+    <h2 data-number="18.6" id="summary-3"><span class="header-section-number">18.6</span> Summary</h2>
     <p>This case study has been an exercise in removing rather than
     building abstractions. We started with a fairly complex
     <code>Check</code> type. Once we realised we were conflating two
@@ -29442,7 +29520,7 @@ Strategies<span class="subtitle">In Scala with Cats</span></h1>
     it is boilerplate setting up syntax for operations on the type
     class. We can cut down on this using compiler plugins such as <a href="https://github.com/mpilquist/simulacrum">Simulacrum</a> and <a href="https://github.com/typelevel/kind-projector">Kind
     Projector</a>.</p>
-    <h2 data-number="19.6" id="summary-5"><span class="header-section-number">19.6</span> Summary</h2>
+    <h2 data-number="19.6" id="summary-4"><span class="header-section-number">19.6</span> Summary</h2>
     <p>In this case study we’ve seen how we can use type classes to
     model a simple CRDT, the GCounter, in Scala. Our implementation
     gives us a lot of flexibility and code reuse: we aren’t tied to the
