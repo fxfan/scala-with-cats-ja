@@ -1,3 +1,5 @@
+<!--
+
 ## The State Monad {#sec:monad:state}
 
 [`cats.data.State`][cats.data.State]
@@ -393,6 +395,334 @@ and runs the result with an initial stack.
 We've done all the hard work now.
 All we need to do is split the input into terms
 and call `runA` and `value` to unpack the result:
+
+```scala mdoc:silent
+def evalInput(input: String): Int =
+  evalAll(input.split(" ").toList).runA(Nil).value
+```
+
+```scala mdoc
+evalInput("1 2 + 3 4 + *")
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## `State` モナド {#sec:monad:state}
+
+[`cats.data.State`][cats.data.State] は、計算の一部として状態を扱うことを可能にする。アトミックな状態操作を表す `State` インスタンスをいくつか定義し、それらを `map` と `flatMap` でつなぎ合わせることで計算全体を表現する。このようにして、実際の状態変化を伴わずに、純粋関数型の方法で可変状態をモデル化することができる。
+
+### `State` の作成と展開
+
+突き詰めれば、`State[S, A]` のインスタンスは `S => (S, A)` 型の関数を表す。`S` は状態の型、`A` は結果の型である。
+
+```scala mdoc:silent
+import cats.data.State
+```
+
+```scala mdoc:silent
+val a = State[Int, String]{ state =>
+  (state, s"The state is $state")
+}
+```
+
+言い換えれば、`State` インスタンスとは次のふたつの処理を行う関数である。
+
+- 入力の状態を出力の状態に変換する
+- 結果を計算する
+
+初期状態を与えれば `State` モナドを実行することができる。`State` には `run`、`runS`、`runA` という三つのメソッドがあり、それぞれ状態と結果の異なる組み合わせを返す。各メソッドが返すのは `Eval` インスタンスで、`State` はそれによってスタックセーフ性を保っている。最終的な結果を取り出すには、通常どおり `value` メソッドを呼び出す。
+
+```scala mdoc
+// 状態と結果を取得する
+val (state, result) = a.run(10).value
+
+// 結果を無視し、状態だけを取得する
+val justTheState = a.runS(10).value
+
+// 状態を無視し、結果だけを取得する
+val justTheResult = a.runA(10).value
+```
+
+### `State` の合成と変換
+
+`Reader` や `Writer` と同様に、`State` モナドの強力さはインスタンス同士を組み合わせる能力にある。`map` と `flatMap` があるインスタンスから別のインスタンスへと状態を受け渡していく。各インスタンスはひとつのアトミックな状態変換を表し、それらの組み合わせによって一連の完全な状態変更の流れが形成される。
+
+```scala mdoc:invisible:reset-object
+import cats.data.State
+val a = State[Int, String]{ state =>
+  (state, s"The state is $state")
+}
+```
+```scala mdoc:silent
+val step1 = State[Int, String]{ num =>
+  val ans = num + 1
+  (ans, s"Result of step1: $ans")
+}
+
+val step2 = State[Int, String]{ num =>
+  val ans = num * 2
+  (ans, s"Result of step2: $ans")
+}
+
+val both = for {
+  a <- step1
+  b <- step2
+} yield (a, b)
+```
+
+```scala mdoc
+val (state, result) = both.run(20).value
+```
+
+見てのとおり、この例における最終的な状態はふたつの変換を順番に適用した結果である。for 内包表記では状態に直接関与していないにもかかわらず、状態はステップからステップへ受け渡されている。
+
+`State` モナド利用の一般的なモデルは、計算の各ステップを `State` インスタンスとして表現し、標準的なモナド演算子を使ってそれらのステップを合成することである。Cats は、基本的な構成要素となるステップを作成するための便利なコンストラクタをいくつか提供している。
+
+  - `get`: 状態を結果として取り出す
+  - `set`: 状態を更新し、結果として `Unit` を返す
+  - `pure`: 状態を無視し、指定された値をそのまま結果として返す
+  - `inspect`: 状態を関数によって変換した上で結果として取り出す
+  - `modify`: 関数を使用して状態を更新する
+
+```scala mdoc
+val getDemo = State.get[Int]
+getDemo.run(10).value
+
+val setDemo = State.set[Int](30)
+setDemo.run(10).value
+
+val pureDemo = State.pure[Int, String]("Result")
+pureDemo.run(10).value
+
+val inspectDemo = State.inspect[Int, String](x => s"${x}!")
+inspectDemo.run(10).value
+
+val modifyDemo = State.modify[Int](_ + 1)
+modifyDemo.run(10).value
+```
+
+for 内包表記を使ってこれらの構成要素を組み立てることができる。中間ステップが状態の変換を表しているだけである場合、その結果は無視するのが一般的である。
+
+```scala mdoc:silent:reset-object
+import cats.data.State
+import State._
+```
+
+```scala mdoc
+val program: State[Int, (Int, Int, Int)] = for {
+  a <- get[Int]
+  _ <- set[Int](a + 1)
+  b <- get[Int]
+  _ <- modify[Int](_ + 1)
+  c <- inspect[Int, Int](_ * 1000)
+} yield (a, b, c)
+
+val (state, result) = program.run(1).value
+```
+
+### 演習: 後置記法の計算機
+
+`State` モナドを使うことで、複雑な式に対するシンプルなインタープリタを実装できる。その実装では、可変レジスタの値を結果と一緒に受け渡しながら処理を進める。シンプルな例として、後置記法による整数の算術式計算機の実装について見ていこう。
+
+後置記法について聞いたことがなくても心配いらない。これは、演算子をオペランドの後に記述する数学的表記法である。たとえば、`1 + 2` と書く代わりに次のように書く。
+
+```scala
+1 2 +
+```
+
+後置記法の式は人間にとっては読みづらいが、コードで評価するのは簡単である。オペランドを入れる*スタック*を用意し、シンボルを左から右へと読み進めながら、次のように操作するだけでよい。
+
+- 数字が見つかったら、それをスタックにプッシュする
+- 演算子が見つかったら、スタックからオペランドをふたつポップし、それらに対して計算を行い、結果をスタックにプッシュする
+
+これにより、括弧を使わずに複雑な式を評価できる。たとえば `(1 + 2) * 3` なら次のようになる。
+
+```scala
+1 2 + 3 * // 1 を見つけ、スタックにプッシュ
+2 + 3 *   // 2 を見つけ、スタックにプッシュ
++ 3 *     // + を見つけ, 1 と 2 をスタックからポップし、
+          //     足し合わせた結果である 3 をスタックにプッシュする
+3 *       // 3 を見つけ、スタックにプッシュ
+*         // * を見つけ, 3 と 3 をスタックからポップし、
+          //     掛け合わせた結果である 9 をスタックにプッシュする
+```
+
+このような式を評価するインタープリタを書いてみよう。`State` インスタンスをスタック上での変換および中間結果を表すものとし、各シンボルを読み取ってこれに変換する。それらの `State` インスタンスを `flatMap` でつなげれば、任意のシンボルの連なりを処理するインタープリタを作成できる。
+
+まずは、単一のシンボルを読み取って `State` インスタンスに変換する `evalOne` 関数を作成せよ。以下のコードをテンプレートとして使用すること。エラーハンドリングについては今は考慮しなくてよい。スタックが不正な状態にある場合、例外を投げてもかまわない。
+
+```scala mdoc:reset:silent
+import cats.data.State
+
+type CalcState[A] = State[List[Int], A]
+
+def evalOne(sym: String): CalcState[Int] = ???
+```
+
+もし難しく感じるなら、返却する `State` インスタンスの基本的な形について考えてみよう。各 `State` インスタンスは、スタックを受け取りスタックと結果のペアを返す関数的な変換を表している。広い文脈は無視して、そのひとつのステップに集中すればよい。
+
+```scala mdoc:invisible
+def someTransformation(input: List[Int]): List[Int] = input
+def someCalculation: Int = 123
+```
+
+```scala mdoc:silent
+State[List[Int], Int] { oldStack =>
+  val newStack = someTransformation(oldStack)
+  val result   = someCalculation
+  (newStack, result)
+}
+```
+
+`Stack` インスタンスは、このような形式で自由に書いてもかまわないし、上で見た便利なコンストラクタのシーケンスとして記述してもよい。
+
+<div class="solution">
+見つかったのが演算子かオペランドかによって必要なスタック操作は異なる。わかりやすさのため、ケース毎にひとつずつヘルパー関数を用意し、それを使って `evalOne` を実装しよう。
+
+```scala mdoc:invisible:reset-object
+import cats.data.State
+
+type CalcState[A] = State[List[Int], A]
+```
+```scala
+def evalOne(sym: String): CalcState[Int] =
+  sym match {
+    case "+" => operator(_ + _)
+    case "-" => operator(_ - _)
+    case "*" => operator(_ * _)
+    case "/" => operator(_ / _)
+    case num => operand(num.toInt)
+  }
+```
+
+まずは `operand` から見ていこう。必要なのは読み取ったオペランドをスタックに積むことだけである。同時に、中間結果としても、そのオペランドを用いる。
+
+```scala mdoc:silent
+def operand(num: Int): CalcState[Int] =
+  State[List[Int], Int] { stack =>
+    (num :: stack, num)
+  }
+```
+
+`operator` 関数はもうすこし複雑である。スタックからオペランドをふたつポップし、計算結果をスタックにプッシュしなければならない。スタックの一番上にあるのは二番目のオペランドだという点に気をつけること。スタック上にオペランドがふたつ以上ない場合、処理は失敗する。この演習では、失敗のハンドリング方法として、例外を投げることを認めている。
+
+```scala mdoc:silent
+def operator(func: (Int, Int) => Int): CalcState[Int] =
+  State[List[Int], Int] {
+    case b :: a :: tail =>
+      val ans = func(a, b)
+      (ans :: tail, ans)
+
+    case _ =>
+      sys.error("Fail!")
+  }
+```
+
+```scala mdoc:invisible
+def evalOne(sym: String): CalcState[Int] =
+  sym match {
+    case "+" => operator(_ + _)
+    case "-" => operator(_ - _)
+    case "*" => operator(_ * _)
+    case "/" => operator(_ / _)
+    case num => operand(num.toInt)
+  }
+```
+</div>
+
+`evalOne` を使うと、次のように単一シンボルの式を評価できる。初期スタックとして `Nil` を渡して `runA` を呼び出し、結果として得られる `Eval` インスタンスを `value` を使って展開する。
+
+```scala mdoc
+evalOne("42").runA(Nil).value
+```
+
+もっと複雑なプログラムも `evalOne`、`map`、`flatMap` を使うことで表現できる。処理のほとんどはスタック上で行われるため、`evalOne("1")` や `evalOne("2")` といった中間ステップの結果は無視している。
+
+```scala mdoc
+val program = for {
+  _   <- evalOne("1")
+  _   <- evalOne("2")
+  ans <- evalOne("+")
+} yield ans
+
+program.runA(Nil).value
+```
+
+この例を一般化し、`List[String]` の結果を計算する `evalAll` メソッドを作成せよ。`evalOne` を使って各シンボルを処理し、結果として得られる `State` モナドを `flatMap` でつなげること。作成する関数のシグネチャは以下のとおりとする。
+
+```scala mdoc:silent
+def evalAll(input: List[String]): CalcState[Int] =
+  ???
+```
+
+<div class="solution">
+`evalAll` の実装では入力に対して畳み込みを行う。`0` をコンテキストに包んだだけの純粋な `CalcState` を初期状態とする。入力されたリストが空であれば `0` が返される。各ステップでは `flatMap` を行う。その際、中間結果は前の例で見たように無視する。
+
+```scala mdoc:invisible:reset-object
+import cats.data.State
+
+type CalcState[A] = State[List[Int], A]
+def operand(num: Int): CalcState[Int] =
+  State[List[Int], Int] { stack =>
+    (num :: stack, num)
+  }
+def operator(func: (Int, Int) => Int): CalcState[Int] =
+  State[List[Int], Int] {
+    case b :: a :: tail =>
+      val ans = func(a, b)
+      (ans :: tail, ans)
+
+    case _ =>
+      sys.error("Fail!")
+  }
+def evalOne(sym: String): CalcState[Int] =
+  sym match {
+    case "+" => operator(_ + _)
+    case "-" => operator(_ - _)
+    case "*" => operator(_ * _)
+    case "/" => operator(_ / _)
+    case num => operand(num.toInt)
+  }
+```
+```scala mdoc:silent
+import cats.syntax.applicative._ // pure
+
+def evalAll(input: List[String]): CalcState[Int] =
+  input.foldLeft(0.pure[CalcState]) { (a, b) =>
+    a.flatMap(_ => evalOne(b))
+  }
+```
+
+</div>
+
+`evalAll` を使えば、複数ステップからなる式を手軽に評価できる。
+
+```scala mdoc
+val multistageProgram = evalAll(List("1", "2", "+", "3", "*"))
+
+multistageProgram.runA(Nil).value
+```
+
+`evalOne` と `evalAll` はどちらも `State` インスタンスを返すので、これらの結果を `flatMap` でつなげることができる。`evalOne` はスタックの単純な変換を、`evalAll` は複雑な変換を生成するが、複雑さにかかわらずどちらも純粋関数である。順序を問わずいくつでも連結が可能である。
+
+```scala mdoc
+val biggerProgram = for {
+  _   <- evalAll(List("1", "2", "+"))
+  _   <- evalAll(List("3", "4", "+"))
+  ans <- evalOne("*")
+} yield ans
+
+biggerProgram.runA(Nil).value
+```
+
+`evalInput` 関数を実装し、この演習課題を完成させよ。この関数は、入力された文字列をシンボルに分割して `evalAll` を呼び出し、その結果に初期スタックを与えて実行するものとする。
+
+<div class="solution">
+難しい部分はすべて終えている。あとは入力をシンボルに分割し、`runA` と `value` を呼び出して結果を展開するだけである。
 
 ```scala mdoc:silent
 def evalInput(input: String): Int =

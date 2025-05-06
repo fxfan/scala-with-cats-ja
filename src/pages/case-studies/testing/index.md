@@ -1,3 +1,5 @@
+<!--
+
 # Case Study: Testing Asynchronous Code {#sec:case-studies:testing}
 
 We'll start with a straightforward case study:
@@ -395,3 +397,303 @@ as well as successful computations.
 Let's move on now to a more complex case study
 where type classes will help us produce something more interesting:
 a map-reduce-style framework for parallel processing.
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+# ケーススタディ: 非同期処理のテスト {#sec:case-studies:testing}
+
+簡単なケーススタディから始めよう。非同期なコードを同期化することで単体テストをシンプルにする方法について考える。
+
+[@sec:foldable-traverse]章で示した、サーバの稼働時間を計測する例に戻ろう。このコードに肉付けを行い、より完全な形へと近づける。ここではふたつのコンポーネントを作成する。ひとつは、リモートサーバから稼働時間を取得する `UptimeClient` である。
+
+```scala mdoc:silent
+import scala.concurrent.Future
+
+trait UptimeClient {
+  def getUptime(hostname: String): Future[Int]
+}
+```
+
+もうひとつは `UptimeService` で、サーバのリストを管理し、利用者がそれらの総稼働時間を取得できるようにする。
+
+```scala mdoc:silent
+import cats.instances.future._ // Applicative
+import cats.instances.list._   // Traverse
+import cats.syntax.traverse._  // traverse
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class UptimeService(client: UptimeClient) {
+  def getTotalUptime(hostnames: List[String]): Future[Int] =
+    hostnames.traverse(client.getUptime).map(_.sum)
+}
+```
+
+`UptimeClient` をトレイトとしてモデリングしたのは、単体テストでスタブ化するためである。たとえば、次に示すようにダミーデータを提供するテストクライアントを作成することができる。
+
+```scala mdoc:silent
+class TestUptimeClient(hosts: Map[String, Int]) extends UptimeClient {
+  def getUptime(hostname: String): Future[Int] =
+    Future.successful(hosts.getOrElse(hostname, 0))
+}
+```
+
+ここで、`UptimeService` の単体テストを書くことを考える。このサービスが値をどのように取得しているかには触れず、それを合計する能力をテストしたい。以下に例を示す。
+
+```scala mdoc:fail
+def testTotalUptime() = {
+  val hosts    = Map("host1" -> 10, "host2" -> 6)
+  val client   = new TestUptimeClient(hosts)
+  val service  = new UptimeService(client)
+  val actual   = service.getTotalUptime(hosts.keys.toList)
+  val expected = hosts.values.sum
+  assert(actual == expected)
+}
+```
+
+だが、このアプリケーションが非同期で実行されることを考慮していなかったというありがちなミス[^warnings]のせいで、このコードはコンパイルできない。`actual` は `Future[Int]` 型で、`expected` は `Int` 型である。これらを直接比較することはできない。
+
+[^warnings]: 厳密には、これは*警告*であってエラーではない。ここでは `scalac` に `-Xfatal-warnings` フラグを設定していることによりエラー扱いされている。
+
+これを解決する方法はいくつかある。テストコードを非同期処理に対応させることもできるが、別の選択肢もある。サービスクラスのコードを同期的にして先ほどのテストを変更することなく動作させてみよう。
+
+## 型コンストラクタの抽象化
+
+`UptimeClient` には、本番で使う非同期的なものと単体テストで使う同期的なもの、二種類の実装が必要となる。
+
+```scala
+trait RealUptimeClient extends UptimeClient {
+  def getUptime(hostname: String): Future[Int]
+}
+
+trait TestUptimeClient extends UptimeClient {
+  def getUptime(hostname: String): Int
+}
+```
+
+問題は `UptimeClient` における抽象メソッドの戻り値型を何にするかである。`Future[Int]` と `Int` を抽象化する必要がある。
+
+```scala
+trait UptimeClient {
+  def getUptime(hostname: String): ???
+}
+```
+
+両方の型がもつ `Int` の部分を保持しつつ、テストコードでは `Future` の部分を取り除きたいということである。一見これは難しく思われるかもしれないが、幸いなことに Cats は `Id` 型という解決策を提供している。`Id` については[@sec:monads:identity]節で取り上げた。これを使えば、型をその意味を変えることなく型コンストラクタでラップすることができる。
+
+```scala
+package cats
+
+type Id[A] = A
+```
+
+`Id` を使えば `UptimeClient` の戻り値型を抽象化できる。これを以下のとおり実装せよ。
+
+- 型コンストラクタ `F[_]` をパラメータとして受け取るように `UptimeClient` トレイトを定義する
+- `UptimeClient` を拡張したトレイト `RealUptimeClient` と `TestUptimeClient` を定義し、`F` をそれぞれ `Future` と `Id` に束縛する
+- それぞれの `getUptime` のメソッドシグネチャを書き出し、それらがコンパイルされることを確認する
+
+<div class="solution">
+
+以下に実装例を示す。
+
+```scala mdoc:reset-object:invisible
+import scala.concurrent.Future
+```
+```scala mdoc:silent
+import cats.Id
+
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+
+trait RealUptimeClient extends UptimeClient[Future] {
+  def getUptime(hostname: String): Future[Int]
+}
+
+trait TestUptimeClient extends UptimeClient[Id] {
+  def getUptime(hostname: String): Id[Int]
+}
+```
+
+`Id[A]` は単なる `A` のエイリアスにすぎない。そのため、`TestUptimeClient` において型を `Id[Int]` とする必要はなく、単に `Int` と書くことができる。
+
+```scala mdoc:reset-object:invisible
+import scala.concurrent.Future
+import cats.Id
+
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+
+trait RealUptimeClient extends UptimeClient[Future] {
+  def getUptime(hostname: String): Future[Int]
+}
+```
+```scala mdoc:silent
+trait TestUptimeClient extends UptimeClient[Id] {
+  def getUptime(hostname: String): Int
+}
+```
+
+もちろん、厳密に言えば `RealUptimeClient` や `TestUptimeClient` で `getUptime` を再定義する必要はないが、これらを書き出すことは技法の詳細を明らかにする助けとなるだろう。
+</div>
+
+これで、`TestUptimeClient` の定義を、以前と同じように `Map[String, Int]` を用いた完全なクラスへと肉付けすることができるはずである。これを実装せよ。
+
+<div class="solution">
+
+最終的なコードは元々の `TestUptimeClient` 実装と似たものとなる。ただし、`Future.successful` 呼び出しはもう必要ない。
+
+```scala mdoc:reset-object:invisible
+import scala.concurrent.Future
+import cats.Id
+
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+
+trait RealUptimeClient extends UptimeClient[Future] {
+  def getUptime(hostname: String): Future[Int]
+}
+```
+```scala mdoc:silent
+class TestUptimeClient(hosts: Map[String, Int])
+  extends UptimeClient[Id] {
+  def getUptime(hostname: String): Int =
+    hosts.getOrElse(hostname, 0)
+}
+```
+</div>
+
+## モナドの抽象化
+
+`UptimeService` に目を向けよう。二種類の `UptimeClient` を抽象化できるようにこれを書き直す必要がある。この作業をふたつのステップに分けて行う。まず、クラスとメソッドのシグネチャを書き換え、それからメソッドの本体を修正する。以下のとおりメソッドシグネチャを書き換えよ。
+
+- `getTotalUptime` の本体をコメントアウトする（`???` に置き換えてコンパイルできるようにしておく）
+- `UptimeService` に型パラメータ `F[_]` を追加し、それを `UptimeClient` に渡す
+
+<div class="solution">
+
+コードは以下のようになるはずである。
+
+```scala
+class UptimeService[F[_]](client: UptimeClient[F]) {
+  def getTotalUptime(hostnames: List[String]): F[Int] =
+    ???
+    // hostnames.traverse(client.getUptime).map(_.sum)
+}
+```
+</div>
+
+続いて、`getTotalUptime` のボディ部のコメントアウトをもとに戻す。次のようなコンパイルエラーが出力されるはずである。
+
+```scala
+// <console>:28: error: could not find implicit value for
+//               evidence parameter of type cats.Applicative[F]
+//            hostnames.traverse(client.getUptime).map(_.sum)
+//                              ^
+```
+
+問題は、`traverse` が `Applicative` インスタンスをもつ値のシーケンスに対してしか使えないということである。元のコードでは `List[Future[Int]]` をトラバースしていた。`Future` には `Applicative` インスタンスが存在するので問題はなかった。しかし、今回のケースではトラバース対象が `List[F[Int]]` であるため、`F` が `Applicative` をもっていることをコンパイラに*証明*する必要がある。`UptimeService` のコンストラクタに暗黙のパラメータを追加し、これを実現せよ。
+
+<div class="solution">
+
+これは暗黙パラメータを用いて以下のように書くことができる。
+
+```scala mdoc:invisible:reset-object
+import cats.syntax.traverse._  // traverse
+import cats.instances.list._
+
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+```
+```scala mdoc:silent
+import cats.Applicative
+import cats.syntax.functor._ // map
+
+class UptimeService[F[_]](client: UptimeClient[F])
+    (implicit a: Applicative[F]) {
+
+  def getTotalUptime(hostnames: List[String]): F[Int] =
+    hostnames.traverse(client.getUptime).map(_.sum)
+}
+```
+
+もしくはコンテキスト境界を使えばもっと簡潔に記述できる。
+
+```scala mdoc:reset-object:invisible
+import cats.Applicative
+import cats.syntax.functor._
+import cats.syntax.traverse._
+import cats.instances.list._
+
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+```
+```scala mdoc:silent
+class UptimeService[F[_]: Applicative]
+    (client: UptimeClient[F]) {
+
+  def getTotalUptime(hostnames: List[String]): F[Int] =
+    hostnames.traverse(client.getUptime).map(_.sum)
+}
+```
+
+`cats.Applicative` だけでなく `cats.syntax.functor` もインポートする必要がある点に注意してほしい。`Future` の `map` メソッドの代わりに Cats が提供する拡張メソッドの `map` を使っているが、これが `Functor` 型の暗黙パラメータを必要とするからである。
+</div>
+
+最後に単体テストに目を向けよう。これまでに加えた修正によって、テストコードは何も変更しなくても意図したとおりに動作する。`TestUptimeClient` のインスタンスを作成し、それを `UptimeService` にラップすることで、`F` が `Id` にバインドされ、残りのコードはモナドやアプリカティブのことを気にせず同期的に動作できるようになる。
+
+```scala mdoc:invisible:reset-object
+import cats.{Id, Applicative}
+import cats.instances.list._  // Traverse
+import cats.syntax.functor._  // map
+import cats.syntax.traverse._ // traverse
+import scala.concurrent.Future
+
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+
+trait RealUptimeClient extends UptimeClient[Future]
+
+class TestUptimeClient(hosts: Map[String, Int])
+    extends UptimeClient[Id] {
+  def getUptime(hostname: String): Int =
+    hosts.getOrElse(hostname, 0)
+  }
+
+class UptimeService[F[_]: Applicative]
+    (client: UptimeClient[F]) {
+
+  def getTotalUptime(hostnames: List[String]): F[Int] =
+    hostnames.traverse(client.getUptime).map(_.sum)
+}
+```
+```scala mdoc:silent
+def testTotalUptime() = {
+  val hosts    = Map("host1" -> 10, "host2" -> 6)
+  val client   = new TestUptimeClient(hosts)
+  val service  = new UptimeService(client)
+  val actual   = service.getTotalUptime(hosts.keys.toList)
+  val expected = hosts.values.sum
+  assert(actual == expected)
+}
+
+testTotalUptime()
+```
+
+## まとめ
+
+このケーススタディで示したのは、Cats を用いて異なる計算シナリオを抽象化する例である。非同期コードと同期コードを抽象化するために `Applicative` 型クラスを使用した。関数型の抽象化を用いることで、実装の詳細を気にすることなく、実行したい一連の計算を記述することができる。
+
+図[@fig:applicatives:hierarchy]では、まさにこの種の抽象化のために設計された計算型クラスのスタックを図示している。`Functor`、`Applicative`、`Monad`、`Traverse` といった型クラスは、マッピング、結合、順次実行、反復などのパターンの抽象的な実装を提供する。これらの型は、その数学的な法則によって、一貫したセマンティクスに基づく挙動を保証されている。
+
+このケーススタディでは `Applicative` を使用した。この型クラスが、今回必要とする最低限の能力をもつものだったからである。もし `flatMap` が必要だったなら `Applicative` の代わりに `Monad` を使うこともできたし、異なるシーケンス型の抽象化を求められていたなら `Traverse` を使うこともできた。また、計算の成功だけでなく、失敗をモデリングする `ApplicativeError` や `MonadError` のような型クラスも存在する。
+
+次はもっと複雑なケーススタディに進もう。型クラスを活用して、並列処理のための MapReduce スタイルのフレームワークを作るという興味深い事例を取り上げる。

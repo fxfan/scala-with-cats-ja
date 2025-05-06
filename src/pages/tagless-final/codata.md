@@ -1,3 +1,5 @@
+<!--
+
 ## Codata Interpreters
 
 In this section we'll explore codata interpreters, using a DSL for terminal interaction as a case study.
@@ -399,3 +401,377 @@ We could factor the interpreter in different ways, and it would still be a codat
 [tui]: https://en.wikipedia.org/wiki/Text-based_user_interface
 [fp]: @/posts/2020-07-05-what-and-why-fp.md
 
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 余データ的インタープリタ
+
+本節では、ターミナルでの対話のための DSL を題材として余データ的インタープリタを探求する。ターミナルは多くのプログラマにとって馴染み深く、そこで使われる CLI アプリケーションは開発者向けのツールとして一般的である。ターミナルの機能はいわゆるエスケープシーケンスを書き込むことで制御されることがよくある。しかし、もっと高水準な抽象が提供されれば、アプリケーションの利便性は向上する。そこで、より使いやすいインターフェースを提供するテキストユーザインターフェース（TUI）ライブラリを作りたい[^tuis]。本節で構築するライブラリは、余データ的インタープリタやモナド、そして合成と推論のための設計が果たす中心的な役割について見せてくれるはずである。
+
+
+### ターミナル
+
+現在のターミナルは、1978年に登場した VT-100 に始まり[今日に至るまで][kitty-kp]機能が集積してできたものである。多くのターミナル機能は ANSI エスケープシーケンスの読み書きによって利用できる。エスケープシーケンスとは、エスケープ文字を先頭とする文字列のことをいう。ここでは、文字スタイルを変更するためのエスケープシーケンスだけを扱う。これにより、システムをシンプルに保ったまま、興味深い成果を得るとともに設計上の論点をひととおり明らかにできる。ここで示すアイデアは、[Terminus][terminus] ライブラリの中で、より本格的なシステムへと拡張されている。
+
+以下に示すコードは、わずかな変更を加えるだけで、ファイルに貼りつけて Scala の最近のバージョンで `scala <ファイル名>` としてそのまま実行できるように書かれている。必要な変更とは `go` 関数の前に `@main` アノテーションを追加することである。つまり、
+
+`def go(): Unit =`
+
+を 
+
+`@main def go(): Unit =`
+
+に変えればよい（これは、本書に記述されたコードをコンパイルするソフトウェア[^tn-tagless-final-codata-01]の制約による）。
+
+例は過去40年ほどのターミナルであればどれでも動作するはずである。Windows 環境では Windows Terminal や [WSL][wsl]、あるいは [WezTerm][wezterm] のような Windows 上で動作するターミナルを使えばよい。
+
+### カラーコード
+
+ターミナルに直接カラーコードを書き込むところから始めよう。これによりターミナル制御の基本を学ぶことができ、同時に ANSI エスケープシーケンスを直接使用することの問題点が明らかとなる。以下が出発点となるコードである。
+
+```scala mdoc:reset-object:silent
+val csiString = "\u001b["
+
+def printRed(): Unit =
+  print(csiString)
+  print("31")
+  print("m")
+
+def printReset(): Unit =
+  print(csiString)
+  print("0")
+  print("m")
+
+def go(): Unit =
+  print("Normal text, ")
+  printRed()
+  print("now red text, ")
+  printReset()
+  println("and now back to normal.")
+```
+
+上述のコードを試してみよう。たとえば、`go` 関数に `@main` アノテーションを追加してファイル `ColorCodes.scala` に保存し、`scala ColorCodes.scala` を実行すればよい。ターミナルの通常のスタイルで表示されるテキストに続いて赤色のテキストが表示され、その後、通常のスタイルに戻ったテキストが続くのが見られるはずである。
+
+色の変更はエスケープシーケンスの書き込みによって制御されている。そのシーケンスは `ESC`（文字 `'\u001b'`）に `'['` が続く文字列で、これが `csiString` の値である。CSI は Control Sequence Introducer を意味している。CSI の後に、使用したいテキストスタイルを指示する文字列を続け、最後に `"m"` を付ける。文字列 `"\u001b[31m"` はターミナルに対して文字色を赤にするよう指示するもので、文字列 `"\u001b[0m"` は、すべてのテキストスタイルをデフォルトに戻すよう指示するものである。
+
+### エスケープシーケンスの問題点
+
+エスケープシーケンスは、ターミナルが処理するのは単純だが、それを生成するプログラマにとっては有用な構造を欠いている。上記のコードにはひとつの潜在的な問題が示されている。スタイル付きのテキストを出力し終えたら、忘れずに色をリセットしなければならないということである。この問題は、手動で確保したメモリを解放し忘れないようにする問題と何ら変わらない。そして、C言語プログラムのメモリ安全性問題に関する長い歴史が示すとおり、この種の作業を人間が確実にこなすことは期待できない。幸いなことに、エスケープシーケンスを忘れてもプログラムがクラッシュする可能性は低いが。
+
+この問題を解決するために、次のような `printRed` 関数を書くことが考えられる。この関数は、文字列を赤色で出力し、その後スタイルをリセットする。
+
+
+```scala mdoc:reset-object:silent
+val csiString = "\u001b["
+val redCode = s"${csiString}31m"
+val resetCode = s"${csiString}0m"
+
+def printRed(output: String): Unit =
+  print(redCode)
+  print(output)
+  print(resetCode)
+
+def go(): Unit =
+  print("Normal text, ")
+  printRed("now red text, ")
+  println("and now back to normal.")
+```
+
+ターミナル出力のスタイリングは文字色を変えることだけではない。たとえば、文字を太字にすることもできる。上記の設計を引き継ぐとコードは次のようになる。
+
+```scala mdoc:reset-object:silent
+val csiString = "\u001b["
+val redCode = s"${csiString}31m"
+val resetCode = s"${csiString}0m"
+val boldOnCode = s"${csiString}1m"
+val boldOffCode = s"${csiString}22m"
+
+def printRed(output: String): Unit =
+  print(redCode)
+  print(output)
+  print(resetCode)
+
+def printBold(output: String): Unit =
+  print(boldOnCode)
+  print(output)
+  print(boldOffCode)
+
+def go(): Unit =
+  print("Normal text, ")
+  printRed("now red text, ")
+  printBold("and now bold.\n")
+```
+
+これでも動作はする。しかし、テキストを赤色かつ太字で出力したい場合はどうだろうか。現在の設計ではこれを表現する方法がなく、すべてのスタイルの組み合わせに対して個別の関数を作るしかない。具体的には、次のような関数を書く必要がある。
+
+```scala
+def printRedAndBold(output: String): Unit =
+  print(redCode)
+  print(boldOnCode)
+  print(output)
+  print(resetCode)
+```
+
+すべてのスタイルの組み合わせについてこのような実装を行うのは現実的でない。根本的な問題は、現在の設計が合成的でないことである。小さな部品を合成してスタイルの組み合わせを構築する手段が存在しない。
+
+### プログラムとインタープリタ
+
+上記の問題を解決するには、`printRed` や `printBold` が、出力対象となる `String` ではなく実行するプログラムを受け取るようにする必要がある。それらのプログラムが具体的に何をするかを知る必要はない。それらを実行する手段があればよい。そうすれば、`printRed` や `printBold` といったコンビネータもまたプログラムを返すことができるようになる。これらのコンビネータが返すプログラムは、まず適切にスタイルを設定し、それから受け取ったプログラムを実行し、終了後にスタイルをリセットする。
+
+プログラムを受け取りプログラムを返すことにより、これらのコンビネータは**閉包性（closure）**をもつ。入力（プログラム）の型と出力の型が同じということである。閉包性があることによって合成が可能となる。
+
+プログラムはどのように表現すればよいだろうか。ここでは余データ、特にそのもっとも単純な形である関数を選ぶ。以下のコードでは型 `Program[A]` を `() => A` という関数として定義している。インタープリタ、すなわちプログラムを実行するものは、単なる関数適用である。ここでは、プログラムを実行していることがより明確にわかるように、単に関数適用するだけの `run` メソッドを作成した。
+
+```scala mdoc:reset-object:silent
+type Program[A] = () => A
+
+val csiString = "\u001b["
+val redCode = s"${csiString}31m"
+val resetCode = s"${csiString}0m"
+val boldOnCode = s"${csiString}1m"
+val boldOffCode = s"${csiString}22m"
+
+def run[A](program: Program[A]): A = program()
+
+def print(output: String): Program[Unit] =
+  () => Console.print(output)
+
+def printRed[A](output: Program[A]): Program[A] =
+  () => {
+    run(print(redCode))
+    val result = run(output)
+    run(print(resetCode))
+    
+    result
+  }
+
+
+def printBold[A](output: Program[A]): Program[A] = 
+  () => {
+    run(print(boldOnCode))
+    val result = run(output)
+    run(print(boldOffCode))
+    
+    result
+  }
+
+
+def go(): Unit =
+  run(() => {
+    run(print("Normal text, "))
+    run(printRed(print("now red text, ")))
+    run(printBold(print("and now bold ")))
+    run(printBold(printRed(print("and now bold and red.\n"))))
+  })
+```
+
+このコードには、[@sec:interpreters:structure]節で初めて見たような、代数的な構造が備わっていることに注目してほしい。
+
+1. `print` がコンストラクタ
+2. `printRed` と `printBold` がコンビネータ
+3. `run` がインタープリタ
+
+先ほど用いた例においてこのコードは正しく動作するが、問題がふたつある。ひとつは合成、もうひとつは使い勝手である。私たちはここでまさに合成の問題を解決しようとしていたはずなので、そこに問題があるというのは意外に思えるかもしれない。確かに、ある側面ではこのシステムは合成的になった。だが、それでもなお正しく機能しないケースがある。たとえば、次のコードを見てほしい。
+
+```scala mdoc:compile-only
+run(printBold(() => {
+  run(print("ここは太字になるはずで、"))
+  run(printBold(print("ここも太字のはず。")))
+  run(print("ついでにここも太字。\n"))
+}))
+```
+
+出力は次のようになる想定だが、
+
+**ここは太字になるはずで、ここも太字のはず。ついでにここも太字。**
+
+実際には次のようになる。
+
+**ここは太字になるはずで、ここも太字のはず。**ついでにここも太字。
+
+内側の `printBold` 呼び出しが終了時に太字スタイルをリセットしてしまい、それにより外側の `printBold` の効果がその後のステートメントに及ばなくなってしまう。
+
+使い勝手の問題というのは、このコードを書くのが煩雑かつミスを招きやすいという点にある。`run` の呼び出しを正しい場所にちりばめる必要があり、この程度の小さな例であっても、筆者自身いくつか間違えた。実のところこれは合成に関するもうひとつの問題でもある。この問題はプログラムを組み合わせるためのメソッドが存在しないことに起因するからである。たとえば、上述のプログラムが三つのサブプログラムの逐次的合成であることを記述する方法がない。
+
+最初の問題はターミナルの状態を追跡することで解決できる。たとえば、`printBold` がすでに太字出力中の状態で呼び出された場合には何もせず、そうでなければ太字スタイルが設定されたことを示すよう状態を更新すればよい。これは、プログラムの型が `() => A` から `Terminal => (Terminal, A)` に変わることを意味する。`Terminal` はターミナルの現在の状態を保持する型である。
+
+もうひとつの問題を解決するには、プログラムを逐次的に合成する方法が求められる。プログラムは `Terminal => (Terminal, A)` という型をもち、状態を `Terminal` の中にいれて引き回すということを思い出そう。「逐次的に合成する」という言葉やこのような型を見て、そこにモナドが関わってくることを感じ取ったかもしれない。そのとおり、これは[@sec:monad:state]節で見た状態モナドの一例である。
+
+Cats を使えば `Program[A]` は以下のように定義できる。
+
+```scala mdoc:reset:silent
+import cats.data.State
+type Program[A] = State[Terminal, A]
+```
+
+ただし、これは `Terminal` が適切に定義されていることを仮定している。まずはこの定義を受け入れ、`Terminal` の定義に焦点を移そう。
+
+`Terminal` は、現在の太字設定と現在の文字色というふたつの状態をもっている。　実際のターミナルはもっと多くの状態をもつが、このふたつをその代表的なものと考えておく。他の状態をモデル化したとしても新しい概念が増えるわけではない。太字設定はオンとオフを切り替えられる単純なトグルでもよいが、実装の都合を考えると、ネストの深さを記録するカウンタとしたほうが取り扱いやすい。現在の文字色はスタックで表現する必要がある。文字色の変更はネストさせることができ、ネストから抜けるときには色を元に戻すべきだからである。具体的に言えば、以下のようなコードを記述でき、期待通りに青と赤を切り替えながら出力されるようにしたい。
+
+```scala
+printBlue(.... printRed(...) ...)
+```
+
+以上をふまえると `Terminal` は次のように定義できる。
+
+```scala mdoc:silent
+final case class Terminal(bold: Int, color: List[String]) {
+  def boldOn: Terminal = this.copy(bold = bold + 1)
+  def boldOff: Terminal = this.copy(bold = bold - 1)
+  def pushColor(c: String): Terminal = this.copy(color = c :: color)
+  // 文字色が最低ひとつはスタックに積まれているときにのみ呼び出す
+  def popColor: Terminal = this.copy(color = color.tail)
+  def peekColor: Option[String] = this.color.headOption
+}
+```
+
+ここではカラーコードのスタックを表現するのに `List` を使っている。状態モナドを用いることによって、プログラム全体に状態が適切に伝播することが保証されているため、可変スタックを使っても構わない。また、状態操作を簡潔にするために、補助メソッドもいくつか定義してある。
+
+準備は整ったので、残りのコードを書いていこう。以下にそのコードを示す。前回のコードと比べて、メソッド名をいくつか短くし、エスケープシーケンスの抽象化を行っている。前述のとおり、このコードは `scala` コマンドでそのまま実行できる。ファイル（たとえば `Terminal.scala`）に貼りつけて `go` 関数に `@main` アノテーションを追加し、`scala Terminal.scala` を実行すればよい。
+
+```scala mdoc:reset-object:silent
+//> using dep org.typelevel::cats-core:2.13.0
+
+import cats.data.State
+import cats.syntax.all.*
+
+object AnsiCodes {
+  val csiString: String = "\u001b["
+
+  def csi(arg: String, terminator: String): String =
+    s"${csiString}${arg}${terminator}"
+
+  // SGR は Select Graphic Rendition の略
+  // スタイルを変更するエスケープシーケンスはすべて SGR である
+  def sgr(arg: String): String =
+    csi(arg, "m")
+
+  val reset: String = sgr("0")
+  val boldOn: String = sgr("1")
+  val boldOff: String = sgr("22")
+  val red: String = sgr("31")
+  val blue: String = sgr("34")
+}
+
+final case class Terminal(bold: Int, color: List[String]) {
+  def boldOn: Terminal = this.copy(bold = bold + 1)
+  def boldOff: Terminal = this.copy(bold = bold - 1)
+  def pushColor(c: String): Terminal = this.copy(color = c :: color)
+  // 文字色が最低ひとつはスタックに積まれているときにのみ呼び出す
+  def popColor: Terminal = this.copy(color = color.tail)
+  def peekColor: Option[String] = this.color.headOption
+}
+object Terminal {
+  val empty: Terminal = Terminal(0, List.empty)
+}
+
+type Program[A] = State[Terminal, A]
+object Program {
+  def print(output: String): Program[Unit] =
+    State[Terminal, Unit](
+      terminal => (terminal, Console.print(output))
+    )
+
+  def bold[A](program: Program[A]): Program[A] =
+    for {
+      _ <- State.modify[Terminal] { terminal =>
+        if terminal.bold == 0 then Console.print(AnsiCodes.boldOn)
+        terminal.boldOn
+      }
+      a <- program
+      _ <- State.modify[Terminal] { terminal =>
+        val newTerminal = terminal.boldOff
+        if terminal.bold == 0 then Console.print(AnsiCodes.boldOff)
+        newTerminal
+      }
+    } yield a
+
+  // 文字色を取り扱うメソッドを構築するためのヘルパーメソッド
+  def withColor[A](code: String)(program: Program[A]): Program[A] =
+    for {
+      _ <- State.modify[Terminal] { terminal =>
+        Console.print(code)
+        terminal.pushColor(code)
+      }
+      a <- program
+      _ <- State.modify[Terminal] { terminal =>
+        val newTerminal = terminal.popColor
+        newTerminal.peekColor match {
+          case None    => Console.print(AnsiCodes.reset)
+          case Some(c) => Console.print(c)
+        }
+        newTerminal
+      }
+    } yield a
+
+  def red[A](program: Program[A]): Program[A] =
+    withColor(AnsiCodes.red)(program)
+
+  def blue[A](program: Program[A]): Program[A] =
+    withColor(AnsiCodes.blue)(program)
+
+  def run[A](program: Program[A]): A =
+    program.runA(Terminal.empty).value
+}
+
+def go(): Unit = {
+  val program =
+    Program.blue(
+      Program.print("This is blue ") >>
+        Program.red(Program.print("and this is red ")) >>
+        Program.bold(Program.print("and this is blue and bold "))
+    ) >>
+      Program.print("and this is back to normal.\n")
+
+  Program.run(program)
+}
+
+```
+
+`Terminal` の構造を定義したので、残りのコードの大部分は `Terminal` の状態操作となる。`Program` オブジェクトに定義したメソッドの多くは、メインのプログラムを実行する前後に状態変更を行うという共通の構造をもっている。
+
+ここで注目すべきなのは、`flatMap` や `>>` といったコンビネータを自分で実装する必要がないという点である。これらは `State` モナドから自動的に得られる。これはモナドのような抽象を再利用することで得られる大きな利点のひとつである。追加の実装をしなくても豊富なメソッド群をすぐに使うことができる。
+
+### 合成と推論
+
+[@sec:what-is-fp]節では関数型プログラミングの核心は推論と合成であると述べた。このふたつは本ケーススタディにおいても中心的な位置を占めている。ここでは推論を容易にするために DSL を明示的に設計した。制御コードをターミナルに直接吐き出すのではなく DSL を構築したのは、すべてまさにそのためである。その一例が、ネストされた呼び出しが期待どおりに動作するよう注意を払った点である。
+
+合成はふたつのレベルで現れる。今回の設計と実装、いずれもが合成的である。設計における合成性についてはケーススタディの中ですでに論じた。実装においても、`Program` は状態モナドとその中に含まれる関数の合成である。状態モナドは `Terminal` 状態の逐次的な変化の流れを、関数はドメイン固有の動作を、それぞれ提供してくれる。
+
+### 余データと拡張性
+
+余データ的インタープリタを選んだのは一見すると恣意的に思えるかもしれない。ここでは、その選択の理由と含意について探っていきたい。
+
+余データは「インターフェースに対してプログラムを書く」ものであると述べた。関数におけるインターフェースは基本的にひとつのメソッド、すなわち関数適用の能力である。これは、`Program` に対する解釈が、それを実行して内部に記述された効果を発動する、というひとつだけであったことと対応している。もし、`Terminal` の状態をログに記録したり、出力をバッファに保存したりといった複数の解釈をもたせたいのであれば、もっと豊かなインターフェースが必要となる。Scala においては、複数のメソッドを公開する `trait` や `class` がそれにあたる。
+
+注意深い読者は、データと余データにおける拡張性のトレードオフを思い出すかもしれない。データでは、新しいインタープリタを追加するのは容易だが、新しい操作を追加するのは難しい。これに対して余データでは、新しい操作の追加は容易だが、新しいインタープリタを追加するのは難しい。そのことは今まさに実例で示されている。たとえば、新しい文字色のコンビネータを追加するのはごく簡単である。次のようにメソッドを定義すればよい。
+
+```scala
+def green[A](program: Program[A]): Program[A] =
+  withColor(AnsiCodes.sgr("32"))(program)
+```
+
+しかし `Program` に複数の解釈を許すような変更を加える場合、既存のコードすべてを書き換える必要が生じる。
+
+余データのもうひとつの利点は Scala の任意のコードを混ぜ込めることである。たとえば、次のように `map` を使うことができる。
+
+```scala
+Program.print("Hello").map(_ => 42)
+```
+
+プログラムを関数として表現することで、Scala の言語機能すべてがそのまま使える。データによる表現で同じことを行おうとすれば、サポートしたいすべての構文要素をレイフィケーションしなければならない。もっとも、これには Scala のセマンティクスが望むと望まざるとにかかわらずそのままついてくるという欠点もある。もし独自のセマンティクスをもった異質な言語を作りたいのであれば、余データによる表現は適切ではない。
+
+インタープリタの分割のしかたはいろいろあるが、それでもなお余データ的インタープリタであることに変わりはない。たとえば、ターミナルへの書き出し用のメソッドを `Terminal` 型にもたせることもできる。こうすれば実装に柔軟性が生まれ、`Terminal` の実装を変更することで、出力先をネットワークソケットやブラウザ上の仮想ターミナルなどに切り替えることも可能になる。しかしそれでも、プログラムをディスクにシリアライズするといった、まったく異なる種類の解釈を行うことは、余データ的手法では難しい。この制限については、次節で Tagless Final という手法を紹介することで対処していく。
+
+
+[^tuis]: [TUI][tui] ライブラリに興味があるなら、Rust 向けにはラタトゥイユをもじったユーモラスな名前の [ratatui](https://github.com/ratatui/ratatui)、Haskell 向けには [brick](https://github.com/jtdaugherty/brick)、Python 向けには [Textual](https://textual.textualize.io/) を見てみるとよいかもしれない。
+
+[^tn-tagless-final-codata-01] 【訳注】 mdoc
+
+[terminus]: https://www.creativescala.org/terminus/
+[wsl]: https://learn.microsoft.com/en-us/windows/wsl/about
+[wezterm]: https://wezfurlong.org/wezterm/index.html
+[tui]: https://en.wikipedia.org/wiki/Text-based_user_interface
+[fp]: @/posts/2020-07-05-what-and-why-fp.md

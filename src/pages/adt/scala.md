@@ -1,3 +1,5 @@
+<!--
+
 ## Algebraic Data Types in Scala 
 
 Now we know what algebraic data types are, we will turn to their representation in Scala. The important point here is that the translation to Scala is entirely determined by the structure of the data; no thinking is required! This means the work is in finding the structure of the data that best represents the problem at hand. Work out the structure of the data and the code directly follows from it.
@@ -224,6 +226,237 @@ enum Tree[A] {
 ```
 
 In the Scala 2 encoding we write
+
+```scala mdoc:reset:silent
+sealed abstract class Tree[A] extends Product with Serializable
+final case class Leaf[A](value: A) extends Tree[A]
+final case class Node[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## Scala における代数的データ型
+
+代数的データ型が何であるかを理解したところで、次にそれが Scala でどのように表現されるかを見ていこう。ここで重要なのは、Scala への翻訳が、データの構造によって完全に決定されるということである。特別なことを考える必要はない。そのため、取り組んでいる課題に最適なデータの構造を見つけることが主な作業となる。データ構造を考え出し、それに従ってコードを書けばよい。
+
+代数的データ型は論理積と論理和で定義されるため、Scala で代数的データ型を表現するためには、これらふたつの概念がどのように表現されるかを知っておく必要がある。Scala3 では Scala2 に比べて代数的データ型の表現が簡素化されているため、それぞれの言語バージョンを別々に見ていく。
+
+なお、代数的データ型を Scala で表現するために使用する言語機能についてはすでに知っているものとし、その説明は割愛する。
+
+### Scala3 における代数的データ型
+
+Scala3 では、論理積（直積型）は `final case class` で表現される。直積型 `A` が `B` *と* `C` から成ると定義する場合、その Scala3 での表現は次のようになる。
+
+```scala
+final case class A(b: B, c: C)
+```
+
+こういった case class を `final` にしない人もいるが、するべきである。`final` でない case class は他のクラスによって拡張される可能性があり、これは代数的データ型の閉じた世界を壊してしまう。
+
+論理和（直和型）は enum で表現される。直和型 `A` が `B` *または* `C` である場合、その Scala3 での表現は次のようになる。
+
+
+```scala
+enum A {
+  case B
+  case C
+}
+```
+
+注意すべき点がいくつかある。データが積の和である場合、たとえば次のようなデータであれば、
+
+- `A` は `B` または `C`
+- `B` は `D` および `E`
+- `C` は `F` および `G`
+
+コード表現は次のようになる。
+
+```scala
+enum A {
+  case B(d: D, e: E)
+  case C(f: F, g: G)
+}
+```
+
+つまり、`enum` の中には `final case class` とは書かない。また、`enum` の中に `enum` をネストすることもできない。ネストされた論理和は、論理積の論理和（これを選言標準形と呼ぶ）に書き換えることができるので、実用にあたってこれが制約になることはない。ただし、ネストされた論理和を表すことのできる Scala2 の表現は Scala3 でも引き続き利用可能である。
+
+### Scala2 における代数的データ型
+
+論理積（直積型）は、Scala2 でも Scala3 でも同じうように表現される。直積型 `A` が `B` *と* `C` から成ると定義する場合、Scala2 での表現は以下のようになる。
+
+```scala
+final case class A(b: B, c: C)
+```
+
+論理和（直和型）は `sealed abstract class` で表現される。直和型 `A` が `B` *または* `C` である場合、Scala2 での表現は以下のとおりである。
+
+```scala
+sealed abstract class A
+final case class B() extends A
+final case class C() extends A
+```
+
+Scala2 で代数的データ型を定義するにあたっては小さなテクニックがいくつかある。
+
+まず、`sealed abstract class` の代わりに `sealed trait` を使用することができる。このふたつの間には大きな実用的差異はない。私の場合、初心者に教える際には `sealed trait` を用いることが多い。そうすることで `abstract class` を紹介する手間を避けることができる。`sealed abstract class` の方が若干パフォーマンスが良く、Java との互換性が高いと思われるが、テストをして確認したわけではない。また、`sealed abstract class` の方が意味的に直和型に近いとも考えられる。
+
+コードをさらに洗練させるために、`sealed abstract class` を `Product` と `Serializable` を継承した型として定義することもできる。このちょっとした工夫がある場合とない場合で、推論される型を比較してみてほしい。
+
+まずは `Product` と `Serializable` を拡張しないコードを見てみよう。
+
+```scala mdoc:silent
+sealed abstract class A
+final case class B() extends A
+final case class C() extends A
+```
+
+```scala mdoc:silent
+val list = List(B(), C())
+// list: List[A extends Product with Serializable] = List(B(), C())
+```
+
+`list` 変数の型に `Product` と `Serializable` が含まれている点に注目してほしい。
+
+そこで `A` に `Product` と `Serializable` を継承させる。
+
+```scala mdoc:reset:silent
+sealed abstract class A extends Product with Serializable
+final case class B() extends A
+final case class C() extends A
+```
+   
+```scala mdoc
+val list = List(B(), C())
+```
+
+これで推論される型がシンプルに読みやすくなる。
+
+この問題は Scala2 でのみ確認できる。Scala3 には、型推論で報告される型には反映されない **transparent トレイト**という概念がある。そのため、Scala3 では `Product` と `Serializable` を追加してもしなくても同じ結果が得られる。
+
+最後に、ある型がデータをひとつも保持しない場合、`case class` の代わりに `case object` を使用することができる。たとえば、ターミナルのようなテキストストリームからの読み込みでは EOF(end-of-file) が返されることがあるが、これは次のようにモデリングできる。
+
+```scala mdoc:silent
+sealed abstract class Result
+final case class Character(value: Char) extends Result
+case object Eof extends Result
+```
+
+ファイルの終端を示す `Eof` には何のデータも紐づかないので、`case object` として定義されている。オブジェクトは拡張できないので、`case object` を `final` としてマークする必要はない。
+
+### 例
+
+いくつか例を挙げて、ここまでの議論についてもっと具体的に考えてみよう。
+
+#### Role と User
+
+ディスカッションフォーラムの例では、ロールは一般ユーザ・モデレータ・管理者のいずれかであるとした。これは論理和であり、適切なパターンに当てはめることで機械的に Scala へと翻訳できる。Scala3 であれば次のようになる。
+
+```scala mdoc:silent
+enum Role {
+  case Normal
+  case Moderator
+  case Administrator
+}
+```
+
+Scala2 の場合は以下のように書ける。
+
+```scala mdoc:reset:silent
+sealed abstract class Role extends Product with Serializable
+case object Normal extends Role
+case object Moderator extends Role
+case object Administrator extends Role
+```
+
+各ロールはデータをひとつも保持しないため、Scala2 のコードでは `case class` ではなく `case object` を使っている。
+
+ユーザは、表示名とメールアドレスとパスワードとロールから構成されると定義した。これは Scala3 と Scala2 のどちらにおいても次のようになる。
+
+```scala mdoc:silent
+final case class User(
+  screenName: String,
+  emailAddress: String,
+  password: String,
+  role: Role
+)
+```
+
+`User` が保持するデータを主に `String` 型で表現しているが、実際のコードでは各フィールドに対して個別の型を定義したほうがよいかもしれない。
+
+#### パス
+
+前述のデータ例で、パスを仮想ペンの一連の動作として定義した。それによると、可能な動作には、直線、ベジエ曲線、または目に見える出力を伴わない移動がある。また、直線には終点があり（始点は自動的に決まる）、ベジエ曲線にはふたつの制御点と終点があり、移動には終点がある。
+
+これらはストレートに Scala での表現に置き換えることができる。Scala3 と Scala2、どちらにおいてもパスは次のように表現できる。
+
+```scala mdoc:invisible
+type Action = Int
+```
+```scala mdoc:silent
+final case class Path(actions: Seq[Action])
+```
+
+ペンの動作は論理和なので、Scala3 と Scala2 で表現の仕方が異なる。Scala3 では次のように記述できる。
+
+```scala mdoc:reset:invisible
+type Point = Int
+```
+```scala mdoc:silent
+enum Action {
+  case Line(end: Point)
+  case Curve(cp1: Point, cp2: Point, end: Point)
+  case Move(end: Point)
+}
+```
+
+なお、ここで用いている `Point` は二次元座標を表現したクラスであるとする。
+
+Scala2 ではもっと冗長な表現方法を用いる必要がある。
+
+```scala mdoc:reset:invisible
+type Point = Int
+```
+```scala mdoc:silent
+sealed abstract class Action extends Product with Serializable 
+final case class Line(end: Point) extends Action
+final case class Curve(cp1: Point, cp2: Point, end: Point)
+  extends Action
+final case class Move(end: Point) extends Action
+```
+
+### Scala3 における代数的データ型の表現
+
+Scala3 の `enum` を使用した代数的データ型の表現が、Scala2 のそれよりもコンパクトであることを見てきたが、Scala2 の表現は依然として使用可能である。では、Scala3 であえて Scala2 の表現を使うべき場面はあるのかというと、いくつか考慮すべきケースがある。
+
+- 現在のところ、Scala3ではネストされた `enum`（`enum` 内の `enum`）をサポートしていない。これは今後変更されるかもしれないが、現時点では、これを選言標準形に変換することなく表現するために、Scala2の方法を使用する方が便利な場合がある。
+
+- Scala2 の表現方法では、代数的データ型に近いが完全にそうとは言えないものを表現することができる。たとえば、`enum` にメソッドを定義する場合、そのメソッドは `enum` のすべてのメンバーに対して意味をなさなくてはならないが、特定のメンバーのみにメソッドを定義したいことがある。このような場合、Scala2 の表現方法を使用する必要がある。
+
+
+#### 演習: 木構造 {-}
+
+代数的データ型の定義に慣れるため、以下の記述を Scala のコードで表せ。なお、用いる Scala のバージョンは好きに選んでよい。両方を試してもかまわない。
+
+`A` 型の要素をもつ `Tree` は以下のいずれかとして定義される。
+
+- `A` 型の値を保持する `Leaf`、もしくは
+- `A` 型の要素をもつ `Tree` を左右の子として保持する `Node`
+
+<div class="solution">
+このような二分木は機械的に Scala のコードに落とし込むことができる。以下は Scala3 で書いたコードである。
+
+```scala mdoc:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+}
+```
+
+Scala2 なら次のようになる。
 
 ```scala mdoc:reset:silent
 sealed abstract class Tree[A] extends Product with Serializable

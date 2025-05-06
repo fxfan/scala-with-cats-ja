@@ -1,3 +1,5 @@
+<!--
+
 ## Summary
 
 In this chapter we've seen monads up-close.
@@ -24,3 +26,14 @@ a functional programming library that is stack-safe by default.
 We don't need to understand `tailRecM` to understand monads,
 but having it around gives us benefits
 of which we can be grateful when writing monadic code.
+
+
+--->
+
+## まとめ
+
+この章ではモナドについて詳しく見てきた。`flatMap` は、複数の計算を順序付けてつなげる演算子と見ることができた。この観点から見ると、`Option` はエラーメッセージなしで失敗する可能性のある計算を、`Either` はメッセージ付きで失敗するかもしれない計算を、`List` は複数の結果をもつ可能性のある計算を、そして `Future` は値を将来のある時点で返すかもしれない計算を、それぞれ表している。
+
+また、Cats が提供する独自の型やデータ構造についても学んだ。そこには `Id`、`Reader`、`Writer`、`State` が含まれており、幅広いユースケースをカバーしている。
+
+最後に、滅多にないとは思うが、独自のモナドを実装しなければならない時のために、`tailRecM` を実装して独自の `Monad` インスタンスを定義する方法を学んだ。`tailRecM` は特殊な仕組みで、デフォルトでスタックセーフな関数型プログラミングライブラリを構築するための妥協点として存在する。モナドを理解するために `tailRecM` の理解は必須ではないが、モナディックなコードを書く際にその恩恵を受けられるのはありがたいことである。

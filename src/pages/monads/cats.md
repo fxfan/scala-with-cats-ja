@@ -1,3 +1,5 @@
+<!--
+
 ## Monads in Cats
 
 It's time to give monads our standard Cats treatment.
@@ -156,3 +158,128 @@ That's more or less everything we need to know
 about the generalities of monads in Cats.
 Now let's take a look at some useful monad instances
 that we haven't seen in the Scala standard library.
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## Cats におけるモナド
+
+次に、モナドについてもこれまでと同様に Cats を用いて解説を進める。いつもどおり、型クラス本体とインスタンスと構文について見ていこう。
+
+### モナド型クラス {#monad-type-class}
+
+モナド型クラスは [`cats.Monad`][cats.Monad] として提供されている。`Monad` はふたつの型クラスを拡張している。そのうちのひとつ `FlatMap` は `flatMap` メソッドを提供し、もうひとつの `Applicative` は `pure` を提供する。`Applicative` はさらに `Functor` を拡張しており、これによってすべての `Monad` が `map` メソッドをもつ。これは前述の演習で見たとおりである。`Applicative` については[@sec:applicatives]章で説明する。
+
+以下は、型クラス自体がもつ `pure`、`flatMap`、および `map` を直接使用する例である。
+
+```scala mdoc:silent
+import cats.Monad
+```
+
+```scala mdoc
+val opt1 = Monad[Option].pure(3)
+val opt2 = Monad[Option].flatMap(opt1)(a => Some(a + 2))
+val opt3 = Monad[Option].map(opt2)(a => 100 * a)
+
+val list1 = Monad[List].pure(3)
+val list2 = Monad[List].
+  flatMap(List(1, 2, 3))(a => List(a, a*10))
+val list3 = Monad[List].map(list2)(a => a + 123)
+```
+
+`Monad` は、`Functor` から継承されたメソッドも含めて、他にも多くのメソッドを提供している。詳しくは [scaladoc][cats.Monad] を参照してほしい。
+
+### デフォルトのインスタンス
+
+Cats は、標準ライブラリに存在するすべてのモナド（`Option`、`List`、`Vector` など）に対してインスタンスを提供している。さらに、Cats は `Future` 用の `Monad` インスタンスも提供している。ただし、`Future` クラス自体に定義されたメソッドとは異なり、モナドの `pure` や `flatMap` メソッドは、暗黙的な `ExecutionContext` パラメータを受け取ることができない。`Monad` トレイトの定義にそのようなパラメータが含まれていないためである。この問題を回避するために、Cats では `Future` の `Monad` インスタンスを呼び出す際に `ExecutionContext` をスコープに含める必要がある。
+
+```scala mdoc:silent
+import scala.concurrent.*
+import scala.concurrent.duration.*
+```
+
+```scala mdoc:fail
+val fm = Monad[Future]
+```
+
+`ExecutionContext` をスコープに含めれば、インスタンスを呼び出すために必要な暗黙の解決が行われる。
+
+```scala mdoc:silent
+import scala.concurrent.ExecutionContext.Implicits.global
+```
+
+```scala mdoc
+val fm = Monad[Future]
+```
+
+この `Monad` インスタンスは、暗黙的に渡された `ExecutionContext` を、この後に行われる `pure` や `flatMap` 呼び出しで利用する。
+
+```scala mdoc:silent
+val future = fm.flatMap(fm.pure(1))(x => fm.pure(x + 2))
+```
+
+```scala mdoc
+Await.result(future, 1.second)
+```
+
+上記に加えて、Cats は標準ライブラリには存在しない多くの新しいモナドを提供している。それらのうちのいくつかをこれから学んでいこう。
+
+### モナドの構文
+
+モナドのための構文は次の三つのパッケージで提供されている。
+
+ - [`cats.syntax.flatMap`][cats.syntax.flatMap]: `flatMap` 用の構文を提供する
+ - [`cats.syntax.functor`][cats.syntax.functor]: `map` 用の構文を提供する
+ - [`cats.syntax.applicative`][cats.syntax.applicative]: `pure` 用の構文を提供する
+
+実際には、`cats.syntax.all.**` からすべての構文をまとめてインポートする方が簡単であることが多い。しかし、ここでは明確さを重視し、個別のインポートを使用する。
+
+モナドインスタンスの構築には `pure` を使うことができる。求めているインスタンスがどれなのか、曖昧さをなくすために型パラメータの指定が必要となることが多い。
+
+```scala mdoc:silent
+import cats.syntax.applicative.* // pure
+```
+
+```scala mdoc
+1.pure[Option]
+1.pure[List]
+```
+
+`Option` や `List` など Scala が標準で提供しているモナドについて、Cats の構文としての `flatMap` や `map` メソッドを使って見せるのは難しい。それらのメソッドはモナド自体に明示的に定義されているためである。そこで、プログラマが指定したモナドに包まれたパラメータに対して計算を行うジェネリックな関数を作成することにする。
+
+```scala mdoc:silent
+import cats.Monad
+import cats.syntax.functor.* // map
+import cats.syntax.flatMap.* // flatMap
+
+def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
+  a.flatMap(x => b.map(y => x*x + y*y))
+```
+
+```scala mdoc
+sumSquare(Option(3), Option(4))
+sumSquare(List(1, 2, 3), List(4, 5))
+```
+
+このコードは for 内包表記を使って書き直すことができる。コンパイラは for 内包表記を `flatMap` と `map` を用いて書き換え、`Monad` を利用するための正しい変換を挿入してくれる。
+
+```scala mdoc:invisible:reset-object
+import cats.Monad
+import cats.syntax.all.*
+```
+```scala mdoc:silent
+def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
+  for {
+    x <- a
+    y <- b
+  } yield x*x + y*y
+```
+
+```scala mdoc
+sumSquare(Option(3), Option(4))
+sumSquare(List(1, 2, 3), List(4, 5))
+```
+
+これで、Cats におけるモナドの一般的な内容についてはおおむねすべて説明した。次に、Scala の標準ライブラリには存在しない有用なモナドインスタンスをいくつか見てみよう。

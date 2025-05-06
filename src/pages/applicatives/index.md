@@ -1,3 +1,5 @@
+<!--
+
 # Semigroupal and Applicative {#sec:applicatives}
 
 In previous chapters we saw
@@ -81,3 +83,45 @@ We'll take a look at different formulations of Applicative,
 as well as the relationships between
 `Semigroupal`, `Functor`, `Applicative`, and `Monad`,
 towards the end of the chapter.
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+# `Semigroupal` と `Applicative` {#sec:applicatives}
+
+ここまで、ファンクターやモナドに対して `map` や `flatMap` を使用し、操作を順序付けて連結する方法について見てきた。ファンクターとモナドはどちらも極めて有用な抽象概念だが、これらでは表現できない種類のプログラムフローも存在する。
+
+その一例がフォームのバリデーションである。フォームのバリデーションにおいては、最初に見つかったエラーで処理を中断するのではなく、*すべての*エラーをユーザに返したい。これを `Either` のようなモナドでモデリングすると、最初のエラーが発生した時点で処理は終了してしまい、他のエラーは失われる。たとえば、以下のコードは最初の `parseInt` の呼び出しで失敗し、それ以降の処理は行われない。
+
+```scala mdoc:silent
+import cats.syntax.either._ // catchOnly
+
+def parseInt(str: String): Either[String, Int] =
+  Either.catchOnly[NumberFormatException](str.toInt).
+    leftMap(_ => s"Couldn't read $str")
+```
+
+```scala mdoc
+for {
+  a <- parseInt("a")
+  b <- parseInt("b")
+  c <- parseInt("c")
+} yield (a + b + c)
+```
+
+もうひとつの例は `Future` の並行処理である。時間のかかる独立したタスクが複数ある場合に、それらを並行して実行するのは理にかなっている。しかし、モナド内包表記ではそれらを順次実行することしかできない。`map` や `flatMap` は、各計算が前の結果に依存していることを想定している。そのようなモデルでは並行処理に求められる動作を捉えることはできない。
+
+```scala
+// context2 は value1 に依存している
+context1.flatMap(value1 => context2)
+```
+
+前述の `parseInt` や `Future.apply` 呼び出しは互いに独立しているが、`map` と `flatMap` はその事実を活用できない。ここで必要なのは計算順序を保証しないもっと制約の弱い構造である。この章では、このパターンをサポートする三つの型クラスを紹介する。
+
+  - `Semigroupal` は、コンテキストをペアとして組み合わせるという発想を広く包含している。Cats が提供している [`cats.syntax.apply`][cats.syntax.apply] パッケージの構文を使えば、`Semigroupal` と `Functor` を利用することで、コンテキストに包まれた値に対して複数の引数をもつ関数を段階的に適用できる。
+  - `Parallel` は、`Monad` インスタンスをもつ型を、それに対応する `Semigroupal` インスタンスをもつ型に変換する。
+  - `Applicative` は `Semigroupal` と `Functor` を拡張し、コンテキストの中で関数をパラメータに適用する方法を提供する。`Applicative` は、[@sec:monads]章で紹介した `pure` メソッドの起源である。
+
+アプリカティブは、Cats で強調されている Semigroupal による定式化ではなく、関数適用の観点から定式化されることが多い。このもうひとつの定式化は、Scalaz や Haskell のような他のライブラリや言語との接点を提供してくれる。この章の終盤では、アプリカティブのさまざまな定式化について学ぶ。また、`Semigroupal`、`Functor`、`Applicative`、`Monad` といった計算を連結する一連の型クラス同士の関係性についても合わせて見ていく。

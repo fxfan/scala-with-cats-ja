@@ -1,3 +1,5 @@
+<!--
+
 ## Contravariant and Invariant in Cats
 
 Let's look at the implementation of
@@ -95,6 +97,94 @@ provided by `cats.syntax.invariant`:
 import cats.*
 import cats.syntax.invariant.* // for imap
 import cats.syntax.semigroup.* // for |+|
+
+given symbolMonoid: Monoid[Symbol] =
+  Monoid[String].imap(Symbol.apply)(_.name)
+```
+
+```scala mdoc
+Monoid[Symbol].empty
+
+Symbol("a") |+| Symbol("few") |+| Symbol("words")
+```
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## Cats の `Contravariant` と `Invariant`
+
+Cats における反変および非変ファンクターの実装を見ていこう。これらはそれぞれ [`cats.Contravariant`][cats.Contravariant] および [`cats.Invariant`][cats.Invariant] 型クラスとして提供されている。その定義を簡略化して以下に示す。
+
+```scala mdoc:invisible
+```
+
+```scala mdoc:silent
+trait Contravariant[F[_]] {
+  def contramap[A, B](fa: F[A])(f: B => A): F[B]
+}
+
+trait Invariant[F[_]] {
+  def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]
+}
+```
+
+### Cats の `Contravariant`
+
+`Contravariant` インスタンスは `Contravariant.apply` メソッドを使って取得できる。Cats は `Eq`、`Show`、`Function1` などパラメータを受け取るデータ型に対して `Contravariant` インスタンスを提供している。以下はその例である。
+
+```scala mdoc:silent:reset
+import cats.*
+
+val showString = Show[String]
+
+val showSymbol = Contravariant[Show].
+  contramap(showString)((sym: Symbol) => s"'${sym.name}")
+```
+
+```scala mdoc
+showSymbol.show(Symbol("dave"))
+```
+
+`contramap` 拡張メソッドを提供する [`cats.syntax.contravariant`][cats.syntax.contravariant] を使えば、もっと便利に書くことができる。
+
+```scala mdoc:silent
+import cats.syntax.contravariant.* // contramap
+```
+
+```scala mdoc
+showString
+  .contramap[Symbol](sym => s"'${sym.name}")
+  .show(Symbol("dave"))
+```
+
+### Cats の `Invariant`
+
+Cats が提供する `Invariant` インスタンスの中に、`Monoid` に対するインスタンスがある。これは、[@sec:functors:invariant]節で紹介した `Codec` の例とはすこし異なる。`Monoid` は以下のような型クラスだった。
+
+```scala
+package cats
+
+trait Monoid[A] {
+  def empty: A
+  def combine(x: A, y: A): A
+}
+```
+
+Scala の [`Symbol`][link-symbol] 型に対して `Monoid` を作成したいとする。Cats は `Symbol` に対する `Monoid` インスタンスを提供していないが、それと似た型である `String` に対してなら提供している。ここで新たに定義する `Monoid` インスタンスの `empty` メソッドは空の `String` を用いて実装することができ、`combine` メソッドは以下のように動作する。
+
+1. ふたつの `Symbol` をパラメータとして受け取る
+2. ふたつの `Symbol` 型パラメータをそれぞれ `String` 値に変換する
+3. `Monoid[String]` を使ってふたつの `String` 値を結合する
+4. 得られた `String` 値を `Symbol` 値に戻す
+
+`imap` を使用してこの `combine` を実装することができる。`imap` には `String => Symbol` 型と `Symbol => String` 型の関数をパラメータとして渡す。以下は、`cats.syntax.invariant` によって提供される `imap` 拡張メソッドを使って記述したコードである。
+
+```scala mdoc:silent
+import cats.*
+import cats.syntax.invariant.* // imap
+import cats.syntax.semigroup.* // |+|
 
 given symbolMonoid: Monoid[Symbol] =
   Monoid[String].imap(Symbol.apply)(_.name)

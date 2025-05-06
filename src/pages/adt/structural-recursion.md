@@ -1,3 +1,5 @@
+<!--
+
 ## Structural Recursion
 
 Structural recursion is our second programming strategy. 
@@ -634,6 +636,618 @@ enum Tree[A] {
 #### Exercise: Using Fold {-}
 
 Prove to yourself that you can replace structural recursion with calls to fold, by redefining `size`, `contains`, and `map` for `Tree` using only fold.
+
+<div class="solution">
+```scala mdoc:reset:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def fold[B](leaf: A => B)(node: (B, B) => B): B =
+    this match {
+      case Leaf(value)       => leaf(value)
+      case Node(left, right) => node(left.fold(leaf)(node), right.fold(leaf)(node))
+    }
+    
+  def size: Int = 
+    this.fold(_ => 1)(_ + _)
+
+  def contains(element: A): Boolean =
+    this.fold(_ == element)(_ || _)
+    
+  def map[B](f: A => B): Tree[B] =
+    this.fold(v => Leaf(f(v)))((l, r) => Node(l, r))
+}
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 構造的再帰
+
+ふたつ目のプログラミング戦略は構造的再帰である。代数的データ型は、特定の構造に基づいたデータをどのように定義するかを示してくれた。構造的再帰は代数的データ型を他の任意の型に変換する方法を教えてくれる。代数的データ型が与えられた場合、その変換は構造的再帰を使って実装することができる。
+
+代数的データ型と同様、構造的再帰の概念と Scala における実装は区別して考える必要がある。そのことは、Scala には構造的再帰を実装する方法がふたつあることからもわかるだろう。そのふたつとは、パターンマッチングを使う方法と動的ディスパッチを使う方法である。これらを順に見ていこう。
+
+### パターンマッチング
+
+Scala におけるパターンマッチングについては基本的な知識があることを前提としているので、ここではパターンマッチングを使って構造的再帰をどのように実装するかについてのみ解説する。代数的データ型には直和型（論理和）と直積型（論理積）の二種類があったことを思い出そう。構造的再帰をパターンマッチングで実装する際には、この二種類それぞれに対応するルールがある。
+
+1. 直和型の各分岐は、パターンマッチ内で別々の `case` となる
+2. 各 `case` は直積型に対応し、通常の方法でパターンが書かれる
+
+これをコードで見てみよう。以下のような直和型と直積型の両方を組み合わせた代数的データ型の例を用いる。
+
+- `A` は `B` または `C` の直和型
+- `B` は `D` および `E` の直積型
+- `C` は `F` および `G` の直積型
+
+Scala3ではこれは次のように表現される。
+
+```scala
+enum A {
+  case B(d: D, e: E)
+  case C(f: F, g: G)
+}
+```
+
+先ほど示したルールに従うと、構造的再帰は以下のようになる。
+
+```scala
+anA match {
+  case B(d, e) => ???
+  case C(f, g) => ???
+}
+```
+
+`???` の部分をどう書くかは何をやりたいか次第であり、一般的な解決策を示すことはできないが、それらを実装するのに役立つ戦略についてはこの後に見ていく。
+
+### 構造的再帰における再帰
+
+この時点では、構造的再帰における「再帰」という言葉がどこから来ているのか疑問に思うかもしれない。再帰については追加のルールがある。データが再帰的である場合、メソッドも同じ箇所で再帰的になる、というものである。
+
+これを実際のデータ型で見てみよう。
+
+`A` 型の要素をもつリストは以下のように定義できる。
+
+- リストは空であるか、もしくは
+- ひとつの `A` 型の値と、それ自体が `A` のリストである残りの部分のペア
+
+これは標準ライブラリにおける `List` の定義そのものである。直和型と直積型から構成された代数的データ型である点に注目してほしい。また、この構造は再帰的でもある。ペアのケースでは、末尾の部分自体がひとつのリストになっている。
+
+すでに学んだ代数的データ型の戦略を使えば、これを直接コードに置き換えることができる。Scala3 では次のようになる。
+
+```scala mdoc:silent
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+}
+```
+
+試しに `MyList` に `map` を実装してみよう。まずは名前と型のみを定めたメソッドの骨組みからスタートする。
+
+```scala mdoc:reset:silent
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+  
+  def map[B](f: A => B): MyList[B] = 
+    ???
+}
+```
+
+最初のステップは、`map` が構造的再帰を使って記述可能であると認識することである。`MyList` は代数的データ型であり、`map` はこの代数的データ型を変換するものなので、構造的再帰が適用できる。実際に構造的再帰の戦略を適用すると、次のようになる。
+
+```scala mdoc:reset:silent
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+  
+  def map[B](f: A => B): MyList[B] = 
+    this match {
+      case Empty() => ???
+      case Pair(head, tail) => ???
+    }
+}
+```
+
+再帰のルールについても考慮しておこう。データが再帰的構造をもつ場合、それと同じ場所でメソッドも再帰呼び出しされる。このデータは `Pair` の `tail` の部分が再帰的なので、`map` もそこで再帰的になる。
+
+```scala
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+  
+  def map[B](f: A => B): MyList[B] = 
+    this match {
+      case Empty() => ???
+      case Pair(head, tail) => ??? tail.map(f)
+    }
+}
+```
+
+なお、`???` は、その部分のコードがまだ完成していないことを示している。
+
+骨組みが完成したら、取り組んでいる課題に固有の部分に進むことができる。ここで役に立つ三つの戦略がある。
+
+1. 各ケースを独立に考えること
+2. 再帰呼び出しの結果は正しいと仮定すること
+3. 型に従うこと
+
+最初のふたつは構造的再帰に特有のもので、最後のひとつは多くの状況で使える一般的な戦略である。それぞれについて簡単に検討し、今回の例にどのように適用するか見ていこう。
+
+最初の戦略は比較的シンプルである。パターンマッチングにおいて、ある `case` の右側にある問題固有のコードを考える際、他のケースにあるコードは無視してかまわない。たとえば、上の `Empty` のケースを考えるとき、`Pair` のケースを気にする必要はないし、逆も同じことが言える。
+
+次の戦略はやや複雑で、再帰に関係している。構造的再帰の戦略は、再帰呼び出しをどこに配置すればよいか示してくれることを思い出してほしい。このとき、再帰呼び出しの処理内容について深く考える必要はない。代わりに、再帰呼び出しが正しく計算されると仮定し、再帰の結果をどう処理するかだけを考えればよい。再帰以外の部分が正確であれば、結果が正しいことは保証される。
+
+上の例には、`tail.map(f)` という再帰呼び出しがある。この再帰呼び出しがリストの `tail` に対する `map` を正しく行ってくれると仮定し、残りのデータ、つまり `head` と再帰呼び出しの結果をどう扱うかだけを考えればよい。
+
+各ケースを独立して考えることができるのはこの特性による。再帰呼び出しは異なるケースをつなぐ唯一のものであり、その書き方は構造的再帰戦略によって与えられる。
+
+最後の戦略は、**型に従うこと**である。これは構造的再帰に限らず、多くの状況で使えるため、別の戦略として扱おうと思う。核となる考え方は、入出力の型情報を活用して、ありうる実装を限定していくというものである。
+
+それでは、これらの戦略を使って `map` の実装を完成させよう。すでに実装した部分を以下に再掲し、この続きを考えていく。
+
+```scala
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+  
+  def map[B](f: A => B): MyList[B] = 
+    this match {
+      case Empty() => ???
+      case Pair(head, tail) => ??? tail.map(f)
+    }
+}
+```
+
+最初の戦略は、各ケースを独立して考えることである。まずは `Empty` のケースから始めよう。このケースには再帰呼び出しがないため、再帰について考える必要はない。代わりに型情報を利用しよう。`Empty` ケースにマッチしたということ以外に入力はないため、入力の型を使ってコードを制約することはできない。一方で、出力の型について考えてみると、`map` は `MyList[B]` を作成しようとしていることがわかる。`MyList[B]` を作成する方法は `Empty` か `Pair` の二通りだけである。そして、`Pair` を作成するには、`B` 型 の `head` が必要だが、それに相当する情報は与えられていないので、`Empty` を使うしかない。*これが書くことのできる唯一のコードである*。型が十分に制約を与えているため、このケースで誤ったコードを書くことはできない。
+
+```scala
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+  
+  def map[B](f: A => B): MyList[B] = 
+    this match {
+      case Empty() => Empty()
+      case Pair(head, tail) => ??? tail.map(f)
+    }
+}
+```
+
+次に `Pair` のケースに移ろう。ここでは構造的再帰の戦略と、型に従うこと、両方を適用することができる。以下に `Pair` のケースを再掲する。
+
+```scala 
+case Pair(head, tail) => ??? tail.map(f)
+```
+
+他のケースとは独立に考えることができることを思い出してほしい。再帰呼び出しの結果は正しいと仮定すると、ここでは `head` をどう処理し、 `tail.map(f)` の結果とどう結合するかだけを考えればよい。あとは型に従ってコードを完成させよう。ゴールは `MyList[B]` 型の値を生成することで、そのために利用できる情報として以下のものがある。
+
+- `tail.map(f)` の呼び出し結果（`MyList[B]` 型）
+- `A` 型の値 `head`
+- `A` を受けとり `B` を返す関数 `f`
+- コンストラクタ `Empty` と `Pair`
+
+すでに記述した `Empty` ケースと同じように、単に `Empty` を返すこともできる。これは型的には正しいが、再帰呼び出しの結果や `head`、関数 `f` をまったく使用していないし、正しい答えではないだろうと予想できる。
+
+また、単に `tail.map(f)` を返すこともでき、これも型的には正しいが、`head` を使用していないので、やはり正しい答えではないだろう。
+
+`head` に関数 `f` を適用して `B` 型の値を生成し、その値と再帰呼び出しの結果を `Pair` を使って組み合わせて `MyList[B]` 型の値を作成することができる。これが正しい解法である。
+
+```scala mdoc:reset:silent
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+  
+  def map[B](f: A => B): MyList[B] = 
+    this match {
+      case Empty() => Empty()
+      case Pair(head, tail) => Pair(f(head), tail.map(f))
+    }
+}
+```
+
+この例題についてここまで読み進めてきたなら、三つの戦略を使って体系的に正しい実装を見つける方法について理解していただけたと思う。再帰戦略と型に従う戦略を交互に用いることで、`Pair` ケースの解法へと導かれたことに注目してほしい。また、ただ型に従うだけでも `Pair` ケースの実装方法が三つに絞り込まれた点にも留意してほしい。今回のコードでは、そして大抵の場合もそうだが、利用できるすべての入力を使用する実装が正しい解決策となる。
+
+### 網羅性チェック
+
+代数的データ型は閉じた世界であり、一旦定義されると拡張できないということを思い出そう。Scala コンパイラは、この性質を利用し、パターンマッチングにおいてすべてのケースが処理されているかどうかをチェックすることができる。ただし、パターンマッチをコンパイラが処理できる形式で記述する必要がある。これは網羅性チェックと呼ばれている。
+
+以下にシンプルな例を挙げる。まずは素直に代数的データ型を定義するところから始める。
+
+```scala mdoc:silent
+// CSSにおいて用いられる可能性のある長さの単位
+enum CssLength {
+  case Em(value: Double)
+  case Rem(value: Double)
+  case Pt(value: Double)
+}
+```
+
+構造的再帰の戦略を使ってパターンマッチを書いていれば、ケースが欠けているときにコンパイラが警告を出してくれる。
+
+```scala
+import CssLength.*
+
+CssLength.Em(2.0) match {
+  case Em(value) => value
+  case Rem(value) => value
+}
+// -- [E029] Pattern Match Exhaustivity Warning: ----------------------------------
+// 1 |CssLength.Em(2.0) match {
+//   |^^^^^^^^^^^^^^^^^
+//   |match may not be exhaustive.
+//   |
+//   |It would fail on pattern case: CssLength.Pt(_)
+//   |
+//   | longer explanation available when compiling with `-explain`
+```
+
+網羅性チェックは非常に有用である。たとえば、代数的データ型に新しいケースを追加したり、ケースを削除したりしたときに、更新する必要のあるパターンマッチはどれかをコンパイラが教えてくれる。
+
+### 動的ディスパッチ
+
+構造的再帰の実装として動的ディスパッチを使用する方法は、オブジェクト指向プログラミングの経験がある人にとって、より自然に感じられる実装テクニックかもしれない。
+
+動的ディスパッチのアプローチは、以下の手順で構成される。
+
+1. 代数的データ型のルートに*抽象メソッド*を定義する
+2. 代数的データ型の各バリアントでその抽象メソッドを実装する
+
+This implementation technique is only available if we use the Scala 2 encoding of algebraic data types.
+
+この実装テクニックは、Scala2 における代数的データ型の表現方法を用いている場合にのみ利用可能である。
+
+Let's see it in the `MyList` example we just looked at.
+Our first step is to rewrite the definition of `MyList` to the Scala 2 style.
+
+これを、先ほど使った `MyList` の例で見ていこう。最初のステップは `MyList` の定義を Scala2 のスタイルに書き換えることである。
+
+```scala mdoc:reset:silent
+sealed abstract class MyList[A] extends Product with Serializable
+final case class Empty[A]() extends MyList[A]
+final case class Pair[A](head: A, tail: MyList[A]) extends MyList[A]
+```
+
+次に、`MyList` に抽象メソッド `map` を定義する。
+
+```scala
+sealed abstract class MyList[A] extends Product with Serializable {
+  def map[B](f: A => B): MyList[B]
+}
+final case class Empty[A]() extends MyList[A]
+final case class Pair[A](head: A, tail: MyList[A]) extends MyList[A]
+```
+
+続いて、具象サブタイプである `Empty` と `Pair` で `map` メソッドを実装する。
+
+```scala mdoc:reset:silent
+sealed abstract class MyList[A] extends Product with Serializable {
+  def map[B](f: A => B): MyList[B]
+}
+final case class Empty[A]() extends MyList[A] {
+  def map[B](f: A => B): MyList[B] = 
+    Empty()
+}
+final case class Pair[A](head: A, tail: MyList[A]) extends MyList[A] {
+  def map[B](f: A => B): MyList[B] =
+    Pair(f(head), tail.map(f))
+}
+```
+
+この `map` の実装を考える際には、パターンマッチングの場合とまったく同じ戦略を使用することができる。実装テクニックは違っても、基礎的な概念は同じである。
+
+これらふたつの実装戦略のうち、どちらを使うべきだろうか。Scala3 で `enum` を使用している場合、選択肢はなく、パターンマッチングを使うしかない。他の状況では、どちらを使うか選択できる。私は、可能であればパターンマッチングを使うほうが好みである。そうすることでメソッド定義全体を一か所にまとめることができる。だが、特に Scala2 では、一部のパターンマッチで型推論に問題が生じることがあり、そのような場合には、動的ディスパッチを使用することもできる。これについては、一般化代数的データ型について見ていく際にさらに詳しく学ぶ予定である。
+
+#### 演習: `Tree` へのメソッド定義
+
+前の演習では代数的データ型 `Tree` を作成した。
+
+```scala mdoc:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+}
+```
+
+Scala2 の表現方法であれば以下のとおり。
+
+```scala mdoc:reset:silent
+sealed abstract class Tree[A] extends Product with Serializable
+final case class Leaf[A](value: A) extends Tree[A]
+final case class Node[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+```
+
+構造的再帰の練習として、この `Tree` に対して以下のメソッドを実装せよ。
+
+* `size` メソッド: `Tree` に格納されている値（`Leafs`）の件数を返す
+* `contains` メソッド: `Tree` が指定された要素を含んでいる場合 `true` を返し、そうでなければ `false` を返す
+* `map` メソッド: `A` を `B` に変換する関数を受け取って、`Tree[B]` を返す
+
+実装にはパターンマッチングと動的ディスパッチどちらでも好きな方を使ってかまわない。
+
+<div class="solution">
+この解答では、直和型の表現として `enum` を使い、メソッドの実装にパターンマッチングを用いている。
+
+まずは、ボディは空のままメソッドを宣言するところから始めよう。
+
+```scala mdoc:reset:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def size: Int = 
+    ???
+
+  def contains(element: A): Boolean =
+    ???
+    
+  def map[B](f: A => B): Tree[B] =
+    ???
+}
+```
+
+これらのメソッドはすべて代数的データ型を変換するので、構造的再帰を使って実装することができる。`Tree` に対する構造的再帰の骨組みを以下のように記述する。再帰呼び出しはデータが再帰的である場所で行われる、というルールも適用した。
+
+```scala
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def size: Int = 
+    this match { 
+      case Leaf(value)       => ???
+      case Node(left, right) => left.size ??? right.size
+    }
+
+  def contains(element: A): Boolean =
+    this match { 
+      case Leaf(value)       => ???
+      case Node(left, right) => left.contains(element) ??? right.contains(element)
+    }
+    
+  def map[B](f: A => B): Tree[B] =
+    this match { 
+      case Leaf(value)       => ???
+      case Node(left, right) => left.map(f) ??? right.map(f)
+    }
+}
+```
+
+ここまで書けば、他の推論テクニックを使ってメソッドの定義を完成させることができる。では `size` を実装していこう。
+
+```scala
+def size: Int = 
+  this match { 
+    case Leaf(value)       => 1
+    case Node(left, right) => left.size ??? right.size
+  }
+```
+
+ケースはそれぞれ独立に考えることができる。`Leaf` のサイズは、定義により常に 1 である。
+
+```scala
+def size: Int = 
+  this match { 
+    case Leaf(value)       => 1
+    case Node(left, right) => left.size ??? right.size
+  }
+```
+
+`Node` のケースには、再帰呼び出しの結果を正しいと仮定する考え方を利用することができる。結合された木のサイズは、左右の子のサイズの合計になるはずである。再帰呼び出しが左右の子のサイズを正しく計算していると仮定すれば、`size` の実装は以下のようになる。
+
+```scala
+def size: Int = 
+  this match { 
+    case Leaf(value)       => 1
+    case Node(left, right) => left.size + right.size
+  }
+```
+
+残りのふたつのメソッドも同じプロセスを使って実装できる。以下に完全な解答を示す。
+
+```scala mdoc:reset:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def size: Int = 
+    this match { 
+      case Leaf(value)       => 1
+      case Node(left, right) => left.size + right.size
+    }
+
+  def contains(element: A): Boolean =
+    this match { 
+      case Leaf(value)       => element == value
+      case Node(left, right) => left.contains(element) || right.contains(element)
+    }
+    
+  def map[B](f: A => B): Tree[B] =
+    this match { 
+      case Leaf(value)       => Leaf(f(value))
+      case Node(left, right) => Node(left.map(f), right.map(f))
+    }
+}
+```
+</div>
+
+
+### 構造的再帰としての畳み込み
+
+最後に、構造的再帰を抽象化したものとして畳み込みメソッドについて見ていこう。先ほどの `Tree` の演習を行ったなら、同じパターンのコードを何度も書いたことに気付いたはずである。演習で作成したメソッドを以下に再掲する。パターンマッチの左側はすべて同じだし、右側も非常に似ていることに注目してほしい。
+
+```scala
+def size: Int = 
+  this match { 
+    case Leaf(value)       => 1
+    case Node(left, right) => left.size + right.size
+  }
+
+def contains(element: A): Boolean =
+  this match { 
+    case Leaf(value)       => element == value
+    case Node(left, right) => left.contains(element) || right.contains(element)
+  }
+  
+def map[B](f: A => B): Tree[B] =
+  this match { 
+    case Leaf(value)       => Leaf(f(value))
+    case Node(left, right) => Node(left.map(f), right.map(f))
+  }
+```
+
+この類似性を認識し公式化することが構造的再帰の要点である。だが、プログラマとしては、この繰り返しを抽象化したくなるかもしれない。構造的再帰の中で変わらない部分をすべて抽出し、変わる部分については呼び出し側が引数として渡せるようなメソッドを作ることはできるだろうか。これは実は可能である。任意の代数的データ型に対して、そういうメソッドを少なくともひとつは定義できる。畳み込みと呼ばれるそのメソッドが構造的再帰の変わらない部分をすべてキャプチャし、やりたいことに応じて異なる部分を呼び出し側が指定できるようにしてくれる。
+
+どのように定義されるのか `MyList` の例を使って見ていこう。`MyList` の定義を再掲する。
+
+```scala mdoc:silent
+enum MyList[A] {
+  case Empty()
+  case Pair(head: A, tail: MyList[A])
+}
+```
+
+`MyList` で使われる構造的再帰の骨組みは、すでに理解しているとおり、以下のようになる。
+
+```scala
+def doSomething[A](list: MyList[A]) =
+  list match {
+    case Empty()          => ???
+    case Pair(head, tail) => ??? doSomething(tail)
+  } 
+```
+
+`MyList` に畳み込みを実装するとは、次のような `fold` メソッドを定義するということである。
+
+```scala
+def fold[A, B](list: MyList[A]): B =
+  list match {
+    case Empty() => ???
+    case Pair(head, tail) => ??? fold(tail)
+  }
+```
+
+ここで `B` は、呼び出し元が生成したい値の型とする。
+
+`fold` メソッドを完成させるには、個々の問題に固有の部分である `???` を埋めるために引数を加える必要がある。`Empty` のケースには `B` 型の値が必要である（型に従って考えていることに注目してほしい）。
+
+```scala
+def fold[A, B](list: MyList[A], empty: B): B =
+  list match {
+    case Empty() => empty
+    case Pair(head, tail) => ??? fold(tail, empty)
+  }
+```
+
+`Pair` のケースでは、 `A` 型の `head` と、 `B` 型の値を生成する再帰処理がすでにあるので、必要なのはそれらふたつを結合する関数ということになる。
+
+```scala mdoc:invisible
+import MyList.*
+```
+```scala mdoc:silent
+def foldRight[A, B](list: MyList[A], empty: B, f: (A, B) => B): B =
+  list match {
+    case Empty() => empty
+    case Pair(head, tail) => f(head, foldRight(tail, empty, f))
+  }
+```
+
+これが `foldRight` メソッドである（この後に見せるもうひとつの解法と区別できるよう名前を変更した）。これを見て、もうひとつの有効な解があることに気付いたかもしれない。`empty` も再帰呼び出しも `B` の値を生成する。型に従って考えれば、次のような結論に至ることもできるだろう。
+
+```scala mdoc:silent
+def foldLeft[A,B](list: MyList[A], empty: B, f: (A, B) => B): B =
+  list match {
+    case Empty() => empty
+    case Pair(head, tail) => foldLeft(tail, f(head, empty), f)
+  }
+```
+
+これが `foldLeft` メソッドで、リストに対する畳み込みの末尾再帰バージョンである。末尾再帰については後の章で解説する。
+
+決まった手順をたどることで、任意の代数的データ型に対してその畳み込みメソッドを作成することができる。そのルールは以下のとおりである。
+
+- 畳み込みは、代数的データ型と追加のパラメータを取り、何らかの別の型（以下では便宜上 `B` と呼ぶ）に変換する関数である
+- 畳み込みは、直和型の各バリアントに対してひとつの追加パラメータをもつ
+- 各パラメータは関数で、結果の型は `B`、対応するコンストラクタの引数と同じ型のパラメータを取る。ただし、再帰的な引数の型は `B` と見なせる
+- コンストラクタに引数がない場合（たとえば `Empty`）、引数のない関数の代わりに、型 `B` の値を使用できる
+
+`MyList` に当てはめると次のようになる。
+
+- ふたつのバリアントがあるので、畳み込みにはふたつのパラメータが必要（リストそれ自体以外に）
+- `Empty` は引数なしコンストラクタなので、`B` 型のパラメータをひとつ
+- `Pair` は `A` 型の引数をひとつと、再帰的な引数をひとつもったコンストラクタなので、対応する関数の型は `(A, B) => B` となる
+
+#### 演習: `Tree` の畳み込み {-}
+
+以前定義した `Tree` に対して畳み込みを実装せよ。二分木の走査には、先行順、後行順、中間順などいくつかの方法があるが、もっとも簡単だと思うものを選んで実装してかまわない。
+
+<div class="solution">
+まずはボディのないメソッド宣言を追加することから始める。
+
+```scala mdoc:reset:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def fold[B]: B =
+    ???
+}
+```
+
+次に、構造的再帰の骨組みを追加する。
+
+```scala
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def fold[B]: B =
+    this match {
+      case Leaf(value)       => ???
+      case Node(left, right) => left.fold ??? right.fold
+    }
+}
+```
+
+これで、型に従ってメソッドにパラメータを追加する準備が整った。`Leaf` のケースには `A => B` 型の関数が必要であることがわかる。
+
+```scala
+enum Tree[A] {
+  case Leaf(value: A => B)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def fold[B](leaf: A => B): B =
+    this match {
+      case Leaf(value)       => leaf(value)
+      case Node(left, right) => left.fold ??? right.fold
+    }
+}
+```
+
+`Node` のケースにはふたつの再帰呼び出しの結果を結合する関数が必要なので、追加するパラメータは `(B, B) => B` という型をもつことになる。
+
+```scala mdoc:reset:silent
+enum Tree[A] {
+  case Leaf(value: A)
+  case Node(left: Tree[A], right: Tree[A])
+  
+  def fold[B](leaf: A => B)(node: (B, B) => B): B =
+    this match {
+      case Leaf(value)       => leaf(value)
+      case Node(left, right) => node(left.fold(leaf)(node), right.fold(leaf)(node))
+    }
+}
+```
+</div>
+
+#### 演習: 畳み込みの利用 {-}
+
+構造的再帰が畳み込みの呼び出しに置き換えられることを確認するため、`Tree` の `size`、`contains`、`map` を、`fold` だけを使って再定義せよ。
 
 <div class="solution">
 ```scala mdoc:reset:silent

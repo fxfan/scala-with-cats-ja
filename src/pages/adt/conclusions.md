@@ -1,3 +1,5 @@
+<!--
+
 ## Conclusions
 
 We have covered a lot of material in this chapter. Let's recap the key points.
@@ -39,7 +41,48 @@ Corecursion is a bit better documented in the contemporary literature. *How to D
 
 *The Derivative of a Regular Type is its Type of One-Hole Contexts* [@mcbride01:deriv] describes the derivative of algebraic data types.
 
+[banana]: https://ris.utwente.nl/ws/portalfiles/portal/6142049/meijer91functional.pdf
+[structural-induction]: https://academic.oup.com/comjnl/article/12/1/41/311605
+[npl]: https://en.wikipedia.org/wiki/NPL_(programming_language)
+[hope]: https://en.wikipedia.org/wiki/Hope_(programming_language)
+[htdc]: https://www.cs.ox.ac.uk/jeremy.gibbons/publications/copro.pdf
+[unfold]: https://dl.acm.org/doi/pdf/10.1145/289423.289455
+[deriv]: https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=7de4f6fddb11254d1fd5f8adfd67b6e0c9439eaa
 
+
+-->
+
+## まとめ
+
+この章では多くの内容を扱った。ここで重要なポイントを振り返っておこう。
+
+代数的データ型を使えば、既存の型を論理積と論理和で組み合わせることによって別のデータの型を表現することができる。論理積は直積型を構築し、論理和は直和型を構築する。代数的データ型は Scala でデータを表現する主要な方法である。
+
+構造的再帰は、与えられた代数的データ型を他の任意の型に変換するための骨組みを提供する。構造的再帰は `fold` メソッドとして抽象化することができる。
+
+構造的再帰における問題固有の部分を完成させるのに役立つ考え方の原則がいくつかある。
+
+1. 各ケースを独立して推論すること
+2. 再帰呼び出しの結果は正しいと仮定すること
+3. 型に従うこと
+
+型に従うことは他の多くの状況で利用できる極めて汎用的な戦略である。
+
+構造的余再帰は、任意の型から代数的データ型を作成するための骨組みを提供する。構造的余再帰は `unfold` メソッドとして抽象化できる。構造的余再帰について推論する際は、命令型のループの処理手順を考えるのと同じように進めるか、あるいは入力が代数的データ型である場合は、構造的再帰についての推論の原則を利用することができる。
+
+関数型プログラミングのふたつの主要なテーマである合成と推論がすでにはっきり認識できる形で示されている点に注目してほしい。代数的データ型は合成的である。直和型と直積型を使って合成することができる。この章では多くの推論原則も見てきた。
+
+代数的データ型について知っておくべきすべてのことを説明したわけではない。これを完全に網羅すれば、それだけで一冊の本になるだろう。さらに掘り下げたい場合に役立つ参考文献や、著者の経歴に関するいくつかの補足を以下に示しておく。
+
+代数的データ型は、関数型プログラミングの入門資料では標準的に取り扱われている。構造的再帰も関数型プログラミングで非常によく使われるが、ここで私が行ったように明確に定義されることは珍しいようである。私はこれらについて *How to Design Programs* [@felleisen18:htdp] から学んだ。
+
+代数的データ型や構造的再帰について、手軽にアクセスできつつも詳細に扱った資料は私の知るかぎり存在しない。これらの概念は、プログラミング言語研究の分野ではもはや前提知識とされているようである。最近の研究は数学的で難解な表記に覆われており、私にとっては読みづらいものが多い。悪名高い *Functional Programming with Bananas, Lenses, Envelopes and Barbed Wire* [@10.1007/3540543961_7] はその一例である。両アイデアの核となる発想は、少なくとも計算可能性理論が登場した1930年代、デジタルコンピュータが存在するはるか以前にまで遡るのではないかと思われる。
+
+構造的再帰に関して私が見つけたもっとも古い参考文献は、*Proving Properties of Programs by Structural Induction* [@10.1093/comjnl/12.1.41] である。代数的データ型とパターンマッチングの発展は、1977年の [NPL][npl] までは十分ではなかったようだが、その後すぐに、より影響力のある言語である [Hope][hope] が登場し、この概念が他のプログラミング言語にも広まった。
+
+余再帰については現代の文献にすこし詳しく記録されている。*How to Design Co-Programs* [@GIBBONS_2021] では、ここで取り上げた主なアイデアが説明されているし、[@10.1145/291251.289455] では `unfold` の使い方について議論されている。
+
+*The Derivative of a Regular Type is its Type of One-Hole Contexts* [@mcbride01:deriv] は代数的データ型の微分について記述している。
 
 [banana]: https://ris.utwente.nl/ws/portalfiles/portal/6142049/meijer91functional.pdf
 [structural-induction]: https://academic.oup.com/comjnl/article/12/1/41/311605

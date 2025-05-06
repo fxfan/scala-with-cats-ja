@@ -1,3 +1,5 @@
+<!--
+
 # Using Cats {#sec:cats}
 
 In this Chapter we'll learn how to use the [Cats](https://typelevel.org/cats) library.
@@ -196,3 +198,151 @@ println(Cat("Garfield", 38, "ginger and black").show)
 ```
 </div>
 
+
+```scala mdoc:reset:silent
+```
+--->
+
+# Cats を使う {#sec:cats}
+
+この章では [Cats](https://typelevel.org/cats) ライブラリの使い方について学ぶ。Cats が提供するものは主にふたつあり、ひとつは型クラスとそのインスタンス、もうひとつはいくつかの便利なデータ構造である。本書では主に型クラスにフォーカスを当てるが、必要に応じてデータ構造についても触れる。
+
+## クイックスタート
+
+もっとも簡単かつ推奨されている Cats の導入方法は、以下のインポートを追加することである。
+
+```scala mdoc:silent
+import cats.*
+import cats.syntax.all.*
+```
+
+ひとつ目のインポートはすべての型クラスを追加する。コンパニオンオブジェクトに定義されている型クラスインスタンスも利用可能となる。ふたつ目のインポートはシンタックスヘルパーを追加する。これによって型クラスが更に扱いやすくなる。`import cats.{*, given}` のようなインポートは必要ない。執筆時点では、Cats は Scala2 スタイル、つまり `implicit` を使って書かれており、それらはワイルドカードによるインポートで取り込まれるからである。
+
+Cats が提供するデータ構造を使用したい場合は、以下も追加する必要がある。
+
+```scala mdoc:silent
+import cats.data.*
+```
+
+## Cats を使う
+
+[`cats.Show`][cats.Show] を例に、Cats の使い方を見ていこう。
+
+`Show` は Cats が提供する型クラスで、[@sec:type-classes:display]節で定義した `Display` に相当する。`toString` を使わずに開発者向けのコンソール出力を生成する仕組みを提供する。以下はその定義を簡略化したものである。
+
+```scala
+package cats
+
+trait Show[A] {
+  def show(value: A): String
+}
+```
+
+`Show` を使うもっとも簡単な方法は、前述のワイルドカードインポートを利用することだが、直接 [cats][cats.package] パッケージからインポートすることもできる。
+
+```scala mdoc:silent
+import cats.Show
+```
+
+Cats の各型クラスのコンパニオンオブジェクトには、指定した型のインスタンスを見つける `apply` メソッドがある。
+
+```scala mdoc:silent
+val showInt = Show.apply[Int]
+```
+
+インスタンスを手に入れたら、そのメソッドを呼び出せばよい。
+
+```scala mdoc
+showInt.show(42)
+```
+
+だが、`import cats.syntax.all.*` でインポートした構文や拡張メソッドを使う方が一般的である。`Show` に対しては、拡張メソッド `show` が定義されている。
+
+```scala mdoc
+42.show
+```
+
+何らかの理由で `show` についての構文だけが必要な場合、[`cats.syntax.show`][cats.syntax.show] をインポートすることもできる。
+
+```scala mdoc:silent
+import cats.syntax.show.*
+```
+
+### 独自インスタンスの定義 {#defining-custom-instances}
+
+`Show` のインスタンスを定義するには、対象となる型に対してトレイトを実装するだけでよい。
+
+```scala mdoc:silent
+import java.util.Date
+
+given dateShow: Show[Date] with 
+  def show(date: Date): String =
+    s"${date.getTime}ms since the epoch."
+```
+```scala mdoc
+new Date().show
+```
+
+しかし、Cats にはこのプロセスを簡略化するための便利なメソッドもいくつか用意されている。`Show` のコンパニオンオブジェクトには、独自の型に対してインスタンスを定義するためのふたつの構築メソッドがある。
+
+```scala
+object Show {
+  // 関数を `Show` インスタンスに変換する
+  def show[A](f: A => String): Show[A] =
+    ???
+
+  // `toString` メソッドから `Show` インスタンスを作成する
+  def fromToString[A]: Show[A] =
+    ???
+}
+```
+
+これらのメソッドを使えば、一から定義するよりも手間をかけずにインスタンスを構築できる。
+
+```scala mdoc:reset:invisible
+import cats.Show
+import java.util.Date
+```
+```scala mdoc:silent
+given dateShow: Show[Date] =
+  Show.show(date => s"${date.getTime}ms since the epoch.")
+```
+
+見てのとおり、構築メソッドを用いたコードは、そうでないコードよりもかなり簡潔である。Cats の多くの型クラスはこのようなヘルパーメソッドを提供しており、一からの、もしくは他の型用の既存インスタンスから変換することによるインスタンス構築をサポートしてくれる。
+
+#### 演習: `Cat` 用の `Show` インスタンス
+
+[@sec:type-classes:cat]節の `Cat` アプリケーションを、`Display` の代わりに `Show` を用いて再実装せよ。
+
+<div class="solution">
+
+まずは必要なものを Cats からインポートしよう。
+
+```scala mdoc:reset-object:silent
+import cats.*
+import cats.syntax.all.*
+```
+
+`Cat` の定義は次のとおり元のままでよい。
+
+```scala mdoc:silent
+final case class Cat(name: String, age: Int, color: String)
+```
+
+コンパニオンオブジェクトでは、先述のヘルパーメソッドのひとつを使って `Display` インスタンスを `Show` インスタンスに置き換える。
+
+```scala mdoc:silent
+given catShow: Show[Cat] = Show.show[Cat] { cat =>
+  val name  = cat.name.show
+  val age   = cat.age.show
+  val color = cat.color.show
+  s"$name is a $age year-old $color cat."
+}
+```
+
+最後に、`Show` のインターフェース構文を用いて `Cat` インスタンスを出力する。
+
+```scala mdoc
+println(Cat("Garfield", 38, "ginger and black").show)
+```
+</div>

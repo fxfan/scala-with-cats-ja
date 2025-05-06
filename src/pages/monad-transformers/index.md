@@ -1,3 +1,5 @@
+<!--
+
 # Monad Transformers {#sec:monad-transformers}
 
 Monads are [like burritos][link-monads-burritos],
@@ -711,6 +713,535 @@ def tacticalReport(ally1: String, ally2: String): String = {
 </div>
 
 You should be able to use `report` as follows:
+
+```scala mdoc
+tacticalReport("Jazz", "Bumblebee")
+tacticalReport("Bumblebee", "Hot Rod")
+tacticalReport("Jazz", "Ironhide")
+```
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+# モナド変換子 {#sec:monad-transformers}
+
+モナドは[ブリトーのようなもの][link-monads-burritos]だとよく言われる。一度その味を覚えれば、何度も手を伸ばしてしまうということである。しかし、これは問題がないわけではない。ブリトーが腰回りを太らせるように、モナドも入れ子になった for 内包表記によってコードベースを太らせてしまうことがある。
+
+データベースとやり取りをする場面を想像してみよう。ユーザのレコードを取得したいが、そのユーザが存在するかどうかはわからない。そのため、結果は `Option[User]` として返すことになる。さらに、データベースとの通信はネットワークの問題や認証のトラブルなど、さまざまな理由で失敗する可能性があるため、その結果は `Either` に包まれる。最終的に得られる結果は `Either[Error, Option[User]]` という形になる。
+
+この値を使うには `flatMap` 呼び出しを入れ子にするか、それと同じことを for 内包表記で行わなければならない。
+
+```scala mdoc:invisible:reset-object
+type Error = String
+
+final case class User(id: Long, name: String)
+
+def lookupUser(id: Long): Either[Error, Option[User]] = ???
+```
+
+```scala mdoc:silent
+def lookupUserName(id: Long): Either[Error, Option[String]] =
+  for {
+    optUser <- lookupUser(id)
+  } yield {
+    for { user <- optUser } yield user.name
+  }
+```
+
+これはすぐに厄介な問題へと発展する。
+
+## 演習: モナドの合成
+
+ここでひとつの疑問が生じる。任意のふたつのモナドが与えられたとき、それらを何らかの方法で組み合わせてひとつのモナドにできるだろうか。つまり、モナドは*合成*できるだろうか。コードを書いてみるとすぐに問題に直面する。
+
+```scala mdoc:silent
+import cats.syntax.applicative._ // pure
+```
+
+```scala
+// 説明用。実際にはコンパイルされない
+def compose[M1[_]: Monad, M2[_]: Monad] = {
+  type Composed[A] = M1[M2[A]]
+
+  new Monad[Composed] {
+    def pure[A](a: A): Composed[A] =
+      a.pure[M2].pure[M1]
+
+    def flatMap[A, B](fa: Composed[A])
+        (f: A => Composed[B]): Composed[B] =
+      // 問題発生！ flatMap をどう書けばいいのだろうか
+      ???
+  }
+}
+```
+
+`M1` や `M2` のことを何も知らない状態で `flatMap` の一般的な定義を書くのは不可能である。しかし、どちらか一方のモナドについて知識があれば、コードを完成させることができる場合が多い。たとえば、上記の `M2` を `Option` に固定すれば、`flatMap` の定義は明らかとなる。
+
+```scala
+def flatMap[A, B](fa: Composed[A])
+    (f: A => Composed[B]): Composed[B] =
+  fa.flatMap(_.fold[Composed[B]](None.pure[M1])(f))
+```
+
+上記の定義が `None` を使用していることに注意してほしい。これは `Option` 固有の概念であり、一般的な `Monad` インターフェースには現れない。`Option` を他のモナドと組み合わせるには、このような詳細情報が必要である。他のモナドについても同様で、それらを組み合わせた `flatMap` メソッドを書くのに役立つ固有の情報が存在する。これがモナド変換子（monad transformer）の背後にあるアイデアである。Cats はさまざまなモナドのための変換子を定義しており、それぞれがそのモナドを他と組み合わせるのに必要な付加知識を提供してくれる。いくつか例を見てみよう。
+
+## 変換の例
+
+Cats は多くのモナド用に変換子を提供しており、その名称にはそれぞれ `T` が接尾辞として付けられている。たとえば、`EitherT` は `Either` を他のモナドと組み合わせ、`OptionT` は `Option` を他と組み合わせる。
+
+以下は `OptionT` を使って `List` と `Option` を組み合わせる例である。簡便のため `ListOption[A]` というエイリアスを使い、`List[Option[A]]` をひとつのモナドとして取り扱う。
+
+```scala mdoc:silent
+import cats.data.OptionT
+
+type ListOption[A] = OptionT[List, A]
+```
+
+ここで注目してほしいのは、`ListOption` を内側から外側に向かって組み立てている点である。`OptionT` は内側のモナドである `Option` 用の変換子であり、外側のモナドの型である `List` をパラメータとしてそこに渡している。
+
+We can create instances of `ListOption`
+using the `OptionT` constructor,
+or more conveniently using `pure`:
+
+`ListOption` のインスタンスを作成するには `OptionT` のコンストラクタを使う。もしくは `pure` を使えばもっと便利である。
+
+```scala mdoc:silent
+import cats.instances.list._     // Monad
+import cats.syntax.applicative._ // pure
+```
+
+```scala mdoc
+val result1: ListOption[Int] = OptionT(List(Option(10)))
+
+val result2: ListOption[Int] = 32.pure[ListOption]
+```
+
+`map` や `flatMap` メソッドは、`List` と `Option` がもつ同名のメソッド同士を組み合わせてひとつの操作にする。
+
+```scala mdoc
+result1.flatMap { (x: Int) =>
+  result2.map { (y: Int) =>
+    x + y
+  }
+}
+```
+
+これがすべてのモナド変換子の基礎である。組み合わされた `map` や `flatMap` メソッドのおかげで、計算の各段階で値を再帰的に取り出して包み直すようなことをしなくても、両方のモナドを扱うことができる。次に API をさらに詳しく見ていこう。
+
+<div class="callout callout-warning">
+*インポートの複雑さについて*
+
+上記コードサンプルのインポート文は、すべての要素がどのように結びつけられているかを示している。
+
+まず、`pure` 構文を得るために [`cats.syntax.applicative`][cats.syntax.applicative] をインポートしている。`pure` は `Applicative[ListOption]` 型の暗黙パラメータを必要とする。まだ `Applicative` については学んでいないが、すべての `Monad` は `Applicative` でもあるため、今はその違いを無視してかまわない。
+
+`Applicative[ListOption]` を生成するには、`List` と `OptionT` それぞれの `Applicative` インスタンスが必要である。`OptionT` は Cats 独自のデータ型なので、そのインスタンスはコンパニオンオブジェクトによって提供される。`List` 用のインスタンスは [`cats.instances.list`][cats.instances.list] に置かれている。
+
+[`cats.syntax.functor`][cats.syntax.functor] や [`cats.syntax.flatMap`][cats.syntax.flatMap] をインポートしていないことにも注目してほしい。これは、`OptionT` が具体的なデータ型であり、独自の `map` や `flatMap` メソッドをもっているためである。これらの構文をインポートしても問題は生じないが、コンパイラは明示的なメソッドを優先するので、インポートされた構文は無視される。
+
+今回こういった複雑さに直面しているのは、[`cats.implicits`][cats.implicits] による包括的なインポートを意図的に避けているためである。このインポートを使用すれば、必要なすべてのインスタンスや構文がスコープに入り、すべてが簡単に動作する。
+</div>
+
+## Cats におけるモナド変換子
+
+モナド変換子はいずれもデータ型であり、[`cats.data`][cats.data] に定義されている。モナド変換子は、モナドの積み重ねをラップして新しいモナドを作り出すことができる。ここで使用されるモナドは Cats の `Monad` 型クラスを通じて構築されたものである。モナド変換子を理解するためにカバーすべき主なポイントは以下のとおりである。
+
+- どのような変換子クラスが提供されているのか
+- 変換子を使用してモナドの積み重ねを構築する方法
+- モナドスタックのインスタンスを作成する方法
+- 積み重ねたモナドを分解し、ラップされたモナドにアクセスする方法
+
+### モナド変換子クラス
+
+Cats では慣例的にモナド `Foo` に対して `FooT` という名前の変換子クラスが用意されている。実際、Cats の多くのモナドは、モナド変換子と `Id` モナドを組み合わせて定義されている。以下に、利用可能なインスタンスをいくつか具体的に挙げてみよう。
+
+- `Option` 用の [`cats.data.OptionT`][cats.data.OptionT]
+- `Either` 用の [`cats.data.EitherT`][cats.data.EitherT]
+- `Reader` 用の [`cats.data.ReaderT`][cats.data.ReaderT]
+- `Writer` 用の [`cats.data.WriterT`][cats.data.WriterT]
+- `State` 用の [`cats.data.StateT`][cats.data.StateT]
+- [`Id`][cats.Id] モナド用の [`cats.data.IdT`][cats.data.IdT]
+
+<div class="callout callout-info">
+*クライスリ射*
+
+[@sec:monads:reader]節で、`Reader` モナドが「クライスリ射」というさらに一般的な概念を特殊化したものであると述べた。クライスリ射は Cats では [`cats.data.Kleisli`][cats.data.Kleisli] として表されている。
+
+ようやく、`Kleisli` と `ReaderT` が実は同じものであると明かすことができる。`ReaderT` は実際には `Kleisli` の型エイリアスとして定義されている。そのため、以前の章で `Reader` を作成したときに、コンソールには `Kleisli` と表示されていたのである。
+</div>
+
+### モナドスタックの構築
+
+これらのモナド変換子はすべて同じ慣例に従っている。変換子自体はスタック内の*内側*にあるモナドを表し、最初の型パラメータが外側のモナドを指定する。残りの型パラメータは、対応するモナドを形成するために使用される型である。
+
+たとえば、先ほどの `ListOption` 型は `OptionT[List, A]` のエイリアスだが、これは実質的に `List[Option[A]]` と同じである。言い換えると、モナドスタックは内側から外側に向かって構築される。
+
+```scala mdoc:invisible:reset
+import cats.data.OptionT
+import cats.syntax.applicative._ // pure
+```
+```scala mdoc:silent
+type ListOption[A] = OptionT[List, A]
+```
+
+多くのモナドやすべての変換子はふたつ以上の型パラメータをもっているため、中間段階に対して型エイリアスを定義しなければならない場合がよくある。
+
+たとえば、`Option` を `Either` で包みたいとする。`Option` がもっとも内側の型なので、`OptionT` モナド変換子を使うことになる。ここで `Either` を最初の型パラメータとしたいが、`Either` 自体にはふたつの型パラメータがある一方で、モナドはひとつしか型パラメータをもたない。この場合、型コンストラクタを必要な形状に合わせるため型エイリアスが必要となる。
+
+```scala mdoc:silent
+// 型コンストラクタのパラメータがひとつになるように Either にエイリアスを定義
+type ErrorOr[A] = Either[String, A]
+
+// OptionT を使って最終的なモナドスタックを構築
+type ErrorOrOption[A] = OptionT[ErrorOr, A]
+```
+
+`ErrorOrOption` は、`ListOption` がそうであるように、モナドである。通常どおり `pure` や `map` や `flatMap` を用いてインスタンスの作成や変換を行うことができる。
+
+```scala mdoc:silent
+import cats.instances.either._ // Monad
+```
+
+```scala mdoc
+val a = 10.pure[ErrorOrOption]
+val b = 32.pure[ErrorOrOption]
+
+val c = a.flatMap(x => b.map(y => x + y))
+```
+
+三つ以上のモナドを積み重ねたい場合はさらにややこしくなる。
+
+たとえば、`Option` の `Either` を包んだ `Future` を作りたいとする。ここでも内側から外側へと組み立てを行う。`OptionT` を `EitherT` で包み、それをさらに `Future` 包む。しかし、`EitherT` は型パラメータを三つもっているため、これを一行で定義することはできない。
+
+```scala
+case class EitherT[F[_], E, A](stack: F[Either[E, A]]) {
+  // etc...
+}
+```
+
+ここで使われる三つの型パラメータは以下のとおり。
+
+- `F[_]` はスタックにおける外側のモナド（ここでは `Either` は内側）
+- `E` は `Either` のエラー型
+- `A` は `Either` の結果型
+
+ここでは、`Future` と `Error` を固定し、`A` を可変とする `EitherT` のエイリアスを作成する。
+
+```scala mdoc:silent
+import scala.concurrent.Future
+import cats.data.{EitherT, OptionT}
+
+type FutureEither[A] = EitherT[Future, String, A]
+
+type FutureEitherOption[A] = OptionT[FutureEither, A]
+```
+
+Our mammoth stack now composes three monads
+and our `map` and `flatMap` methods
+cut through three layers of abstraction:
+
+これで、この巨大なスタックは三つのモナドを合成したものとなり、`map` や `flatMap` は三層の抽象化を突き抜けて動作する。
+
+```scala mdoc:silent
+import cats.instances.future._ // Monad
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+```
+
+```scala mdoc:silent
+val futureEitherOr: FutureEitherOption[Int] =
+  for {
+    a <- 10.pure[FutureEitherOption]
+    b <- 32.pure[FutureEitherOption]
+  } yield a + b
+```
+
+<div class="callout callout-warning">
+*Kind Projector*
+
+モナドスタックを構築する際に、頻繁に複数の型エイリアスを定義しているなら、[Kind Projector][link-kind-projector] コンパイラプラグインを試してみるといいかもしれない。Kind Projector は Scala の型構文を拡張し、部分適用された型コンストラクタをより簡単に定義できるようにしてくれる。たとえば、次のように使うことができる。
+
+```scala mdoc
+import cats.instances.option._ // Monad
+
+123.pure[EitherT[Option, String, _]]
+```
+
+Kind Projector がすべての型宣言を一行に簡素化できるわけではないが、必要な中間型定義の数を減らしコードを読みやすく保つことができる。
+</div>
+
+### インスタンスの構築と展開
+
+すでに見たように、モナド変換子の `apply` メソッドやおなじみの `pure` 構文[^eithert-monad-error]を使うことで、ひとつのモナドとして扱えるように変換されたモナドスタックを作成することができる。
+
+```scala mdoc
+// apply を使ってインスタンス作成
+val errorStack1 = OptionT[ErrorOr, Int](Right(Some(10)))
+
+// pure を使ってインスタンス作成
+val errorStack2 = 32.pure[ErrorOrOption]
+```
+
+[^eithert-monad-error]: Cats は `EitherT` 用の `MonadError` インスタンスを提供しているので、`raiseError` を使っても `pure` と同じようにインスタンスを作成できる。
+
+モナド変換子スタックを用いた計算が終わった後は、`value` メソッドを使ってスタックを展開することができる。これにより、変換されていないスタックが返され、通常どおりに個別のモナドを操作できる。
+
+```scala mdoc
+// 変換されていないモナドスタックの抽出
+errorStack1.value
+
+// スタック内の Either に対する map 操作
+errorStack2.value.map(_.getOrElse(-1))
+```
+
+`value` の呼び出しごとにモナド変換子がひとつ展開される。大きなスタックを完全に展開するには複数回の呼び出しが必要になることもある。たとえば、前出の `FutureEitherOption` スタックを `Await` するには、`value` を二回呼び出す必要がある。
+
+```scala mdoc
+futureEitherOr
+
+val intermediate = futureEitherOr.value
+
+val stack = intermediate.value
+
+Await.result(stack, 1.second)
+```
+
+### デフォルトインスタンス
+
+Cats が提供する多くのモナドは、対応する変換子と `Id` モナドを用いて定義されている。この事実は、モナドと変換子の API が同一であることを裏付けており、ユーザに安心感を与えてくれる。`Reader`、`Writer`、そして `State` は、いずれもこの方法で定義されている。
+
+```scala
+type Reader[E, A] = ReaderT[Id, E, A] // = Kleisli[Id, E, A]
+type Writer[W, A] = WriterT[Id, W, A]
+type State[S, A]  = StateT[Id, S, A]
+```
+
+一方で、対応するモナドとは別々にモナド変換子が定義されることもある。このような場合、変換子のメソッドは、モナドのメソッドを模倣する傾向がある。たとえば、`OptionT` には `getOrElse` が定義されているし、`EitherT` には `fold`、`bimap`、`swap` などが定義されている。
+
+### 利用パターン
+
+変換子はあらかじめ定義された方法でモナドを融合するため、さまざまな場所で広範囲にモナド変換子を利用するのは、時に難しいことがある。考えなしに使用すると、モナド変換子を異なる文脈で扱う際に、一旦モナドスタックを展開して別の構成で再構築する必要が生じることもある。
+
+対処方法はいくつかある。ひとつは、単一の「スーパー・スタック」を作成し、それをコードベース全体で一貫して使用するというアプローチである。この方法は、コードが単純で大部分が均一な性質をもっている場合にうまく機能する。たとえばウェブアプリケーションであれば、リクエストハンドラはすべて非同期であり、失敗時には同じ体系のHTTPエラーコードを返す、と決めてしまうことができる。この場合、エラーを表現する代数的データ型を設計し、`Future` と `Either` を融合させたものをコード全体で使用すればよい。
+
+```scala mdoc:invisible:reset-object
+import cats.data.EitherT
+import cats.instances.list._
+import scala.concurrent.Future
+```
+```scala mdoc:silent
+sealed abstract class HttpError
+final case class NotFound(item: String) extends HttpError
+final case class BadRequest(msg: String) extends HttpError
+// etc...
+
+type FutureEither[A] = EitherT[Future, HttpError, A]
+```
+
+この手法は、コードベースが大規模で、部分ごとの技術的特性の違いが大きい場合にはうまく機能しなくなる。そのような場面ではコンテキストごとに適しているスタックが異なる。そういったコンテキストに適しているもうひとつのデザインパターンが、モナド変換子を局所的な「接着コード」として使うアプローチである。モジュールの境界では変換されていないスタックを公開し、モジュール内部での操作のためにそれらを一時的に変換し、処理が終わったら再び変換を解除して次に渡す。この方法であれば、各モジュールはどのモナド変換子を使用するかを独自に決定できるようになる。
+
+```scala mdoc:silent
+import cats.data.Writer
+
+type Logged[A] = Writer[List[String], A]
+
+// メソッドは変換されていないスタックを返す
+def parseNumber(str: String): Logged[Option[Int]] =
+  util.Try(str.toInt).toOption match {
+    case Some(num) => Writer(List(s"Read $str"), Some(num))
+    case None      => Writer(List(s"Failed on $str"), None)
+  }
+
+// 合成を単純化するため内部的にはモナド変換子を用いる
+def addAll(a: String, b: String, c: String): Logged[Option[Int]] = {
+  import cats.data.OptionT
+
+  val result = for {
+    a <- OptionT(parseNumber(a))
+    b <- OptionT(parseNumber(b))
+    c <- OptionT(parseNumber(c))
+  } yield a + b + c
+
+  result.value
+}
+```
+
+```scala mdoc
+// このアプローチではモジュールのユーザに OptionT を強制することはない
+val result1 = addAll("1", "2", "3")
+val result2 = addAll("1", "a", "3")
+```
+
+残念ながら、モナド変換子の扱いに万能のアプローチは存在しない。チームの規模や経験、コードベースの複雑さなど、さまざまな要因によって、最適なアプローチは異なるだろう。モナド変換子が自分たちに適しているかどうかを判断するためには、試行錯誤し、同僚からのフィードバックを集める必要があるかもしれない。
+
+## 演習: モナド戦士、トランスフォーム、出動！
+
+変形して姿を隠すことで知られるオートボットたちは、戦闘中に仲間のパワーレベルを問い合わせるメッセージを頻繁に送信する。彼らはこの情報を使って戦略を立て、強力な攻撃を仕掛けるのである。メッセージ送信のメソッドは次のようになっている。
+
+```scala
+def getPowerLevel(autobot: String): Response[Int] =
+  ???
+```
+
+地球の粘性の高い大気の中では通信に時間がかかる。衛星の故障ややっかいなディセプティコン[^transformers]による妨害のためにメッセージが失われることもある。そこで、`Response` はモナドのスタックとして表現されている。
+
+```scala mdoc
+type Response[A] = Future[Either[String, A]]
+```
+
+[^transformers]: オートボットのニューラルネットワークが Scala で実装されているのはよく知られた事実である。一方、ディセプティコンの頭脳はもちろん動的型付けである。
+
+コンボイは自分のニューラルマトリクス内でのネストされた for 内包表記にうんざりしている。モナド変換子を使って `Response` の型定義を書き直し、彼を助けよ。
+
+<div class="solution">
+このモナドスタックは比較的シンプルな組み合わせである。`Future` を外側に置き、`Either` を内側に配置したいので、`Future` を型パラメータとする `EitherT` を使って内側から外側に向けて構築する。
+
+```scala mdoc:silent:reset-object
+import cats.data.EitherT
+import scala.concurrent.Future
+
+type Response[A] = EitherT[Future, String, A]
+```
+</div>
+
+架空の仲間たちからデータを取得する `getPowerLevel` 関数を実装し、`Response` の定義が適切であることをテストせよ。以下のデータを使用するものとする。
+
+```scala mdoc:silent
+val powerLevels = Map(
+  "Jazz"      -> 6,
+  "Bumblebee" -> 8,
+  "Hot Rod"   -> 10
+)
+```
+
+オートボットが `powerLevels` のマップに存在しない場合は、アクセスできなかったことを報告するエラーメッセージを返すこと。また、有用性を高めるため、メッセージには `name` を含めること。
+
+<div class="solution">
+```scala mdoc:silent:reset
+import cats.data.EitherT
+import scala.concurrent.Future
+val powerLevels = Map(
+  "Jazz"      -> 6,
+  "Bumblebee" -> 8,
+  "Hot Rod"   -> 10
+)
+```
+```scala mdoc:silent
+import cats.instances.future._ // Monad
+import scala.concurrent.ExecutionContext.Implicits.global
+
+type Response[A] = EitherT[Future, String, A]
+
+def getPowerLevel(ally: String): Response[Int] = {
+  powerLevels.get(ally) match {
+    case Some(avg) => EitherT.right(Future(avg))
+    case None      => EitherT.left(Future(s"$ally unreachable"))
+  }
+}
+```
+</div>
+
+二体のオートボットは、パワーレベルの合計が15を超えると、必殺技の使用が可能となる。二体の仲間の名前を受け取り、必殺技が使えるかどうかを判定するメソッド `canSpecialMove` を作成せよ。指定した仲間のいずれかが見つからない場合は、適切なエラーメッセージとともに失敗させること。
+
+```scala mdoc:silent
+def canSpecialMove(ally1: String, ally2: String): Response[Boolean] =
+  ???
+```
+
+<div class="solution">
+指定された仲間それぞれにパワーレベルを問い合わせ、得られた結果を `map` と `flatMap` で結合すればよい。
+
+```scala mdoc:invisible:reset-object
+import cats.implicits._
+import cats.data._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+type Response[A] = EitherT[Future, String, A]
+
+val powerLevels = Map(
+  "Jazz"      -> 6,
+  "Bumblebee" -> 8,
+  "Hot Rod"   -> 10
+)
+
+def getPowerLevel(ally: String): Response[Int] = {
+  powerLevels.get(ally) match {
+    case Some(avg) => EitherT.right(Future(avg))
+    case None      => EitherT.left(Future(s"$ally unreachable"))
+  }
+}
+```
+```scala mdoc:silent
+def canSpecialMove(ally1: String, ally2: String): Response[Boolean] =
+  for {
+    power1 <- getPowerLevel(ally1)
+    power2 <- getPowerLevel(ally2)
+  } yield (power1 + power2) > 15
+```
+</div>
+
+最後に、二体の仲間の名前を受け取り、彼らに必殺技が使えるかどうかを記したメッセージを出力するメソッド `tacticalReport` を作成せよ。
+
+```scala mdoc:silent
+def tacticalReport(ally1: String, ally2: String): String =
+  ???
+```
+
+<div class="solution">
+`value` メソッドを使ってモナドスタックを展開し、さらに `Await` と `fold` で `Future` と `Either` を展開すればよい。
+
+```scala mdoc:invisible:reset
+import cats.implicits._
+import cats.data._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+type Response[A] = EitherT[Future, String, A]
+
+val powerLevels = Map(
+  "Jazz"      -> 6,
+  "Bumblebee" -> 8,
+  "Hot Rod"   -> 10
+)
+
+def getPowerLevel(ally: String): Response[Int] = {
+  powerLevels.get(ally) match {
+    case Some(avg) => EitherT.right(Future(avg))
+    case None      => EitherT.left(Future(s"$ally unreachable"))
+  }
+}
+```
+```scala mdoc:silent
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
+def canSpecialMove(ally1: String, ally2: String): Response[Boolean] =
+  for {
+    power1 <- getPowerLevel(ally1)
+    power2 <- getPowerLevel(ally2)
+  } yield (power1 + power2) > 15
+
+def tacticalReport(ally1: String, ally2: String): String = {
+  val stack = canSpecialMove(ally1, ally2).value
+
+  Await.result(stack, 1.second) match {
+    case Left(msg) =>
+      s"Comms error: $msg"
+    case Right(true)  =>
+      s"$ally1 and $ally2 are ready to roll out!"
+    case Right(false) =>
+      s"$ally1 and $ally2 need a recharge."
+  }
+}
+```
+</div>
+
+これで、`tacticalReport` は以下のように使えるようになるはずである。
 
 ```scala mdoc
 tacticalReport("Jazz", "Bumblebee")

@@ -1,3 +1,5 @@
+<!--
+
 ## Tagless Final Interpreters
 
 We'll now explore tagless final, an extension to the basic codata interpreter.
@@ -286,3 +288,273 @@ A few notes before we move on.
 In this example the program type is the same as the type we interpret to. We can use `Double` as the program type when we want to interpret to `Double`, and likewise with `String`. This is usually *not* the case. It's just a coincidence of using arithmetic that we don't need any additional information to calculate the final result, and hence the program type and interpreter result type are the same. 
 
 There is quite a high notational overhead of tagless final, compared to the data and codata interpreters. We'll address this later, and end up with an encoding of tagless final in Scala that looks like ordinary code. First, however, we'll introduce a more compelling example: cross-platform user interfaces.
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## Tagless Final インタープリタ
+
+ここでは、基本的な余データ的インタープリタを拡張した手法である Tagless Final を探っていく。ターミナル DSL のケーススタディでは、問題が見つかるたびに修正を加えるという場当たり的な方法で DSL を構築してきた。本節ではこれをより体系的に進め、どのように戦略を当てはめればコードを導出することができるのかを説明する。それによって、基本的な余データ的インタープリタを Tagless Final に変換する方法も明らかになるだろう。
+
+最初に、余データ的インタープリタにおける各型の役割を明示しておく。[@sec:interpreters:structure]節で見たように、代数においては三種類のメソッドが存在する。
+
+* コンストラクタ（`A => Program` 型）
+* コンビネータ（`Program => Program` 型）
+* インタープリタ（`Program => A` 型）
+
+ターミナル DSL では、`Program` 型を以下のように定義した。
+
+```scala
+type Program[A] = State[Terminal, A]
+```
+
+コンストラクタは `String => Program[Unit]` 型の `print` ひとつだけである。出力スタイルを変える `bold`、`red`、`blue` といったメソッドはすべて `Program[A] => Program[A]` 型のコンビネータである。そして関数適用という唯一のインタープリタがあり、事実上 `Program[A] => A` という型をもっている。
+
+余データ的インタープリタにおいて可能な解釈は、`Program` 型に対して利用可能なメソッドに限定される。ターミナル DSL はプログラムを関数として表現しているため、利用可能な解釈はただひとつだけである。この制限を回避するための Tagless Final の鍵となるアイデアは、`Program` 型をプログラム操作によってパラメータ化することにある。これがどういう意味なのかはやや分かりにくいので、Tagless Final の簡単な例を通じて説明しよう。
+
+例として扱うのは算術式である。特に魅力的とは言えないが誰もがよく知っている題材なので、ドメインに気を取られることなく Tagless Final の詳細に集中できる。より実用的な例は後ほど取り上げる。
+
+まずはデータによるインタープリタを定義し、それを余データ的インタープリタに変換し、その後 Tagless Final を適用する。以下に代数的データ型を用いて定義されたプログラム型を示す。コンストラクタは代数的データ型の一部として含まれるため、明示的な定義は不要である。
+
+```scala mdoc:silent
+enum Expr {
+  case Add(l: Expr, r: Expr)
+  case Sub(l: Expr, r: Expr)
+  case Mul(l: Expr, r: Expr)
+  case Div(l: Expr, r: Expr)
+  
+  case Literal(value: Double)
+}
+```
+
+続いて、ふたつのインタープリタを定義する。ひとつは `Expr` を評価して `Double` 値を算出し、もうひとつは `Expr` を `String` として出力する。いずれも、構造的再帰を用いて実装される。
+
+```scala mdoc:silent
+object EvalInterpreter {
+  import Expr.*
+
+  def eval(expr: Expr): Double =
+    expr match {
+      case Add(l, r) => eval(l) + eval(r)
+      case Sub(l, r) => eval(l) - eval(r)
+      case Mul(l, r) => eval(l) * eval(r)
+      case Div(l, r) => eval(l) / eval(r)
+      case Literal(value) => value
+    }
+}
+object PrintInterpreter {
+  import Expr.*
+
+  def print(expr: Expr): String =
+    expr match {
+      case Add(l, r) => s"(${print(l)} + ${print(r)})"
+      case Sub(l, r) => s"(${print(l)} - ${print(r)})"
+      case Mul(l, r) => s"(${print(l)} * ${print(r)})"
+      case Div(l, r) => s"(${print(l)} / ${print(r)})"
+      case Literal(value) => value.toString
+    }
+}
+```
+
+簡単な使用例を見てみよう。まず式を定義する。ここでは `1 + 2` という式を考える。
+
+```scala mdoc:silent
+val onePlusTwo = Expr.Add(Expr.Literal(1), Expr.Literal(2))
+```
+
+そうすると、この式を二種類の方法で解釈可能となる。
+
+```scala mdoc
+EvalInterpreter.eval(onePlusTwo)
+PrintInterpreter.print(onePlusTwo)
+```
+
+ここにはおなじみのトレードオフがある。新しいインタープリタを追加するのは簡単だが、プログラム型に新しいオペレータを追加するのは難しい。
+
+次に、これを余データ表現に変換してみよう。インタープリタは `Expr` 型のメソッドとして定義される。
+
+```scala mdoc:reset:silent
+trait Expr {
+  def eval: Double
+  def print: String
+}
+```
+
+コンストラクタとコンビネータは `Expr` インスタンスを生成する。`Expr` の部分型を明示的に定義することもできたが、ここではコードをコンパクトに保つため無名の部分型を用いた。実装には構造的余再帰を用いている。
+
+```scala mdoc:reset:silent
+trait Expr {
+  def eval: Double
+  def print: String
+
+  def +(that: Expr): Expr = {
+    val self = this
+    new Expr {
+      def eval: Double = self.eval + that.eval
+      def print: String = s"(${self.print} + ${that.print})"
+    }
+  }
+
+  def -(that: Expr): Expr = {
+    val self = this
+    new Expr {
+      def eval: Double = self.eval - that.eval
+      def print: String = s"(${self.print} - ${that.print})"
+    }
+  }
+
+  def *(that: Expr): Expr = {
+    val self = this
+    new Expr {
+      def eval: Double = self.eval * that.eval
+      def print: String = s"(${self.print} * ${that.print})"
+    }
+  }
+
+  def /(that: Expr): Expr = {
+    val self = this
+    new Expr {
+      def eval: Double = self.eval / that.eval
+      def print: String = s"(${self.print} / ${that.print})"
+    }
+  }
+}
+object Expr {
+  def literal(value: Double): Expr =
+    new Expr {
+      def eval: Double = value
+      def print: String = value.toString
+    }
+}
+```
+
+これを使って先ほどの例と同じ式を記述できる。
+
+```scala mdoc:silent
+val onePlusTwo = Expr.literal(1) + Expr.literal(2)
+```
+
+そして、先ほどと同じようにそれを解釈する。
+
+```scala mdoc
+onePlusTwo.eval
+onePlusTwo.print
+```
+
+想定していたとおり、このコードは先ほどとは反対の拡張性をもっている。プログラムに新しい操作を追加するのは簡単にできる。たとえば以下では `sin` という操作を追加している。
+
+```scala mdoc:silent
+def sin(expr: Expr): Expr = {
+  new Expr {
+    def eval: Double = Math.sin(expr.eval)
+    def print: String = s"sin(${expr.print})"
+  }
+}
+```
+
+しかし一方で、`Expr` にすでに定義されている `eval` と `print` というふたつの解釈にしか対応できないという制約がある。
+
+議論をより正確に進められるように、ここでいくつか用語を導入しておきたい。まず、**プログラム代数（program algebras）**という言葉を、コンストラクタとコンビネータの集まりを指すものとして用いることにする。これらはプログラムを作成するために用いられる代数の一部だからである。また、プログラムそのものと**プログラム型（program type）**を区別する必要がある。先ほどの例で言えば `Expr` がプログラム型で、プログラムとはプログラム型の値を生成する式のことを指す。
+
+Tagless Final の核心は、次の二点にある。
+
+1. プログラム型によってパラメータ化されたプログラム代数を定義すること  
+2. プログラムを、それが依存しているプログラム代数によってパラメータ化すること
+
+先ほどの例におけるプログラム代数は次のように定義できる。
+
+```scala mdoc:silent:reset
+trait Arithmetic[Expr] {
+  def +(l: Expr, r: Expr): Expr
+  def -(l: Expr, r: Expr): Expr
+  def *(l: Expr, r: Expr): Expr
+  def /(l: Expr, r: Expr): Expr
+  
+  def literal(value: Double): Expr
+}
+```
+
+プログラム型である `Expr` によってパラメータ化されている点に注目してほしい。この定義をもとにプログラムを作成できる。以下は、これまで見てきたのと同じ例を Tagless Final 形式で書き直したものである。
+
+```scala mdoc:silent
+def onePlusTwo[Expr](arithmetic: Arithmetic[Expr]): Expr =
+  arithmetic.+(arithmetic.literal(1.0), arithmetic.literal(2.0))
+```
+
+プログラムとプログラム型が区別されていることを意識しておくとよい。プログラムはプログラム型の値を作成するが、それ自体はプログラム型ではない。Tagless Final において、プログラムとはプログラム代数を受け取りプログラム型を返す関数である。
+
+`Arithmetic` インスタンスを作成することでこの例は完成する。
+
+```scala mdoc:silent
+object DoubleArithmetic extends Arithmetic[Double] {
+  def +(l: Double, r: Double): Double =
+    l + r
+  def -(l: Double, r: Double): Double =
+    l - r
+  def *(l: Double, r: Double): Double = 
+    l * r
+  def /(l: Double, r: Double): Double = 
+    l / r
+  
+  def literal(value: Double): Double =
+    value
+}
+```
+
+この例は以下のように書けば実行できる。
+
+```scala mdoc
+onePlusTwo(DoubleArithmetic)
+```
+
+Tagless Final は両方の軸について拡張性を提供してくれる。新しいインタープリタの追加は以下のように行うことができる。
+
+```scala mdoc:silent
+object PrintArithmetic extends Arithmetic[String] {
+  def +(l: String, r: String): String =
+    s"($l + $r)"
+  def -(l: String, r: String): String =
+    s"($l - $r)"
+  def *(l: String, r: String): String = 
+    s"($l * $r)"
+  def /(l: String, r: String): String = 
+    s"($l / $r)"
+  
+  def literal(value: Double): String =
+    value.toString
+}
+```
+
+実行方法は先ほどと同じである。
+
+```scala mdoc
+onePlusTwo(PrintArithmetic)
+```
+
+新しいプログラム代数を定義することもできる。
+
+```scala mdoc:silent
+trait Trigonometry[Expr] {
+  def sin(expr: Expr): Expr
+}
+```
+
+そして、プログラムでそれらを用いる。
+
+```scala mdoc:silent
+def sinOnePlusTwo[Expr](
+    arithmetic: Arithmetic[Expr],
+    trigonometry: Trigonometry[Expr]
+  ): Expr =
+  trigonometry.sin(onePlusTwo(arithmetic))
+```
+
+ここで合成が用いられていることも重要なポイントである。プログラム `sinOnePlusTwo` は `onePlusTwo` を再利用している。
+
+次に進む前にいくつか補足しておきたい。
+
+この例では、プログラム型とインタプリタの出力型が一致している。`Double` へと解釈したいときはプログラム型として `Double` を用いているし、`String` の場合も同様である。これはたまたま算術式という題材を用いているからであり、いつもそうとはかぎらない。算術式から最終的な結果を算出するのに追加情報が必要ないため、プログラム型と出力型が一致しているにすぎない。
+
+また、Tagless Final はデータや余データによるインタープリタと比べて記法上の負荷が高い。これについては後ほど取り扱い、最終的には普通の Scala コードのような見た目の表現へと改善していく。だがその前に、もっと魅力的な例としてクロスプラットフォームのユーザインターフェースを取り上げよう。
