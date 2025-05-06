@@ -24,12 +24,13 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-sm-8 pt-4">
-          <p class="small text-center">Read or download the current version</p>
+          <p class="small text-center">最新版を読む（ダウンロードする）</p>
           <p class="d-flex justify-content-between">
             <a href="dist/scala-with-cats.html">HTML</a>
             <a href="dist/scala-with-cats.pdf">PDF</a>
             <a href="dist/scala-with-cats.epub">ePUB</a>
-            <a href="https://github.com/scalawithcats/scala-with-cats">Source</a>
+            <a href="https://github.com/fxfan/scala-with-cats-ja">Source （翻訳版）</a>
+            <a href="https://github.com/scalawithcats/scala-with-cats">Source （原文）</a>
           </p>
         </div>
       </div>
@@ -43,6 +44,7 @@
         </div>
         <div class="col-sm-8">
           <div class="text-center">
+            <!--
             <blockquote class="blockquote dark text-justify">
               <p>
                 <em>Functional Programming Strategies</em> is the evolution of <em>Scala with Cats</em>.
@@ -66,30 +68,53 @@
               </p>
               <footer class="blockquote-footer">Noel</footer>
             </blockquote>
-
-            <p><small><em>Scala with Cats</em> is still available in
-              <a href="dist/scala-with-cats-1.html">HTML</a>,
-              <a href="dist/scala-with-cats-1.pdf">PDF</a>,
-              and,
-              <a href="dist/scala-with-cats-1.epub">ePub</a>.
+            -->
+            <blockquote class="blockquote dark text-justify">
+              <p>
+                <em>Functional Programming Strategies</em> は、<em>Scala with Cats</em> の発展版である。
+                この新しい書籍の目標は、<em>Scala with Cats</em> における当初の目標──紙の書籍としての刊行と Cats 2 に対応する改定──を引き継ぎつつ、
+                著者が十年以上にわたって Scala によるソフトウェア構築に用いてきた要となる概念や技法をカバーすることである。
+                この試みがうまくいけば、本書を読むことで Scala を使う方はもちろん、他の関連する関数型言語を使う方も、
+                卓越したソフトウェアを構築するための道具を手にできるはずである。
+              </p>
+              <p>
+                こうした変更により本書の重点は型クラスから離れていき、
+                徐々に、旧タイトルではもはや内容を正確に表していないと感じるようになった。
+                そこで新たなタイトルが必要となった。
+                現在この本はプログラミング戦略というアイデアに焦点を当てているので、
+                <em>Functional Programming Strategies</em> とするのは当然の選択だった。
+                サブタイトルの <em>In Scala with Cats</em> は、本書の系譜を示すものであり、
+                型クラスや Cats におけるその実装に関する内容が引き続き含まれていることを表している。
+              </p>
+              <p>
+                <em>Scala with Cats</em> と本書を支えてくれたすべての方に感謝する。
+                長い道のりではあったが、読者にとってそれだけの価値があることを願っている。
+              </p>
+              <footer class="blockquote-footer">Noel</footer>
+            </blockquote>
+            <p><small>旧版である <em>Scala with Cats</em> は
+              <a href="dist/scala-with-cats-1.html">HTML</a>、
+              <a href="dist/scala-with-cats-1.pdf">PDF</a>、
+              <a href="dist/scala-with-cats-1.epub">ePub</a>
+              で読むことができる。
             </small></p>
           </div>
         </div>
       </div>
       <div class="row justify-content-center">
         <div class="col-sm-8 pt-4">
-          <h4 class="text-center pb-2">Sign up to the newsletter to stay updated on progress.</h4>
+          <h4 class="text-center pb-2">本書の執筆状況に関する最新情報を受け取りたい方はニュースレターにご登録ください。</h4>
           <form
-            action="https://buttondown.email/api/emails/embed-subscribe/scalawithcats"
+            action="https://buttondown.email/api/emails/embed-subscribe/functionalprogrammingstrategies"
             method="post"
             target="popupwindow"
-            onsubmit="window.open('https://buttondown.email/scalawithcats', 'popupwindow')"
+            onsubmit="window.open('https://buttondown.email/functionalprogrammingstrategies', 'popupwindow')"
             class="embeddable-buttondown-form"
           >
             <div class="form-group">
-              <label for="bd-email">Email address</label>
+              <label for="bd-email">メールアドレス</label>
               <input type="email" class="form-control" name="email" id="bd-email">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
+              <small class="form-text text-muted">入力いただいたメールアドレスを第三者と共有することはありません。</small>
             </div>
             <input type="hidden" value="1" name="embed"></input>
             <input type="submit" class="btn btn-primary" value="Subscribe"></input>
@@ -102,11 +127,20 @@
 
       <div class="row justify-content-center">
         <div class="col-sm-8 pt-4">
+          <!--
           <h4 class="text-center pb-2">Support the Book</h4>
           <p class="text-justify">
             There are a few options if you'd like to support Functional Programming Strategies.
             Once printed books are available you could purchase a copy (or perhaps one for you and one for a colleague?)
             If you need help with a Scala project there is a great team available at <a href="https://inner-product.com/">Inner Product</a>.</p>
+          -->
+          <h4 class="text-center pb-2">本書の支援について</h4>
+          <p class="text-justify">
+            『Functional Programming Strategies』を支援したいとお考えの方には、いくつか方法があります。
+            書籍の印刷版が入手可能になった際には、ご購入をご検討ください（ご自身用と、同僚の分もいかがでしょう？）。
+            また、Scala を用いたプロジェクトにおいてサポートが必要な場合は、ぜひご相談ください。
+            <a href="https://inner-product.com/">Inner Product</a> の優れたチームが対応します。
+          </p>
         </div>
       </div>
 
