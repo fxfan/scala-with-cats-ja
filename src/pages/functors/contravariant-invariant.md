@@ -1,3 +1,5 @@
+<!--
+
 ## Contravariant and Invariant Functors {#sec:functors:contravariant-invariant}
 
 As we have seen, we can think of `Functor's` `map` method as
@@ -453,3 +455,368 @@ we can convert from `F[A]` to `F[B]`
 via a function `A => B`
 and vice versa via a function `B => A`.
 </div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 反変ファンクターと非変ファンクター {#sec:functors:contravariant-invariant}
+
+これまで見てきたように、`Functor` の `map` メソッドが行うのは、変換をチェーンに追加することだと考えることができる。ここでは、更にふたつの型クラスを見ていく。ひとつは操作をチェーンの先頭に挿入するもの、もうひとつは*双方向の*操作チェーンを構築するものである。これらはそれぞれ、*反変ファンクター（contravariant functor）*、*非変ファンクター（invariant functor）*と呼ばれている。
+
+<div class="callout callout-info">
+*この節は一旦スキップしてもよい。*
+
+本書におけるもっとも重要な型クラスで次章の中心的テーマとなるのがモナドだが、モナドを理解するのに反変ファンクターや不変ファンクターについて知っておく必要はない。しかし、反変ファンクターや不変ファンクターは、[@sec:applicatives]章で `Semigroupal` や `Applicative` を論じる際に役立つ。
+
+今すぐモナドに進みたい場合は[@sec:monads]章に飛んでかまわない。[@sec:applicatives]章を読む前に、この節に戻ってくるとよい。
+</div>
+
+### 反変ファンクターと `contramap` メソッド {#sec:functors:contravariant}
+
+最初に紹介するのは反変ファンクターである。この型クラスは `contramap` という操作を提供する。このメソッドは、操作をチェーンの先頭に挿入する（prepending）。一般的な型シグネチャを図 [@fig:functors:contramap-type-chart]に示す。
+
+![Type chart: the contramap method](src/pages/functors/generic-contramap.pdf+svg){#fig:functors:contramap-type-chart}
+
+`contramap` メソッドは、*変換*を表すデータ型に対してのみ意味をもつ。たとえば `Option` に対して `contramap` を定義することはできない。`Option[B]` に含まれる値を `A => B` という関数を通して逆方向に処理する方法がないためである。一方、[@sec:type-classes:display]節で説明した `Display` 型クラスに対しては `contramap` を定義できる。
+
+```scala mdoc:silent
+trait Display[A] {
+  def display(value: A): String
+}
+```
+
+`Display[A]` は `A` から `String` への変換を表している。`Display` の `contramap` メソッドは、`B => A` 型の関数 `func` を受け取り、新しい `Display[B]` を生成する。
+
+```scala mdoc:silent:reset-object
+trait Display[A] {
+  def display(value: A): String
+
+  def contramap[B](func: B => A): Display[B] =
+    ???
+}
+
+def display[A](value: A)(using p: Display[A]): String =
+  p.display(value)
+```
+
+#### 演習: `contramap` で魅せる
+
+上記の `Display` に `contramap` メソッドを実装せよ。次のコードテンプレートから始め、`???` を動作する実装に置き換えるとよい。
+
+```scala
+trait Display[A] {
+  def display(value: A): String
+
+  def contramap[B](func: B => A): Display[B] =
+    new Display[B] {
+      def display(value: B): String =
+        ???
+    }
+}
+```
+
+行き詰まった場合は、型について考えるとよい。`B` という型の値 `value` を `String` に変換する必要がある。どのような関数やメソッドが利用可能で、それらをどういう順番で組み合わせるべきだろうか。
+
+<div class="solution">
+動作する実装を以下に示す。`func` を使って `B` を `A` に変換し、その後、元の `Display` を使って `A` を `String` に変換する。すこし巧妙なテクニックとして、`self` エイリアスを使い、外側と内側の `Display` を区別している。
+
+```scala mdoc:silent:reset-object
+trait Display[A] { self =>
+
+  def display(value: A): String
+
+  def contramap[B](func: B => A): Display[B] =
+    new Display[B] {
+      def display(value: B): String =
+        self.display(func(value))
+    }
+}
+
+def display[A](value: A)(using p: Display[A]): String =
+  p.display(value)
+```
+</div>
+
+テスト用に `String` と `Boolean` に対する `Display` インスタンスを定義しよう。
+
+```scala mdoc:silent
+given stringDisplay: Display[String] with {
+  def display(value: String): String =
+    s"'${value}'"
+}
+
+given booleanDisplay: Display[Boolean] with {
+  def display(value: Boolean): String =
+    if value then "yes" else "no"
+}
+```
+
+```scala mdoc
+display("hello")
+display(true)
+```
+
+次に、下記のような `Box` という case クラスに対して `Display` インスタンスを定義せよ。これは[@sec:type-classes:composition]節で言及した型クラスの合成の例である。
+
+```scala mdoc:silent
+final case class Box[A](value: A)
+```
+
+`new Display[Box]` などとフルスクラッチで定義を書き出すのではなく、`contramap` を使って既存のインスタンスから求めているインスタンスを作成すること。
+
+```scala mdoc:invisible
+given boxDisplay[A](using p: Display[A]): Display[Box[A]] =
+  p.contramap[Box[A]](_.value)
+```
+
+このインスタンスは次のように利用できる。
+
+```scala mdoc
+display(Box("hello world"))
+display(Box(true))
+```
+
+`Box` の中身の型に対して　`Display` インスタンスが用意されていない場合、`display` 呼び出しはコンパイルに失敗する。
+
+```scala mdoc:fail
+display(Box(123))
+```
+
+<div class="solution">
+インスタンスがあらゆる型の `Box` に対して汎用的になるよう、`Box` の中身の型に対応する `Display` インスタンスをベースにする。以下のように完全な定義を手作業で書き出してもよいし、
+
+```scala mdoc:invisible:reset-object
+trait Display[A] {
+  self =>
+
+  def display(value: A): String
+
+  def contramap[B](func: B => A): Display[B] =
+    new Display[B] {
+      def display(value: B): String =
+        self.display(func(value))
+    }
+}
+final case class Box[A](value: A)
+```
+```scala mdoc:silent
+given boxDisplay[A](
+    using p: Display[A]
+): Display[Box[A]] with {
+  def display(box: Box[A]): String =
+    p.display(box.value)
+}
+```
+
+もしくは、using 句によって解決された `Display` インスタンスをベースに `contramap` を使って新しいインスタンスを定義することもできる。
+
+```scala mdoc:invisible:reset-object
+trait Display[A] {
+  self =>
+
+  def display(value: A): String
+
+  def contramap[B](func: B => A): Display[B] =
+    new Display[B] {
+      def display(value: B): String =
+        self.display(func(value))
+    }
+}
+
+def display[A](value: A)(implicit p: Display[A]): String =
+  p.display(value)
+
+given stringDisplay: Display[String] =
+  new Display[String] {
+    def display(value: String): String =
+      s"'${value}'"
+  }
+
+given booleanDisplay: Display[Boolean] =
+  new Display[Boolean] {
+    def display(value: Boolean): String =
+      if(value) "yes" else "no"
+  }
+final case class Box[A](value: A)
+```
+```scala mdoc:silent
+given boxDisplay[A](using p: Display[A]): Display[Box[A]] =
+  p.contramap[Box[A]](_.value)
+```
+
+`contramap` を使う方がはるかにシンプルである。また、　純粋関数型のコンビネータを用いてシンプルな部品を組み合わせることで解決策を構築するという、関数型プログラミングのアプローチをよく表現している。
+</div>
+
+
+### 非変ファンクターと `imap` メソッド {#sec:functors:invariant}
+
+*非変ファンクター*は、`imap` というメソッドを実装している。これは大雑把に言えば `map` と `contramap` を組み合わせたようなものである。`map` が関数をチェーンに追加することで、また `contramap` が操作をチェーンの先頭に挿入することで新しい型クラスインスタンスを生成するのに対して、`imap` は双方向の変換ペアを使ってインスタンスを生成する。
+
+もっとも直感的な例は、Circe の [`Codec`][link-circe-codec] や Play JSON の [`Format`][link-play-json-format] のような、あるデータ型についてのエンコードとデコードを表現する型クラスである。`Display` に機能を追加して、`String` との間のエンコードとデコードをサポートすれば、独自の `Codec` を構築できる。
+
+```scala mdoc:silent
+trait Codec[A] {
+  def encode(value: A): String
+  def decode(value: String): A
+  def imap[B](dec: A => B, enc: B => A): Codec[B] = ???
+}
+```
+
+```scala mdoc:invisible:reset-object
+trait Codec[A] {
+  self =>
+
+  def encode(value: A): String
+  def decode(value: String): A
+
+  def imap[B](dec: A => B, enc: B => A): Codec[B] =
+    new Codec[B] {
+      def encode(value: B): String =
+        self.encode(enc(value))
+
+      def decode(value: String): B =
+        dec(self.decode(value))
+    }
+}
+```
+
+```scala mdoc:silent
+def encode[A](value: A)(using c: Codec[A]): String =
+  c.encode(value)
+
+def decode[A](value: String)(using c: Codec[A]): A =
+  c.decode(value)
+```
+
+`imap` の型チャートを図[@fig:functors:imap-type-chart]に示す。`Codec[A]` と、`A => B` および `B => A` の関数のペアがあれば、`imap` メソッドは `Codec[B]` を生成する。
+
+![Type chart: the imap method](src/pages/functors/generic-imap.pdf+svg){#fig:functors:imap-type-chart}
+
+使用例として、渡された値をそのまま返すだけの `encode` と `decode` をもつシンプルな `Codec[String]` を想像してみよう。
+
+```scala mdoc:silent
+given stringCodec: Codec[String] with {
+  def encode(value: String): String = value
+  def decode(value: String): String = value
+}
+```
+
+`imap` を使えば、この `stringCodec` をもとにして他の型に対する多くの有用な `Codec` を構築することができる。
+
+```scala mdoc:silent
+given intCodec: Codec[Int] =
+  stringCodec.imap(_.toInt, _.toString)
+
+given booleanCodec: Codec[Boolean] =
+  stringCodec.imap(_.toBoolean, _.toString)
+```
+
+<div class="callout callout-info">
+*エラーへの対処*
+
+ここで紹介した `Codec` 型クラスの `decode` メソッドは失敗を考慮していない。データ間のより洗練された関係をモデル化したい場合は、ファンクターにとどまらず*レンズ*や*オプティクス*を検討するとよい。
+
+オプティクスはこの本では扱わない。深く知りたければ、Julien Truffaut のライブラリ [Monocle][link-monocle] がすばらしい出発点になってくれるだろう。
+</div>
+
+
+#### `imap` を使った変換的思考
+
+上述の `Codec` に `imap` を実装せよ。
+
+<div class="solution">
+正しく動作する実装を以下に示す。
+
+```scala mdoc:silent:reset-object
+trait Codec[A] { self =>
+  def encode(value: A): String
+  def decode(value: String): A
+
+  def imap[B](dec: A => B, enc: B => A): Codec[B] = {
+    new Codec[B] {
+      def encode(value: B): String =
+        self.encode(enc(value))
+
+      def decode(value: String): B =
+        dec(self.decode(value))
+    }
+  }
+}
+```
+
+```scala mdoc:invisible
+given stringCodec: Codec[String] =
+  new Codec[String] {
+    def encode(value: String): String = value
+    def decode(value: String): String = value
+  }
+
+given intCodec: Codec[Int] =
+  stringCodec.imap[Int](_.toInt, _.toString)
+
+given booleanCodec: Codec[Boolean] =
+  stringCodec.imap[Boolean](_.toBoolean, _.toString)
+
+def encode[A](value: A)(using c: Codec[A]): String =
+  c.encode(value)
+
+def decode[A](value: String)(using c: Codec[A]): A =
+  c.decode(value)
+```
+</div>
+
+作成した `imap` メソッドが正しく動くことを、`Double` 型用の `Codec` を定義することで示せ。
+
+<div class="solution">
+`stringCodec` の `imap` メソッドを使ってこれを実装できる。
+
+```scala mdoc:silent
+given doubleCodec: Codec[Double] =
+  stringCodec.imap[Double](_.toDouble, _.toString)
+```
+</div>
+
+最後に、次の `Box` 型との相互変換を行う `Codec` を実装せよ。
+
+```scala mdoc:silent
+final case class Box[A](value: A)
+```
+
+<div class="solution">
+ここでは、任意の `A` について `Box[A]` との相互変換を行う汎用的な `Codec` が求められている。暗黙パラメータとしてスコープに導入される `Codec[A]` インスタンスの `imap` を用いることでこれを作成する。
+
+```scala mdoc:silent
+given boxCodec[A](using c: Codec[A]): Codec[Box[A]] =
+  c.imap[Box[A]](Box(_), _.value)
+```
+</div>
+
+作成したインスタンスは次のように利用できるはずである。
+
+```scala mdoc
+encode(123.4)
+decode[Double]("123.4")
+
+encode(Box(123.4))
+decode[Box[Double]]("123.4")
+```
+
+<div class="callout callout-warning">
+*ファンクターの名前に込められた意味*
+
+これらの異なる種類のファンクターはどうして「反変」「不変」「共変」という名称で呼ばれているのだろうか。
+
+[@sec:variance]節を思い出してほしい。変位は部分型関係に影響を与える。部分型関係とは本質的には、ある型の値を、別の型の値が期待されている文脈でコードを破壊することなく使用可能か、という関係性のことを指す。
+
+部分型関係は、変換可能性とみなすことができる。もし `B` が `A` の部分型であれば、`B` は常に `A` に変換できる。
+
+これは、`B => A` 型の関数が存在するとき `B` は `A` の部分型である、と言い換えることができる。共変ファンクターはこの関係性を正確に捉えている。`F` が共変ファンクターであれば、`B => A` という変換があるときは常に `F[B]` を `F[A]` に変換できる[^tn-functors-contravariant-invariant-01]。
+
+反変ファンクターはそれと逆のパターンを捉えている。`F` が反変ファンクターであれば、`B => A` という変換があるときは常に `F[A]` を `F[B]` に変換できる。
+
+最後に、不変ファンクターは、`A => B` 型関数を通じて `F[A]` を `F[B]` に変換でき、`B => A` 型関数についてその逆がいえる、そういうケースを捉えている。
+</div>
+
+[^tn-functors-contravariant-invariant-01]: 【訳注】 以下は訳者の勝手な解釈だが、おそらく、次のようなことを言いたいのだと思う。`B` を `A` に変換できるということは、`B` は `A` に必要とされるすべての情報をもっており（もしくは生み出すことができ）、`A` を代替できる。この関係を仮に、`B` は `A` の「変換的部分型」であると呼ぶとしたら、`A` と `B` の間の変換的部分型関係とファンクター `F[A]` と `F[B]` の間の変換的部分型関係は、`A` と `B` の部分型関係と高カインド型 `F[A]` と `F[B]` の部分型関係のアナロジーで考えることができる。この発想により、変換関係に変位の概念をもち込むことができる。不変ファンクター `F` についてのみ更に補足すると、`F` は `A => B` （もしくはその逆）という単方向の変換があっても `F[A]` と `F[B]` の間に変換的部分型関係が成立しないから「不変」である。ただし、双方向の変換が存在する場合、`A` と `B` は互いに変換的部分型であるということになり、それは `A` と `B` が（変換的に）同じ型であることを意味する。ゆえに `F[A]` と `F[B]` は相互に変換可能であるという一見「不変」という言葉と矛盾した性質を示す。

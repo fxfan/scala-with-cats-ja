@@ -1,3 +1,5 @@
+<!--
+
 # Objects as Codata {#sec:codata}
 
 In this chapter we will look at **codata**, the dual of algebraic data types.
@@ -24,3 +26,18 @@ Next we will look at transforming algebraic data to codata, and vice versa.
 We will finish by examining differences in extensibility.
 
 A quick note about terminology before we proceed. We might expect to use the term algebraic codata for the dual of algebraic data, but conventionally just codata is used. I assume this is because data is usually understood to have a wider meaning than just algebraic data, but codata is not used outside of programming language theory. For simplicity and symmetry, within this chapter I'll just use the term data to refer to algebraic data types.
+
+
+-->
+
+# 余データとしてのオブジェクト {#sec:codata}
+
+この章では、代数的データ型の双対である**余データ**について見ていく。代数的データ型はモノがどのように構築されるかに焦点を当てているのに対して、余データはモノがどのように利用されるかに焦点を当てる。余データは、型に対して実行できる操作を指定することで定義される。これはオブジェクト指向プログラミングにおけるインターフェースの使い方と非常に似ており、これが余データに注目する最初の理由である。オブジェクト指向プログラミングは、余データという概念によって、我々が今議論している戦略と整合性のある概念的枠組みの中に位置づけられる。
+
+しかし、余データに注目するのはオブジェクト指向プログラミングを捉えるためだけではない。余データには、代数的データにはない特性がある。たとえば、余データを使うことで、無限の要素を持つ構造、終わりのないリストや永遠に実行されるサーバーループのようなものを作成することができる。また、余データは拡張性の点でも代数的データとは異なる形をもっている。代数的データ型を別の何かへと変換する関数を新しく作成するのは簡単だが、代数的データ型に新しいバリアントを追加するには既存のコードを変更する必要がある。余データはその逆で、新しい実装を簡単に作成できるが、余データを変換する関数は余データが定義するインターフェースに制約される。
+
+前章では、代数的データ型を使用してプログラムを記述するための戦略として、構造的再帰と構造的余再帰を取り上げた。余データについても同様で、余データを消費するプログラムを書く際には構造的再帰を、生成するプログラムを書く際には構造的余再帰を使用することができる。
+
+まず、余データをより正確に定義し、いくつかの例を見ていこうと思う。次に、Scala における余データの表現方法とオブジェクト指向プログラミングとの関係について説明する。余データの作成方法を理解した後は、無限構造の例を使って、構造的再帰や構造的余再帰を用いた余データの扱い方を学ぶ。その後、代数的データ型と余データの相互変換について考察し、最後に拡張性の違いを検証する。
+
+進める前に用語について簡単に触れておきたい。代数的データの双対としては「代数的余データ」という用語を期待されるかもしれないが、慣例的に単に「余データ」という用語が使われる。これは、データという言葉が、一般的に代数的データに限定されず、より広い意味をもつのに対して、余データはプログラミング言語理論の外では使われないからだと考えられる。この章では、簡潔さと対称性のために、代数的データ型を指す際に「データ」という用語を使用する。

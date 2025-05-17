@@ -1,3 +1,5 @@
+<!--
+
 ## Type Classes and Variance
 
 In this section we'll discuss how variance interacts
@@ -313,3 +315,230 @@ a type annotation like `Some(1) : Option[Int]`
 or by using "smart constructors"
 like the `Option.apply`, `Option.empty`, `some`, and `none` methods
 we saw in Section [@sec:type-classes:comparing-options].
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 型クラスと変位
+
+この節では、変位（variance）が型クラスのインスタンス選択にどのように影響するかを説明する。変位は Scala の型システムの中でも理解が難しい部分のひとつである。なので、まずは変位についておさらいし、それから型クラスとの相互作用について見ていく。
+
+### 変位 {#sec:variance}
+
+変位は、ある型およびその部分型（subtype）に対して定義された型クラスインスタンス同士の関係性に関わる概念である。たとえば、`Some` は `Option` の部分型だが、`JsonWriter[Option[Int]]` 型のインスタンスが定義されているときに、`Json.toJson(Some(1))` という式のコンテキストパラメータとしてそのインスタンスが選択されるだろうか。それを決めるのが変位である。
+
+変位を説明するにあたっては、型コンストラクタと部分型付け（subtyping）というふたつの概念が必要となる。
+
+変位はすべての**型コンストラクタ**に適用される。型コンストラクタとは `F[A]` という型における `F` の部分を指す。たとえば、`List` や `Option` や `JsonWriter` はすべて型コンストラクタである。型コンストラクタは最低でもひとつ型パラメータをもっていなければならず、もっと多くもっていることもある。つまり、型パラメータをふたつもっている `Either` も型コンストラクタである。
+
+部分型付けとは型同士の関係である。`A` 型の値を必要としている場所に `B` 型の値を使うことができるのであれば、`B` は `A` の部分型であると言える。この関係を表すのに `B <: A` という記号を用いることがある。
+
+変位は、`A` と `B` の間に部分型関係がある場合の、`F[A]` と `F[B]` との間の部分型関係がどのようなものであるかを表す。`B` が `A` の部分型である場合、各変位は以下のように説明できる。
+
+1. `F[B] <: F[A]` であれば、`F` は `A` に対して **共変（covariant）** であるという
+2. `F[B] >: F[A]` であれば、`F` は `A` に対して **反変（contravariant）** であるという
+3. `F[B]` と `F[A]` の間に部分型関係がなければ、`F` は `A` に対して **非変（invariant）** であるという
+
+型コンストラクタを定義する際には、その型パラメータに変位アノテーションをつけることができる。たとえば、共変性は `+` 記号で表す。
+
+```scala
+trait F[+A] // "+" は共変を表す
+```
+
+変位アノテーションをつけなければ、その型パラメータは非変となる。次に、共変・反変・非変について詳しく見ていこう。
+
+### 共変
+
+共変とは、`B` が `A` の部分型であるときに、`F[B]` が `F[A]` の部分型となる関係をいう。共変は、`List` や `Option` などのコレクションをはじめとする多くの型をモデリングするのに使える。
+
+```scala
+trait List[+A]
+trait Option[+A]
+```
+
+Scala のコレクションが共変であることにより、ある型のコレクションをその部分型のコレクションで置き換えることが可能である。たとえば、`Circle` が `Shape` の部分型であるならば `List[Shape]` が期待されるあらゆる場所で `List[Circle]` を使うことができる。
+
+```scala mdoc:silent
+sealed trait Shape
+final case class Circle(radius: Double) extends Shape
+```
+
+```scala
+val circles: List[Circle] = ???
+val shapes: List[Shape] = circles
+```
+
+```scala mdoc:invisible
+val circles: List[Circle] = null
+val shapes: List[Shape] = circles
+```
+
+一般的に言えば、共変は、`List` のようなコンテナ型から取り出すことのできるデータや、メソッドの戻り値など、出力となるデータの型に対して用いられる。
+
+### 反変
+
+反変パラメータをもつ型コンストラクタは `-` 記号を用いて次のように表記される。
+
+```scala
+trait F[-A]
+```
+
+ややこしいと思うかもしれないが、反変とは、`A` が `B` の部分型であるときに、`F[B]` が `F[A]` の部分型となる関係をいう。既出の `JsonWriter` 型クラスのように、入力となる型をモデリングするときに用いられる。
+
+```scala mdoc:invisible
+trait Json
+```
+
+```scala mdoc
+trait JsonWriter[-A] {
+  def write(value: A): Json
+}
+```
+
+もうすこし掘り下げてみよう。変位とは、ある型の値を別の型の値に置き換える能力に関する概念である。`Shape` 型の値と `Circle` 型の値、そして `Shape` と `Circle` それぞれの `JsonWriter` がある状況を考えてみるとよい。
+
+```scala
+val shape: Shape = ???
+val circle: Circle = ???
+
+val shapeWriter: JsonWriter[Shape] = ???
+val circleWriter: JsonWriter[Circle] = ???
+```
+
+```scala mdoc:invisible
+val shape: Shape = null
+val circle: Circle = null
+
+val shapeWriter: JsonWriter[Shape] = null
+val circleWriter: JsonWriter[Circle] = null
+```
+
+```scala mdoc:silent
+def format[A](value: A, writer: JsonWriter[A]): Json =
+  writer.write(value)
+```
+
+`format` に渡せる値とライターの組み合わせはどれか、考えてみてほしい。`Circle` はすべて `Shape` でもあるため、どちらのライターを使っても `Circle` を `write` できる。逆に、`Shape` はすべてが `Circle` というわけではないので、`circleWriter` で `Shape` を書き出すことはできない。
+
+反変を使えば、このような関係性をモデリングすることができる。`Circle` は `Shape` の部分型であるため、`JsonWriter[Shape]` が `JsonWriter[Circle]` の部分型となる。つまり、`JsonWriter[Circle]` が期待される場所であればどこでも、`shapeWriter` を使用することができる。
+
+### 非変
+
+非変性はもっともシンプルである。`+` と `-` いずれも指定しなかった型パラメータは非変となる。
+
+```scala
+trait F[A]
+```
+
+これは、 `A` と `B` との関係がいかなるものであっても、`F[A]` と `F[B]` とが互いに部分型関係をもたないことを意味する。これが Scala の型コンストラクタにおけるデフォルトの変位である。
+
+### 変位とインスタンス選択
+
+コンパイラは、求めている型か*もしくはその部分型*にマッチする given インスタンスを探す。したがって、変位指定を行うことで、型クラスインスタンスの選択をある程度は制御することができる。
+
+以下のような代数的データ型があると想像してほしい。
+
+```scala mdoc:silent
+enum A {
+  case B
+  case C
+}
+```
+
+たいていの場合、これについて考えるべきことはふたつある。
+
+ 1. 上位型に対して定義されたインスタンスがあれば、それが選択されるか。たとえば、`A` 用に定義されたインスタンスは `B` 型や `C` 型の値に対しても機能するのか。
+
+ 2. 部分型に対して定義されたインスタンスは上位型に対するものよりも優先的に選択されるか。たとえば、`A` と `B` それぞれ用のインスタンスが定義されている状態で、`B` 型の値に対するインスタンスを必要とした場合、`B` 用のインスタンスが `A` 用のものよりも優先的に選択されるのか。
+
+両方を同時に実現することはできない。各変位における挙動は次表のとおりとなる。
+
+---------------------------------------------------------------------------
+型クラスの変位指定                     非変         共変        反変
+----------------------------------- ----------- ----------- ---------------
+上位型用インスタンスが使われるか          いいえ       いいえ       はい
+特化型用インスタンスが優先されるか        いいえ       はい         いいえ
+---------------------------------------------------------------------------
+
+いくつか例を見てみよう。以下の型を用いて部分型関係を示す。
+
+```scala mdoc:reset:silent
+trait Animal
+trait Cat extends Animal
+trait DomesticShorthair extends Cat
+```
+
+今、三種類の変位に対応する三つの異なる型クラスを定義し、それぞれについて `Cat` 型用のインスタンスを定義する。
+
+```scala mdoc:silent
+trait Inv[A] {
+  def result: String
+}
+object Inv {
+  given Inv[Cat] with
+    def result = "Invariant"
+    
+  def apply[A](using instance: Inv[A]): String =
+    instance.result
+}
+
+trait Co[+A] {
+  def result: String
+}
+object Co {
+  given Co[Cat] with
+    def result = "Covariant"
+
+  def apply[A](using instance: Co[A]): String =
+    instance.result
+}
+
+trait Contra[-A] {
+  def result: String
+}
+object Contra {
+  given Contra[Cat] with
+    def result = "Contravariant"
+
+  def apply[A](using instance: Contra[A]): String =
+    instance.result
+}
+```
+
+まず正常に動作するケースを考えよう。選択されるのは常に `Cat` 用のインスタンスである。非変の場合、厳密に `Cat` 型を指定する必要がある。共変の場合は、`Cat` の上位型、反変の場合は、`Cat` の部分型を指定することができる。
+
+```scala mdoc
+Inv[Cat]
+Co[Animal]
+Co[Cat]
+Contra[DomesticShorthair]
+Contra[Cat]
+```
+
+次は動作しないケースである。非変の場合、`Cat` 以外の型に対しては該当するインスタンスは見つからない。以下のような上位型用の型インスタンス検索は失敗するし、
+
+```scala mdoc:fail
+Inv[Animal]
+```
+
+部分型用も同様に失敗する。
+
+```scala mdoc:fail
+Inv[DomesticShorthair]
+```
+
+共変の場合、インスタンスが定義されている型の部分型に対するインスタンス検索は失敗する。
+
+```scala mdoc:fail
+Co[DomesticShorthair]
+```
+
+反変の場合、インスタンスが定義されている型の上位型に対するインスタンス検索は失敗する。
+
+```scala mdoc:fail
+Contra[Animal]
+```
+
+言うまでもなく、完全なシステムは存在しない。もっとも用いられるのは非変の型クラスで、その場合、必要ならば部分型に対してより具体的なインスタンスを指定することが可能となる。ただし、これはたとえば、`Some[Int]` 型の値に対して `Option` 用の型クラスインスタンスが使用されないことを意味する。この問題は、`Some(1): Option[Int]` のような型注釈を使うか、`Option.apply`、`Option.empty`、`some`、`none` メソッドといった「スマートコンストラクタ」を使うことで解決できる。スマートコンストラクタについては[@sec:type-classes:comparing-options]節で見た。

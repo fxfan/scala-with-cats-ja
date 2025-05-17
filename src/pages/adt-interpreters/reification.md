@@ -1,3 +1,5 @@
+<!--
+
 ## Interpreters and Reification {#sec:interpreters:reification}
 
 There are two different programming strategies at play in the regular expression code we've just written:
@@ -142,6 +144,162 @@ object Expression {
 ```
 
 Here's an example showing use, and that the code is correct.
+
+```scala mdoc:silent
+val fortyTwo = ((Expression(15.0) + Expression(5.0)) * Expression(2.0) + Expression(2.0)) / Expression(1.0)
+```
+```scala mdoc
+fortyTwo.eval
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## インタープリタとレイフィケーション {#sec:interpreters:reification}
+
+ここまでに書いた正規表現の実装では、ふたつの異なるプログラミング戦略が使われている。
+
+1. インタープリタ戦略
+2. レイフィケーションによるインタープリタの実装戦略
+
+**インタープリタ戦略**の本質が記述と実行の分離であることを思い出してほしい。インタープリタ戦略を用いるにあたっては、少なくとも記述とインタープリタのふたつが必要である。記述はプログラムであり、我々が行いたいことを表している。インタープリタはそのプログラムを実行し、そこに記述された指示を実行に移す。
+
+正規表現の例では `Regexp` オブジェクトがプログラムであり、文字列の中から探したいパターンを記述している。そして、`matches` メソッドがインタープリタである。記述された指示を実行に移し、パターンが入力全体にマッチするかどうか調べる。パターンが入力の一部にマッチするかどうかを判定するような別のインタープリタを作ることもできるだろう。
+
+### インタープリタの構造 {#sec:interpreters:structure}
+
+インタープリタ戦略をに基づく実装では、メソッドには一定の分類や関係性があり、それが特定の構造をもっている。メソッドには以下の三種類がある。
+
+1. **コンストラクタ**または**導入形式（introduction form）**。`A => Program` という型をもつ。ここで `A` はプログラムではない任意の型で、`Program` は文字どおりプログラムを表す型である。コンストラクタは、Scala では慣習的に `Program` のコンパニオンオブジェクト上に定義される。正規表現の例では `apply` が `Regexp` のコンストラクタのひとつだった。`apply` は `String => Regexp` という型をもっており、コンストラクタがもつべき型である `A => Program` に該当している。もうひとつのコンストラクタである `empty` は単なる `Regexp` 型の値だったが、これは `() => Regexp` 型のメソッドと等価であり、やはりコンストラクタとしての型をもっている。
+
+2. **コンビネータ**。少なくともひとつのプログラムを入力として受け取り、プログラムを出力する。その型は `Program => Program` を基本とするが、追加のパラメータをもつことが往々にしてある。正規表現の例で見た `++`、`orElse`、および `repeat` はすべてコンビネータである。これらはすべて `this` パラメータとして `Regexp` 型の入力をもち、別の `Regexp` を生成する。`++` や `orElse` は追加パラメータももっている。それらは `Regexp` 型だったが、コンビネータの追加パラメータが常にプログラム型であるというわけではない。コンビネータは通常 `Program` のメソッドとして定義される。
+
+3. **デストラクタ**、**インタープリタ**、または**除去形式（elimination form）**。`Program => A` という型をもつ。正規表現の例ではインタープリタは `matches` のひとつだけだったが、追加するのは簡単である。たとえば、マッチした文字列の一部を抽出したり、入力の特定の位置でマッチする文字列を見つけたり、といったものが考えられる。
+
+この構造は、関数型プログラミングの世界では**代数**や**コンビネータライブラリ**と呼ばれることがよくある。代数におけるコンストラクタやデストラクタは、代数的データ型のコンストラクタやデストラクタについてよりも抽象的なレベルで語られる。代数のコンストラクタとは、本書の分類でいうと理論レベルの抽象概念であり、その具体的実装として、技法レベルでは代数的データ型のコンストラクタという選択肢がある。実装方法は他にも存在するが、それについては改めて説明するつもりである。
+
+### レイフィケーションによるインタープリタ実装
+
+インタープリタの構成要素について理解したので、今回使った実装戦略についてより明確に説明することが可能となった。使った戦略は、**レイフィケーション（reification）**、**脱関数化（defunctionalization）**、**深い埋め込み（deep embedding）**、または**始代数（initial algebra）**と呼ばれる。
+
+<!--
+TODO: deep embeddingに対して日本語の訳語を当てた前例があまりない件
+-->
+
+具現化（reification）とは、一般的に言えば抽象的なものを実体のある形にすることを指す。プログラミングにおけるレイフィケーション（reification）とは、メソッドや関数をデータとして表現することを指す。インタープリタ戦略においては、解釈したいプログラムがもつ抽象的な構造を、`Program` 型を生成するすべての構成要素、すなわちコンストラクタやコンビネータへと落とし込むことを意味している。
+
+以下にレイフィケーションのルールを挙げる。
+
+1. プログラムを表現する型を定義する。ここではそれを `Program` と呼ぶ
+2. `Program` を代数的データ型として実装する
+3. すべてのコンストラクタとコンビネータはそれぞれが代数的データ型 `Program` を構成する直積型となる
+4. 各直積型はコンストラクタもしくはコンビネータが受け取るパラメータと同じプロパティで構成される。コンビネータについては `this` パラメータもそこに含む
+
+`Program` を代数的データ型として定義すれば、インタープリタは `Program` に対する構造的再帰となる。
+
+#### 演習: 算術式 {-}
+
+ここでレイフィケーションの練習をしよう。課題は、算術式のインタープリタを実装することである。式は以下のいずれかであるとする。
+
+- 数値リテラル。`Double` を受け取って `Expression` を生成する
+- ふたつの式の加算
+- ふたつの式の減算
+- ふたつの式の乗算
+- ふたつの式の除算
+
+以上の記述を `Expression` 型として具現化せよ。
+
+<div class="solution">
+ポイントは、テキストによる記述がコードとどのように対応するかを理解し、正しくレイフィケーションを適用することである。
+
+```scala mdoc:reset:silent 
+enum Expression {
+  case Literal(value: Double)
+  case Addition(left: Expression, right: Expression)
+  case Subtraction(left: Expression, right: Expression)
+  case Multiplication(left: Expression, right: Expression)
+  case Division(left: Expression, right: Expression)
+}
+object Expression {
+  def apply(value: Double): Expression =
+    Literal(value)
+}
+```
+</div>
+
+続いて、`Double` 型の値を生成する `eval` インタープリタを実装せよ。インタープリタは一般的な算術規則に従って式を解釈することとする。
+
+<div class="solution">
+インタープリタは構造的再帰である。
+
+```scala mdoc:reset:silent 
+enum Expression {
+  case Literal(value: Double)
+  case Addition(left: Expression, right: Expression)
+  case Subtraction(left: Expression, right: Expression)
+  case Multiplication(left: Expression, right: Expression)
+  case Division(left: Expression, right: Expression)
+  
+  def eval: Double =
+    this match {
+      case Literal(value)              => value
+      case Addition(left, right)       => left.eval + right.eval
+      case Subtraction(left, right)    => left.eval - right.eval
+      case Multiplication(left, right) => left.eval * right.eval
+      case Division(left, right)       => left.eval / right.eval
+    }
+}
+object Expression {
+  def apply(value: Double): Expression =
+    Literal(value)
+}
+```
+</div>
+
+ライブラリの使い勝手を向上させるため `+` や `-` などのメソッドを追加せよ。また、いくつかの式を記述し、このライブラリが期待どおりに動作することを確かめよ。
+
+<div class="solution">
+以下が完全なコードである。
+
+```scala mdoc:reset:silent
+enum Expression {
+  case Literal(value: Double)
+  case Addition(left: Expression, right: Expression)
+  case Subtraction(left: Expression, right: Expression)
+  case Multiplication(left: Expression, right: Expression)
+  case Division(left: Expression, right: Expression)
+
+  def +(that: Expression): Expression =
+    Addition(this, that)
+
+  def -(that: Expression): Expression =
+    Subtraction(this, that)
+
+  def *(that: Expression): Expression =
+    Multiplication(this, that)
+
+  def /(that: Expression): Expression =
+    Division(this, that)
+
+  def eval: Double =
+    this match {
+      case Literal(value)              => value
+      case Addition(left, right)       => left.eval + right.eval
+      case Subtraction(left, right)    => left.eval - right.eval
+      case Multiplication(left, right) => left.eval * right.eval
+      case Division(left, right)       => left.eval / right.eval
+    }
+}
+object Expression {
+  def apply(value: Double): Expression =
+    Literal(value)
+}
+```
+
+また、以下は、その使い方およびコードが正しいことを示す例である。
 
 ```scala mdoc:silent
 val fortyTwo = ((Expression(15.0) + Expression(5.0)) * Expression(2.0) + Expression(2.0)) / Expression(1.0)

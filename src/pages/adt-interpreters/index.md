@@ -1,3 +1,5 @@
+<!--
+
 # Reified Interpreters {#sec:interpreters}
 
 The interpreter strategy is perhaps the most important in all of functional programming. The central idea is to **separate description from action**. When we use the interpreter strategy our program consists of two parts: the description, instructions, or program that describes what we want to do, and the interpreter that carries the actions in the description. In this chapter we'll start exploring the design and implementation of interpreters, focusing on implementations using algebraic data types. 
@@ -20,5 +22,34 @@ Throughout this chapter we will explore the interpreter strategy by building a s
 
 We'll start with a basic implementation strategy that uses algebraic data types and structural recursion. We'll then look at transformations to turn our interpreter into a version that avoids using the stack and hence avoids the possibility of stack overflow.
 
+
+[krop]: https://github.com/creativescala/krop
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+# インタープリタ {#sec:interpreters}
+
+インタープリタ戦略は関数型プログラミングにおいてもっとも重要な戦略と言えるかもしれない。中心となるアイデアは**記述と実行の分離**である。インタープリタ戦略を用いたプログラムは、実行したい内容の記述と、その記述に従って実際にアクションを実行するインタープリタというふたつの部分から構成される。この章では、まずインタープリタの設計と実装について探ることから始める。特に代数的データ型を用いた実装に焦点を当てる。
+
+記述と実行を区別する場面には必ずインタープリタが登場する。インタープリタは多大な開発労力を要する複雑なものと思われるかもしれないが、実際にはそうではないことを伝えたい。おそらく、皆さんは日頃のコーディングでそれと気付かずに多くのインタープリタを既に使用しているはずである。たとえば、[Krop][krop] という Web フレームワークから抜き出した以下のコードを考えてみよう。
+
+```scala
+val route =
+  Route(
+    Request.get(Path.root / "user" / Param.int),
+    Response.ok(Entity.text)
+  ).handle(userId => s"You asked for the user ${userId.toString}")
+```
+
+このコードは、パス `"/user/<int>"` に対する `GET` リクエストにマッチし、テキストのボディをもった `Ok` レスポンスを返すルートを定義している。この種のルーティングライブラリは Web フレームワークにおいて普遍的で、簡単に実装できるものだが、実はインタープリタ戦略に必要な要素をすべて含んでいる。
+
+インタープリタが重要なのは、それが副作用を許容しながらも合成と推論を可能にする鍵となるからである。たとえば、インタープリタ戦略を使ってグラフィックスライブラリを実装することを考えてほしい。プログラムは、描画したい内容をシンプルに記述するが、重要なのはその記述部が実際には何も描画しないということである。インタープリタがこの記述を受け取り、それに基づいて描画を行う。記述部は副作用を伴わないので自由に合成できる。たとえば、円を描画する記述と四角形を描画する記述があれば、それらを組み合わせて「四角形の横に円を描く」といった新たな記述を作り出すことができる。もし即座に描画が行われていたら合成は行えない。同様に、この仕組みの下では、プログラムは画面に何が表示されるかをそのまま記述しており、それ以前の描画による状態を気にする必要がないので、推論が容易である。
+
+この章では、正規表現のための一連のインタープリタを構築することで、インタープリタ戦略を探求していく。正規表現を選んだのは、それが多くの人にとって馴染みのあるものであり、使い方もシンプルだからである。これなら、実現する機能（ここでは正規表現）固有の詳細にとらわれることなく、インタープリタ戦略の細部に集中することができるし、ついでに現実的で役に立つ結果を得ることもできる。
+
+まずは、代数的データ型と構造的再帰を用いた基本的な実装戦略から始めよう。その後、スタックの利用を避けることでスタックオーバーフローの可能性を回避するバージョンへとインタープリタを変換する方法について見ていく。
 
 [krop]: https://github.com/creativescala/krop

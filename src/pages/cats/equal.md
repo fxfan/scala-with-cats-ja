@@ -1,3 +1,5 @@
+<!--
+
 ## Example: Eq
 
 We will finish off this chapter by looking at another useful type class:
@@ -201,6 +203,200 @@ given catEqual: Eq[Cat] =
 ```
 
 Finally, we test things out in a sample application:
+
+```scala mdoc
+val cat1 = Cat("Garfield",   38, "orange and black")
+val cat2 = Cat("Heathcliff", 32, "orange and black")
+
+cat1 === cat2
+cat1 =!= cat2
+
+val optionCat1 = Option(cat1)
+val optionCat2 = Option.empty[Cat]
+
+optionCat1 === optionCat2
+optionCat1 =!= optionCat2
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 例題: `Eq`
+
+この章の最後に、もうひとつの便利な型クラスである [`cats.Eq`][cats.kernel.Eq] を見ていく。`Eq` は*型安全な等価性*をサポートし、Scala 組み込みの `==` 演算子の使いづらさを解消するように設計されている。
+
+ほとんどの Scala 開発者は、以下のようなコードを書いたことがあるだろう。
+
+```scala
+List(1, 2, 3).map(Option(_)).filter(item => item == 1)
+// warning: Option[Int] and Int are unrelated: they will most likely never compare equal
+// res: List[Option[Int]] = List()
+
+```
+
+もちろん、このような単純なミスを犯すことは少ないだろうが、言いたいことの要点は伝わるだろう。この `filter` 句の述語は、`Int` と `Option[Int]` を比較しているため、常に `false` を返す。
+
+これはプログラマのミスで、`item` は `1` ではなく `Some(1)` と比較されるべきだった。しかし、 `==` はどのような型のオブジェクト同士にも使えるので、形式的には型エラーではない。`Eq` は、型安全な等価性チェックを提供し、この問題を解決する。
+
+### 自由、友愛、等価性
+
+`Eq` を使えば、任意の型のインスタンス間で型安全な等価性を定義できる。
+
+```scala
+package cats
+
+trait Eq[A] {
+  def eqv(a: A, b: A): Boolean
+  // ...eqvに基づくその他の具象メソッド
+}
+```
+
+[`cats.syntax.eq`][cats.syntax.eq] で定義されているインターフェース構文では、スコープ内に `Eq[A]` インスタンスが存在する場合、等価性チェックを行うためのふたつのメソッドが提供される。
+
+- `===` はふたつのオブジェクトが等しいかどうかを判定する
+- `=!=` はふたつのオブジェクトが等しくないかどうかを判定する
+
+### `Int` の比較
+
+いくつか例を見てみよう。とりあえず型クラスをインポートしておく。
+
+```scala mdoc:silent:reset-object
+import cats.*
+```
+
+次に `Int` 用のインスタンスを手に入れる。
+
+```scala mdoc:silent
+val eqInt = Eq[Int]
+```
+
+これで、`eqInt` を直接用いて等価性を調べることができる。
+
+```scala mdoc
+eqInt.eqv(123, 123)
+eqInt.eqv(123, 234)
+```
+
+Scala の `==` メソッドと異なり、違う型のオブジェクトを `eqv` で比較しようとするとコンパイルエラーになる。
+
+```scala mdoc:fail
+eqInt.eqv(123, "234")
+```
+
+[`cats.syntax.eq`][cats.syntax.eq] からインターフェース構文をインポートし `===` および `=!=` を使うこともできる。
+
+```scala mdoc:silent
+import cats.syntax.all.* // === と =!= をインポートする
+```
+
+```scala mdoc
+123 === 123
+123 =!= 234
+```
+
+こちらも、異なる型をもつ値同士を比較するとコンパイルエラーになる。
+
+```scala mdoc:fail
+123 === "123"
+```
+
+### `Option` の比較 {#sec:type-classes:comparing-options}
+
+ここで、`Option[Int]` に関するすこし興味深い例を見てみよう。
+
+```scala mdoc:fail
+Some(1) === None
+```
+
+このコードは、型が完全には一致していないため、エラーとなる。`Int` と `Option[Int]` の `Eq` インスタンスはスコープ内にあるが、比較している値は `Some[Int]` 型である。この問題を解決するには、引数を `Option[Int]` 型に明示的にキャストする必要がある。
+
+```scala mdoc
+(Some(1) : Option[Int]) === (None : Option[Int])
+```
+
+標準ライブラリの `Option.apply` と `Option.empty` メソッドを使えば、もっとわかりやすく書ける。
+
+```scala mdoc
+Option(1) === Option.empty[Int]
+```
+
+あるいは、[`cats.syntax.option`][cats.syntax.option] が提供する特別な構文を使って、以下のように書くこともできる。
+
+```scala mdoc
+1.some === none[Int]
+1.some =!= none[Int]
+```
+
+### 独自型の比較
+
+独自の `Eq` インスタンスを定義したいときは、`Eq.instance` メソッドを使えばよい。`Eq.instance` は `(A, A) => Boolean` 型の関数を受け取って `Eq[A]` を返す。
+
+```scala mdoc:silent
+import java.util.Date
+
+given dateEq: Eq[Date] =
+  Eq.instance[Date] { (date1, date2) =>
+    date1.getTime === date2.getTime
+  }
+```
+
+```scala mdoc:silent
+val x = new Date() // 現在日時
+val y = new Date() // 現在より一瞬後の日時
+```
+
+```scala mdoc
+x === x
+x === y
+```
+
+#### 演習: 自由、友愛、等にゃん性
+
+`Cat` の例に対して `Eq` インスタンスを実装せよ。
+
+```scala mdoc:silent
+final case class Cat(name: String, age: Int, color: String)
+```
+
+また、それを用いて、以下のオブジェクト同士の等価性と非等価性を確認せよ。
+
+```scala mdoc:silent
+val cat1 = Cat("Garfield",   38, "orange and black")
+val cat2 = Cat("Heathcliff", 33, "orange and black")
+
+val optionCat1 = Option(cat1)
+val optionCat2 = Option.empty[Cat]
+```
+
+<div class="solution">
+まずは Cats のインポートを行う。この演習では `Eq` 型クラスと `Eq` のインターフェース構文を使用するので、それらのインポートから始める。
+
+```scala mdoc:silent:reset-object
+import cats.*
+import cats.syntax.all.* 
+```
+
+`Cat` クラスはこれまでどおりである。
+
+```scala mdoc:silent
+final case class Cat(name: String, age: Int, color: String)
+```
+
+`Eq[Cat]` の実装に必要となる `Int`と `String` の `Eq` インスタンスをスコープに入れる。
+
+```scala mdoc:silent
+given catEqual: Eq[Cat] =
+  Eq.instance[Cat] { (cat1, cat2) =>
+    (cat1.name  === cat2.name ) &&
+    (cat1.age   === cat2.age  ) &&
+    (cat1.color === cat2.color)
+  }
+```
+
+最後に、サンプルアプリケーションを作成しテストすれば完了である。
 
 ```scala mdoc
 val cat1 = Cat("Garfield",   38, "orange and black")

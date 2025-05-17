@@ -1,3 +1,5 @@
+<!--
+
 ## Functors in Cats
 
 Let's look at the implementation of functors in Cats.
@@ -242,6 +244,217 @@ object Tree {
 ```
 
 Now we can use our `Functor` properly:
+
+```scala mdoc
+Tree.leaf(100).map(_ * 2)
+
+Tree.branch(Tree.leaf(10), Tree.leaf(20)).map(_ * 2)
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## Cats におけるファンクター
+
+Cats におけるファンクターの実装を見ていこう。モノイドのときと同じく三つの側面、*型クラス*、*インスタンス*、*構文*に着目する。
+
+### ファンクターの型クラスとインスタンス
+
+ファンクター型クラスは [`cats.Functor`][cats.Functor] として定義されている。インスタンスの取得には、Cats の標準的な設計に従ってコンパニオンオブジェクトに定義された `Functor.apply` メソッドを使う。デフォルトのインスタンスは通常どおりコンパニオンオブジェクト上に置かれており、明示的にインポートする必要はない。
+
+```scala mdoc:silent:reset-object
+import cats.*
+import cats.syntax.all.*
+```
+
+```scala mdoc
+val list1 = List(1, 2, 3)
+val list2 = Functor[List].map(list1)(_ * 2)
+
+val option1 = Option(123)
+val option2 = Functor[Option].map(option1)(_.toString)
+```
+
+`Functor` は `lift` というメソッドを提供している。これは、`A => B` 型の関数を、ファンクター内の値を操作する `F[A] => F[B]` 型関数に変換する。
+
+```scala mdoc
+val func = (x: Int) => x + 1
+
+val liftedFunc = Functor[Option].lift(func)
+
+liftedFunc(Option(1))
+```
+
+もうひとつよく使うメソッドとして `as` がある。これはファンクター内の値を指定された値に置き換える。
+
+```scala mdoc
+Functor[List].as(list1, "As")
+```
+
+### ファンクターの構文
+
+`Functor` の構文によって提供される主なメソッドは `map` だが、その使い方を `Option` や `List` で実演するのは難しい。それらのクラスには元々 `map` メソッドが組み込まれており、そして Scala コンパイラは常に拡張メソッドよりも組み込みのメソッドを優先するからである。以下では、そのような問題をもたない例をふたつ挙げる。
+
+まずは関数に対する変換を見てみよう。Scala の `Function1` 型には `map` メソッドが存在しない（同じ機能をもつメソッドは `andThen` と呼ばれる）ので、ファンクターの構文と名前が衝突することはない。
+
+```scala mdoc:silent
+val func1 = (a: Int) => a + 1
+val func2 = (a: Int) => a * 2
+val func3 = (a: Int) => s"${a}!"
+val func4 = func1.map(func2).map(func3)
+```
+
+```scala mdoc
+func4(123)
+```
+
+別の例を見てみよう。今回は、特定の具体的なファンクター型に依存しないように、ファンクター全般を抽象化して扱う。数値がどのようなファンクターのコンテキストに包まれていようと、それに対して計算処理を適用するメソッドを記述できる。
+
+```scala mdoc:silent
+def doMath[F[_]](start: F[Int])
+    (implicit functor: Functor[F]): F[Int] =
+  start.map(n => n + 1 * 2)
+```
+
+```scala mdoc
+doMath(Option(20))
+doMath(List(1, 2, 3))
+```
+
+To illustrate how this works,
+let's take a look at the definition of
+the `map` method in `cats.syntax.functor`.
+Here's a simplified version of the code:
+
+これがどのように機能するかを示すために、`cats.syntax.functor` 内の `map` メソッドの定義を見てみよう。以下はそのコードを簡略化したものである。
+
+```scala
+implicit class FunctorOps[F[_], A](src: F[A]) {
+  def map[B](func: A => B)
+      (implicit functor: Functor[F]): F[B] =
+    functor.map(src)(func)
+}
+```
+
+ある型について、その型自体が `map` メソッドをもたなければ、コンパイラはこの拡張メソッド定義によって `map` メソッドを挿入できる。
+
+```scala
+foo.map(value => value + 1)
+```
+
+`foo` それ自体は `map` メソッドをもたないと仮定すると、コンパイラはこの記述がこのままではエラーになることを検出し、それを修正するために式を `FunctorOps` で包み込む。
+
+```scala
+new FunctorOps(foo).map(value => value + 1)
+```
+
+`FunctorOps` の `map` メソッドは暗黙の `Functor` インスタンスをパラメータとして要求する。つまり、`F` のための `Functor` インスタンスがスコープ内に存在すれば、このコードはコンパイルできるが、そうでなければコンパイルエラーとなる。
+
+```scala mdoc:silent
+final case class Box[A](value: A)
+
+val box = Box[Int](123)
+```
+
+```scala mdoc:fail
+box.map(value => value + 1)
+```
+
+`as` メソッドも構文として利用できる。
+
+```scala mdoc
+List(1, 2, 3).as("As")
+```
+
+### 独自型のためのインスタンス
+
+ファンクターを定義するのは簡単で、`map` メソッドを定義するだけでよい。`Option` 用の `Functor` は [`cats.instances`][cats.instances] に既に存在するが、これを例として以下に示す。実装は単純で、`Option` の `map` メソッドを呼び出すだけである。
+
+```scala
+implicit val optionFunctor: Functor[Option] =
+  new Functor[Option] {
+    def map[A, B](value: Option[A])(func: A => B): Option[B] =
+      value.map(func)
+  }
+```
+
+インスタンスに依存性を注入しなければならないことが時々ある。たとえば、`Future` のために独自の `Functor` を定義する場合（これも仮の例である。Cats はこれを `cats.instances.future` で提供している）、`Future` の `map` メソッドが要求する `ExecutionContext` 型の暗黙パラメータについて考慮する必要がある。`Functor` の `map` にパラメータを追加することはできないので、この依存性はインスタンスを作成するときに解決しなければならない。
+
+```scala mdoc:silent
+import scala.concurrent.{Future, ExecutionContext}
+
+implicit def futureFunctor
+    (implicit ec: ExecutionContext): Functor[Future] =
+  new Functor[Future] {
+    def map[A, B](value: Future[A])(func: A => B): Future[B] =
+      value.map(func)
+  }
+```
+
+`Future` 用の `Functor` インスタンスを呼び出すと、コンパイラは暗黙の解決によって、まず  `futureFunctor` 関数を発見する。次に、再帰的な解決により `ExecutionContext` インスタンスを呼び出し場所を基準とするスコープで探す。この振る舞いは、`Functor.apply` を直接使う場合でも、`map` 拡張メソッド経由で間接的に呼び出す場合でも変わらない。コンパイラによるこの展開は以下のようになるだろう。
+
+```scala
+// 実際に記述するコード
+Functor[Future]
+
+// コンパイラはまずこのように展開する
+Functor[Future](futureFunctor)
+
+// そしてこう
+Functor[Future](futureFunctor(executionContext))
+```
+
+### 演習: ファンクターを二分木に適用する
+
+以下の二分木データ型に対して `Functor` を作成し、期待どおりに動作するか `Branch` と `Leaf` の両インスタンスについて確認せよ。
+
+```scala mdoc:silent
+sealed trait Tree[+A]
+
+final case class Branch[A](left: Tree[A], right: Tree[A])
+  extends Tree[A]
+
+final case class Leaf[A](value: A) extends Tree[A]
+```
+
+<div class="solution">
+セマンティクスは `List` に対する `Functor` と似ている。データ構造を再帰的に走査し、見つかったすべての `Leaf` に関数を適用する。ファンクター則に基づき、`Branch` と `Leaf` の構造はそのまま保たれる必要がある。
+
+```scala mdoc:silent
+implicit val treeFunctor: Functor[Tree] =
+  new Functor[Tree] {
+    def map[A, B](tree: Tree[A])(func: A => B): Tree[B] =
+      tree match {
+        case Branch(left, right) =>
+          Branch(map(left)(func), map(right)(func))
+        case Leaf(value) =>
+          Leaf(func(value))
+      }
+  }
+```
+
+この `Functor` を用いて `Tree` を変換してみよう。
+
+```scala mdoc:fail
+Branch(Leaf(10), Leaf(20)).map(_ * 2)
+```
+
+だがこのコードは [@sec:variance] で議論した非変性の問題に引っかかる。コンパイラは `Tree` に対しては `Functor` インスタンスを見つけることができるが、`Branch` や `Leaf` に対しては見つけられない。この問題を補うためにスマートコンストラクタを追加しよう。
+
+```scala mdoc:silent
+object Tree {
+  def branch[A](left: Tree[A], right: Tree[A]): Tree[A] =
+    Branch(left, right)
+
+  def leaf[A](value: A): Tree[A] =
+    Leaf(value)
+}
+```
+
+これで、この `Functor` は正常に利用可能となる。
 
 ```scala mdoc
 Tree.leaf(100).map(_ * 2)

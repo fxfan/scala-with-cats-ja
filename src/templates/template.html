@@ -47,7 +47,7 @@
   <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container-fluid">
       <details>
-        <summary class="nav-item p-2"><h5 class="d-inline-block mb-0">Table of Contents</h5></summary>
+        <summary class="nav-item p-2"><h5 class="d-inline-block mb-0">目次</h5></summary>
         $toc$
       </details>
     </div>
@@ -57,13 +57,16 @@
       $if(title)$
       <h1 class="title">$title$$if(subtitle)$<span class="subtitle">$subtitle$</span>$endif$</h1>
       $for(author)$
-      <h3 class="author">By $author$</h3>
+      <h3 class="author">$author$ 著</h3>
       $endfor$
+      $if(translator)$
+      <p class="translator">$translator$ 訳</p>
+      $endif$
       $if(date)$
-      <p class="date">$date$ Edition</p>
+      <p class="date">$date$ 版</p>
       $endif$
       $endif$
-      <p>Published by <a href="https://inner-product.com/">Inner Product</a></p>
+      <p><a href="https://inner-product.com/">Inner Product</a> 刊</p>
     </div>
   </header>
 

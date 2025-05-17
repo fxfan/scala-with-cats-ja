@@ -1,3 +1,5 @@
+<!--
+
 ## Conclusions
 
 In this chapter we've discussed why we might want to build interpreters, and seen techniques for building them.
@@ -27,5 +29,22 @@ These ideas are classics in programming language theory.
 *Definitional Interpreters for Higher-Order Programming Languages* [@10.1145/800194.805852] details defunctionalization, a limited form of reification and continuation passing style. (If you want to read this paper, I suggest the [re-typeset version from 1998][defn], which is much more readable than the original typewriter version.)
 These ideas are expanded on in *Defunctionalization at Work* [@10.1145/773184.773202].
 *Continuation-Passing Style, Defunctionalization, Accumulations, and Associativity* [@gibbons22:cps] is a very readable and elegant paper that highlights the importance of associativity in these transformations.
+
+[defn]: https://homepages.inf.ed.ac.uk/wadler/papers/papers-we-love/reynolds-definitional-interpreters-1998.pdf
+
+
+-->
+
+## まとめ
+
+この章では、インタープリタを構築する理由について議論し、その構築手法を見てきた。改めて述べると、インタープリタ戦略の核心は記述と実行の分離にある。記述はプログラムであり、インタープリタはそのプログラムを実行する。この分離によって、プログラムの合成および、プログラムの実行時まで作用を遅延させて管理することが可能となる。プログラムはコンストラクタとコンビネータで定義され、インタープリタはデストラクタとして定義される。この構造はしばしば代数と呼ばれる。戦略の名前はインタープリタに焦点を置いているが、プログラムはプログラマがシステムと対話するためのユーザインターフェースであり、その設計も同様に重要である。
+
+最初の実装戦略は、代数が定義するコンストラクタとコンビネータを代数的データ型としてレイフィケーションすることだった。そうすれば、インタープリタはこの代数的データ型に対する構造的再帰となる。だが、単純な実装はスタックセーフでないことがわかり、それを解決するために末尾再帰と継続というアイデアを導入した。継続を関数としてレイフィケーションし、どのようなプログラムであってもすべてのメソッド呼び出しが末尾位置に来る継続渡しスタイルへと変換可能であることを見た。しかし、Scala ランタイムの制約により、末尾位置にある呼び出しがすべて末尾呼び出し最適化の対象となるわけではない。そこで、呼び出しとリターンをデータ構造としてレイフィケーションし、トランポリンと呼ばれる再帰ループで扱えるようにした。これらの戦略の根底には双対性の概念がある。レイフィケーションにあたっては関数とデータの双対性を活用し、継続やトランポリン化においては関数呼び出しとデータの返却との間の双対性を利用している。
+
+スタックセーフなインタープリタは多くの場面で重要だが、基本的な構造的再帰とくらべてコードは読みにくくなる。基本的なインタープリタで十分なケースもあるだろう。
+
+算術式の例のように単純な式ツリーを評価する場合、スタック領域が枯渇する可能性はほぼない。そのようなツリーの深さは要素数に対して対数的に増大するので、極端に大きなツリーでないかぎり、その深さがスタックセーフ性の問題へとつながることはない。一方で、正規表現の例では、スタック消費は正規表現ツリーの深さではなくマッチング対象となる入力の長さによって決まる。このようなケースではスタックセーフ性はより重要となる。単純な実装が許容される条件は他にもあるかもしれない。仮に、入力が小さいことを保証されているシチュエーションでのみライブラリが使用されるとわかっているのであれば、スタックセーフでない実装でも問題はない。常に、場面に応じて適切な技術を選択することが重要である。
+
+これらのアイデアはプログラミング言語理論において古典的なものである。「*Definitional Interpreters for Higher-Order Programming Languages* [@10.1145/800194.805852]」は、レイフィケーションのひとつの形態である脱関数化や、継続渡しスタイルについて詳述している。この論文を読むなら[1998年の再組版バージョン][defn]を推奨する。元のタイプライター版よりもはるかに読みやすい。「*Defunctionalization at Work* [@10.1145/773184.773202]」はこれらのアイデアを発展させている。「*Continuation-Passing Style, Defunctionalization, Accumulations, and Associativity* [@gibbons22:cps]」は、これらの変換における結合律の重要性にフォーカスした非常に読みやすく洗練された論文である。
 
 [defn]: https://homepages.inf.ed.ac.uk/wadler/papers/papers-we-love/reynolds-definitional-interpreters-1998.pdf

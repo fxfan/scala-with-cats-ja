@@ -1,3 +1,5 @@
+<!--
+
 ## Type Class Composition {#sec:type-classes:composition}
 
 ```scala mdoc:invisible:reset-object
@@ -143,3 +145,121 @@ If you don't, you'll end up defining an **implicit conversion**.
 Implicit conversion is an older programming pattern
 that is frowned upon in modern Scala code.
 Fortunately, the compiler will warn you should you do this.
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 型クラスの合成 {#sec:type-classes:composition}
+
+```scala mdoc:invisible:reset-object
+// JSONのシンプルな抽象構文木を定義する
+sealed trait Json
+final case class JsObject(get: Map[String, Json]) extends Json
+final case class JsString(get: String) extends Json
+final case class JsNumber(get: Double) extends Json
+case object JsNull extends Json
+object Json {
+  def toJson[A](value: A)(using w: JsonWriter[A]): Json =
+    w.write(value)
+}
+
+// このトレイトが「JSONへのシリアライズ」機能を表す
+trait JsonWriter[A] {
+  def write(value: A): Json
+}
+```
+
+ここまで、コンパイラにメソッド呼び出しのコンテキストパラメータを供給させる手段としての型クラスを見てきた。これは便利だが、たくさんの新しい概念を導入したわりに得られるものが小さいようにも見える。型クラスの真の強みは、コンパイラが複数の given インスタンスを組み合わせて新しい given インスタンスを構築できる点にある。これは**型クラスの合成（type class composition）**として知られている。
+
+型クラスの合成は、まだ本書で言及していない given インスタンスのある機能を利用することで実現される。実は given インスタンス自身もまたコンテキストパラメータをもつことができる。しかし、その詳細に入る前に、この仕組みの必要性を認識できるような例を見てみよう。
+
+`Option` 用の `JsonWriter` を定義することを考える。アプリケーションで必要となるすべての型 `A` に対して、`JsonWriter[Option[A]]` を用意する必要がある。given インスタンスを集めたライブラリを作成するなど、強引に問題解決を試みることもできるだろう。
+
+```scala
+given optionIntWriter: JsonWriter[Option[Int]] =
+  ???
+
+given optionPersonWriter: JsonWriter[Option[Person]] =
+  ???
+
+// など……
+```
+
+だが、このアプローチがスケールしないのは明らかである。アプリケーション内の型それぞれについて、その型を `A` とすれば、`A` 用の given インスタンスと `Option[A]` 用の given インスタンスが必要になってしまう。
+
+幸いなことに、`Option[A]` を JSON シリアライズするコードは、`A` 用の型クラスインスタンスに基づいた共通のコンストラクタとして抽象化することができる。
+
+- `Some(aValue)` に対しては、型 `A` 用の `JsonWriter` を使って `aValue` を書き出す
+- `None` に対しては、`JsNull` を返す
+
+このアイデアを、パラメータ化された given インスタンスを用いてコード化したものを次に示す。
+
+```scala mdoc:silent
+given optionWriter[A](using writer: JsonWriter[A]): JsonWriter[Option[A]] =
+  new JsonWriter[Option[A]] {
+    def write(option: Option[A]): Json =
+      option match {
+        case Some(aValue) => writer.write(aValue)
+        case None         => JsNull
+      }
+  }
+```
+
+このメソッドは、型 `A` に固有のシリアライズ化ロジックをコンテキストパラメータとして受け取ることによって、`Option[A]` 用の `JsonWriter` を構築する。
+
+```scala mdoc:invisible
+given stringWriter: JsonWriter[String] =
+  new JsonWriter[String] {
+    def write(value: String): Json = JsString(value)
+  }
+```
+```scala mdoc:silent
+Json.toJson(Option("A string"))
+```
+
+上記のような式を見つけると、コンパイラは `JsonWriter[Option[String]]` 型の given インスタンスを探し、発見したインスタンスをコンテキストパラメータとしてメソッドに渡す。
+
+```scala mdoc:silent
+Json.toJson(Option("A string"))(using optionWriter[String])
+```
+
+続いて、`optionWriter` のコンテキストパラメータとして利用するため、再帰的に `JsonWriter[String]` を探す。
+
+```scala mdoc:silent
+Json.toJson(Option("A string"))(using optionWriter(using stringWriter))
+```
+
+このように、given インスタンスの解決は、利用可能な given インスタンスの組み合わせを探索し、目指す型クラスインスタンスを作成する組み合わせを発見するプロセスとなる。
+
+### Scala2 における型クラスの合成
+
+Scala2 では `implicit` メソッドと `implicit` パラメータを使うことで同じ効果を得ることができる。前述の `optionWriter` と同等のものを Scala2 で記述したコードを次に示す。
+
+```scala mdoc:invisible:reset-object
+// JSONのシンプルな抽象構文木を定義する
+sealed trait Json
+final case class JsObject(get: Map[String, Json]) extends Json
+final case class JsString(get: String) extends Json
+final case class JsNumber(get: Double) extends Json
+case object JsNull extends Json
+
+// このトレイトが「JSONへのシリアライズ」機能を表す
+trait JsonWriter[A] {
+  def write(value: A): Json
+}
+```
+```scala mdoc:silent
+implicit def scala2OptionWriter[A]
+    (implicit writer: JsonWriter[A]): JsonWriter[Option[A]] =
+  new JsonWriter[Option[A]] {
+    def write(option: Option[A]): Json =
+      option match {
+        case Some(aValue) => writer.write(aValue)
+        case None         => JsNull
+      }
+  }
+```
+
+メソッドのパラメータを implicit にすることを忘れてはならない。そうしないと、**暗黙の型変換（implicit conversion）**を定義したことになってしまう。暗黙の型変換は古いプログラミングパターンであり、最近の Scala コードでは推奨されない。幸いなことに、もし間違ってしまっても、コンパイラはメソッドパラメータに `implicit` をつけるよう警告してくれる。

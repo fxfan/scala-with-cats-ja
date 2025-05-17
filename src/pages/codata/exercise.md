@@ -1,3 +1,5 @@
+<!--
+
 ## Exercise: Sets
 
 In this extended exercise we'll explore the `Set` interface we have already used in several examples, reproduced below.
@@ -149,6 +151,169 @@ val integers = Evens.union(odds)
 ```
 
 It has the expected behaviour.
+
+```scala mdoc
+integers.contains(1)
+integers.contains(2)
+integers.contains(3)
+```
+</div>
+
+
+```scala mdoc:reset:silent
+```
+--->
+
+## 演習: さまざまな集合
+
+この追加演習では、これまでの例でも何度か使用した `Set` インターフェースについて詳しく見ていく。以下にその定義を再掲する。
+
+```scala mdoc:silent
+trait Set[A] {
+  
+  /** 与えられた要素がこの集合に含まれていれば True */
+  def contains(elt: A): Boolean
+  
+  /** この集合のすべての要素と与えられた要素を含む新しい集合を構築する */
+  def insert(elt: A): Set[A]
+  
+  /** この集合と指定された集合の和集合を構築する */
+  def union(that: Set[A]): Set[A]
+}
+```
+
+集合の要素を `List` で管理するシンプルな実装についてもすでに見た。
+
+```scala mdoc:silent
+final class ListSet[A](elements: List[A]) extends Set[A] {
+
+  def contains(elt: A): Boolean =
+    elements.contains(elt)
+
+  def insert(elt: A): Set[A] =
+    ListSet(elt :: elements)
+
+  def union(that: Set[A]): Set[A] =
+    elements.foldLeft(that) { (set, elt) => set.insert(elt) }
+}
+object ListSet {
+  def empty[A]: Set[A] = ListSet(List.empty)
+}
+```
+
+`union` の実装はあまり満足のいくものではない。コードを書くための戦略を全く利用していないからである。`union` と `insert` はどちらも、*あらゆる*集合に対して汎用的に動作する方法で実装することができる（つまり、`Set` トレイト上に実装することができる）。また、その実装には、この章で学んだ戦略を活用することが可能である。それらを踏まえて、`union` と `insert` を再実装せよ。
+
+<div class="solution">
+以下の解法では、これらのメソッドを実装するのに構造的余再帰を用いた。何を行っているのかが明確になるよう、サブクラスには名前を付けることとした。
+
+```scala mdoc:reset:silent
+trait Set[A] {
+  
+  def contains(elt: A): Boolean
+  
+  def insert(elt: A): Set[A] =
+    InsertOneSet(elt, this)
+  
+  def union(that: Set[A]): Set[A] =
+    UnionSet(this, that)
+}
+
+final class InsertOneSet[A](element: A, source: Set[A]) 
+    extends Set[A] {
+
+  def contains(elt: A): Boolean =
+    elt == element || source.contains(elt)
+}
+
+final class UnionSet[A](first: Set[A], second: Set[A])
+    extends Set[A] {
+
+  def contains(elt: A): Boolean =
+    first.contains(elt) || second.contains(elt)
+}
+```
+</div>
+
+```scala mdoc:invisible
+final class ListSet[A](elements: List[A]) extends Set[A] {
+
+  def contains(elt: A): Boolean =
+    elements.contains(elt)
+
+  override def insert(elt: A): Set[A] =
+    ListSet(elt :: elements)
+}
+object ListSet {
+  def empty[A]: Set[A] = ListSet(List.empty)
+}
+```
+
+続いて、すべての偶数からなる集合 `Evens` を実装せよ。これは `Set[Int]` 型で表現される。この集合は無限集合であり、要素すべてを直接列挙することはできない（32ビットの `Int` に含まれるすべての偶数を列挙することは実際には可能だが、膨大なメモリ空間を消費するため、ここではその方法を取らない）。
+
+<div class="solution">
+ここでは `Evens` を `object` として実装した。クラスとして実装した場合、そのインスタンスはどれも同じになる。インスタンスはひとつあればよい。
+
+```scala mdoc:silent
+object Evens extends Set[Int] {
+
+  def contains(elt: Int): Boolean =
+    (elt % 2 == 0)
+}
+```
+
+驚かれるかもしれないが、これで正しく動くのである。`Evens` と `ListSet` を用いてさらにいくつかの集合を定義してみよう。
+
+```scala mdoc:silent
+val evensAndOne = Evens.insert(1)
+val evensAndOthers = 
+  Evens.union(ListSet.empty.insert(1).insert(3))
+```
+
+想定どおりに動くことを確認しておく。
+
+```scala mdoc
+evensAndOne.contains(1)
+evensAndOthers.contains(1)
+evensAndOne.contains(2)
+evensAndOthers.contains(2)
+evensAndOne.contains(3)
+evensAndOthers.contains(3)
+```
+</div>
+
+このアイデアを一般化して、集合を**指示関数（indicator function）**によって定義する方法を考えることができる。指示関数は `A => Boolean` 型の関数であり、入力が集合に属する場合に `true` を返す。指示関数をひとつパラメータとして受け取って構築されるクラス `IndicatorSet` を実装せよ。
+
+<div class="solution">
+```scala mdoc:silent
+final class IndicatorSet[A](indicator: A => Boolean)
+    extends Set[A] {
+
+  def contains(elt: A): Boolean =
+    indicator(elt)
+}
+```
+
+動作確認用に、すべての奇数からなる無限集合を定義してみよう。
+
+```scala mdoc:silent
+val odds = IndicatorSet[Int](_ % 2 == 1)
+```
+
+次に、これが想定どおりに動くことを示す。
+
+```scala mdoc
+odds.contains(1)
+odds.contains(2)
+odds.contains(3)
+```
+
+奇数と偶数の和集合をとれば、すべての整数を含む集合が得られる。
+
+```scala mdoc:silent
+val integers = Evens.union(odds)
+```
+
+これは以下のとおり想定した挙動を示してくれる。
 
 ```scala mdoc
 integers.contains(1)

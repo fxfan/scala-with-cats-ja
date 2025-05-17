@@ -3,6 +3,8 @@
   @title-spacing: @line-height-computed;
   @author-height: 1.5 * @line-height-computed;
   @author-spacing: @line-height-computed;
+  @translator-height: 1 * @line-height-computed;
+  @translator-spacing: 2 * @line-height-computed;
   @date-height: 1 * @line-height-computed;
   @date-spacing: 2 * @line-height-computed;
   @logo-height: 100px;
@@ -50,6 +52,11 @@
     .author {
       margin: 0 0 @author-spacing;
       line-height: @author-height;
+    }
+
+    .translator {
+      margin: 0 0 @translator-spacing;
+      line-height: @translator-height;
     }
 
     .date {
