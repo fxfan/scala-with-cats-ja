@@ -7179,11 +7179,11 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         <ul>
         <li><a href="#並列化された-map-と-fold" id="toc-並列化された-map-と-fold"><span class="toc-section-number">18.1</span> 並列化された <em>map</em>
         と <em>fold</em></a></li>
-        <li><a href="#implementing-foldmap" id="toc-implementing-foldmap"><span class="toc-section-number">18.2</span> Implementing
-        <em>foldMap</em></a></li>
-        <li><a href="#parallelising-foldmap" id="toc-parallelising-foldmap"><span class="toc-section-number">18.3</span> Parallelising
-        <em>foldMap</em></a></li>
-        <li><a href="#summary" id="toc-summary"><span class="toc-section-number">18.4</span> Summary</a></li>
+        <li><a href="#foldmap-の実装" id="toc-foldmap-の実装"><span class="toc-section-number">18.2</span> <em>foldMap</em>
+        の実装</a></li>
+        <li><a href="#foldmap-の並列化" id="toc-foldmap-の並列化"><span class="toc-section-number">18.3</span> <em>foldMap</em>
+        の並列化</a></li>
+        <li><a href="#まとめ-13" id="toc-まとめ-13"><span class="toc-section-number">18.4</span> まとめ</a></li>
         </ul></li>
         <li><a href="#case-study-data-validation" id="toc-case-study-data-validation"><span class="toc-section-number">19</span> Case Study: Data
         Validation</a>
@@ -7197,7 +7197,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         <li><a href="#transforming-data" id="toc-transforming-data"><span class="toc-section-number">19.4</span> Transforming
         Data</a></li>
         <li><a href="#kleislis" id="toc-kleislis"><span class="toc-section-number">19.5</span> Kleislis</a></li>
-        <li><a href="#summary-1" id="toc-summary-1"><span class="toc-section-number">19.6</span> Summary</a></li>
+        <li><a href="#summary" id="toc-summary"><span class="toc-section-number">19.6</span> Summary</a></li>
         </ul></li>
         <li><a href="#case-study-crdts" id="toc-case-study-crdts"><span class="toc-section-number">20</span> Case Study: CRDTs</a>
         <ul>
@@ -7209,7 +7209,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
         Type Class</a></li>
         <li><a href="#abstracting-a-key-value-store" id="toc-abstracting-a-key-value-store"><span class="toc-section-number">20.5</span> Abstracting a Key Value
         Store</a></li>
-        <li><a href="#summary-2" id="toc-summary-2"><span class="toc-section-number">20.6</span> Summary</a></li>
+        <li><a href="#summary-1" id="toc-summary-1"><span class="toc-section-number">20.6</span> Summary</a></li>
         </ul></li>
         <li><a href="#acknowledgements" id="toc-acknowledgements"><span class="toc-section-number">21</span> Acknowledgements</a>
         <ul>
@@ -11441,19 +11441,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     ```scala
     randoms.take(5)
     // res19: List[Double] = List(
-    //   0.23802053142224255,
-    //   0.3083975661114293,
-    //   0.14908978841832754,
-    //   0.14750448435143892,
-    //   0.308432799619625
+    //   0.8168506438398561,
+    //   0.2831786030479383,
+    //   0.6408130714348103,
+    //   0.17052687685774093,
+    //   0.8329971781077224
     // )
     randoms.take(5)
     // res20: List[Double] = List(
-    //   0.33991336008965034,
-    //   0.5166523680642573,
-    //   0.12679647082652867,
-    //   0.883995905228082,
-    //   0.1946605746279273
+    //   0.3416745440042276,
+    //   0.6676966675844719,
+    //   0.8269494921555589,
+    //   0.9834844122285875,
+    //   0.7661887741460548
     // )
     ```
 
@@ -11472,19 +11472,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     ```scala
     randomsByNeed.take(5)
     // res21: List[Double] = List(
-    //   0.7426495844770117,
-    //   0.7426495844770117,
-    //   0.7426495844770117,
-    //   0.7426495844770117,
-    //   0.7426495844770117
+    //   0.7301549221760117,
+    //   0.7301549221760117,
+    //   0.7301549221760117,
+    //   0.7301549221760117,
+    //   0.7301549221760117
     // )
     randomsByNeed.take(5)
     // res22: List[Double] = List(
-    //   0.7426495844770117,
-    //   0.7426495844770117,
-    //   0.7426495844770117,
-    //   0.7426495844770117,
-    //   0.7426495844770117
+    //   0.7301549221760117,
+    //   0.7301549221760117,
+    //   0.7301549221760117,
+    //   0.7301549221760117,
+    //   0.7301549221760117
     // )
     ```
 
@@ -11512,19 +11512,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     ```scala
     randomsByNeed2.take(5)
     // res23: List[Double] = List(
-    //   0.7265654309242707,
-    //   0.7906924860601395,
-    //   0.9207368458625224,
-    //   0.6861061846227321,
-    //   0.5005059600390331
+    //   0.6801831625647624,
+    //   0.710601169430227,
+    //   0.4614792974659129,
+    //   0.3787171844168147,
+    //   0.39178349686137026
     // )
     randomsByNeed2.take(5)
     // res24: List[Double] = List(
-    //   0.7265654309242707,
-    //   0.7906924860601395,
-    //   0.9207368458625224,
-    //   0.6861061846227321,
-    //   0.5005059600390331
+    //   0.6801831625647624,
+    //   0.710601169430227,
+    //   0.4614792974659129,
+    //   0.3787171844168147,
+    //   0.39178349686137026
     // )
     ```
 
@@ -11894,19 +11894,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     するたびに、<em>異なる</em>結果が得られることに注目してほしい。これらの結果は本来同じであることが期待される。</p>
     <div class="sourceCode" id="cb128"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>randoms<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res45: List[Double] = List(</span></span>
-<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8689311881022702,</span></span>
-<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.3298728617760234,</span></span>
-<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7160210218093154,</span></span>
-<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.995181755591098,</span></span>
-<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7268422947313913</span></span>
+<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   2.2924799822798825E-5,</span></span>
+<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.03381951041268916,</span></span>
+<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.2005697625333388,</span></span>
+<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6090609303314423,</span></span>
+<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8407442035068102</span></span>
 <span id="cb128-8"><a href="#cb128-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb128-9"><a href="#cb128-9" aria-hidden="true" tabindex="-1"></a>randoms<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb128-10"><a href="#cb128-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res46: List[Double] = List(</span></span>
-<span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.21794585612764772,</span></span>
-<span id="cb128-12"><a href="#cb128-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.567007579365764,</span></span>
-<span id="cb128-13"><a href="#cb128-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7199368447518654,</span></span>
-<span id="cb128-14"><a href="#cb128-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.7409346782573337,</span></span>
-<span id="cb128-15"><a href="#cb128-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8030460025801684</span></span>
+<span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.44854748878414485,</span></span>
+<span id="cb128-12"><a href="#cb128-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6259186751000002,</span></span>
+<span id="cb128-13"><a href="#cb128-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.8593839485682416,</span></span>
+<span id="cb128-14"><a href="#cb128-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.980693092386352,</span></span>
+<span id="cb128-15"><a href="#cb128-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6800212819857074</span></span>
 <span id="cb128-16"><a href="#cb128-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>次に、<code>lazy val</code>
     を使い、必要渡しスタイルで同じストリームを定義してみよう。</p>
@@ -11919,19 +11919,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     したときに得られる結果は<em>同じ</em>になる。ただし、どの数もすべて同じになってしまう。</p>
     <div class="sourceCode" id="cb130"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a>randomsByNeed<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res47: List[Double] = List(</span></span>
-<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117</span></span>
+<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994</span></span>
 <span id="cb130-8"><a href="#cb130-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb130-9"><a href="#cb130-9" aria-hidden="true" tabindex="-1"></a>randomsByNeed<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb130-10"><a href="#cb130-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res48: List[Double] = List(</span></span>
-<span id="cb130-11"><a href="#cb130-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-12"><a href="#cb130-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-13"><a href="#cb130-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-14"><a href="#cb130-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117,</span></span>
-<span id="cb130-15"><a href="#cb130-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9740494849792117</span></span>
+<span id="cb130-11"><a href="#cb130-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-12"><a href="#cb130-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-13"><a href="#cb130-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-14"><a href="#cb130-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994,</span></span>
+<span id="cb130-15"><a href="#cb130-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4960531325200994</span></span>
 <span id="cb130-16"><a href="#cb130-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>要素ごとに異なる乱数をもちつつ、それぞれの値は固定値であるようなストリームを作りたい場合、遅延評価を用いるように
     <code>unfold</code> を再定義する必要がある。</p>
@@ -11948,19 +11948,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb132-2"><a href="#cb132-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unfoldByNeed</span><span class="op">(</span><span class="ex">Random</span><span class="op">,</span> r <span class="op">=&gt;</span> r<span class="op">.</span><span class="fu">nextDouble</span><span class="op">(),</span> r <span class="op">=&gt;</span> r<span class="op">)</span></span></code></pre></div>
     <div class="sourceCode" id="cb133"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>randomsByNeed2<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res49: List[Double] = List(</span></span>
-<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4575439241117727,</span></span>
-<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.12177128814286797,</span></span>
-<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.43825559146838444,</span></span>
-<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4162350613260639,</span></span>
-<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.004487918502592447</span></span>
+<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.37666168899861174,</span></span>
+<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9405825156798319,</span></span>
+<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5628726849362917,</span></span>
+<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.0924808960507496,</span></span>
+<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6846216853892201</span></span>
 <span id="cb133-8"><a href="#cb133-8" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span>
 <span id="cb133-9"><a href="#cb133-9" aria-hidden="true" tabindex="-1"></a>randomsByNeed2<span class="op">.</span><span class="fu">take</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span>
 <span id="cb133-10"><a href="#cb133-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res50: List[Double] = List(</span></span>
-<span id="cb133-11"><a href="#cb133-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4575439241117727,</span></span>
-<span id="cb133-12"><a href="#cb133-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.12177128814286797,</span></span>
-<span id="cb133-13"><a href="#cb133-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.43825559146838444,</span></span>
-<span id="cb133-14"><a href="#cb133-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.4162350613260639,</span></span>
-<span id="cb133-15"><a href="#cb133-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.004487918502592447</span></span>
+<span id="cb133-11"><a href="#cb133-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.37666168899861174,</span></span>
+<span id="cb133-12"><a href="#cb133-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.9405825156798319,</span></span>
+<span id="cb133-13"><a href="#cb133-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.5628726849362917,</span></span>
+<span id="cb133-14"><a href="#cb133-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.0924808960507496,</span></span>
+<span id="cb133-15"><a href="#cb133-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   0.6846216853892201</span></span>
 <span id="cb133-16"><a href="#cb133-16" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p>これらの微妙な問題は、関数型プログラマが可能なかぎり状態を使用しないよう努める理由のひとつである。</p>
     <!--
@@ -13821,7 +13821,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     summon[JsonWriter[String]]
-    // res6: JsonWriter[String] = repl.MdocSession$MdocApp3$JsonWriter$$anon$7@41c603a8
+    // res6: JsonWriter[String] = repl.MdocSession$MdocApp3$JsonWriter$$anon$7@2a43d221
     ```
 
     Most type classes in Cats provide other means to summon instances.
@@ -14022,7 +14022,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     スコープに存在する任意の値を呼び出すことができる。必要なのは、求めている値の型を指定することだけで、あとは
     <code>summon</code> がやってくれる。</p>
     <div class="sourceCode" id="cb201"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>summon<span class="op">[</span>JsonWriter<span class="op">[</span><span class="ex">String</span><span class="op">]]</span></span>
-<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: JsonWriter[String] = repl.MdocSession$MdocApp11$JsonWriter$$anon$14@26d096c1</span></span></code></pre></div>
+<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res14: JsonWriter[String] = repl.MdocSession$MdocApp11$JsonWriter$$anon$14@77fc4b75</span></span></code></pre></div>
     <p>Cats
     のほとんどの型クラスはインスタンスを入手するための方法を他にも提供しているが、<code>summon</code>
     はデバッグ目的で使える便利な代替手段である。コードの途中に
@@ -17856,7 +17856,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     ```
     ```scala
     new Date().show
-    // res2: String = "1748356295071ms since the epoch."
+    // res2: String = "1748783366000ms since the epoch."
     ```
 
     However, Cats also provides
@@ -18017,7 +18017,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb309-4"><a href="#cb309-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">show</span><span class="op">(</span>date<span class="op">:</span> <span class="ex">Date</span><span class="op">):</span> <span class="ex">String</span> <span class="op">=</span></span>
 <span id="cb309-5"><a href="#cb309-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">s&quot;${</span>date<span class="op">.</span>getTime<span class="ss">}</span><span class="st">ms since the epoch.</span><span class="ss">&quot;</span></span></code></pre></div>
     <div class="sourceCode" id="cb310"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb310-1"><a href="#cb310-1" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> <span class="ex">Date</span><span class="op">().</span>show</span>
-<span id="cb310-2"><a href="#cb310-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res9: String = &quot;1748356295078ms since the epoch.&quot;</span></span></code></pre></div>
+<span id="cb310-2"><a href="#cb310-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res9: String = &quot;1748783366003ms since the epoch.&quot;</span></span></code></pre></div>
     <p>しかし、Cats
     にはこのプロセスを簡略化するための便利なメソッドもいくつか用意されている。<code>Show</code>
     のコンパニオンオブジェクトには、独自の型に対してインスタンスを定義するためのふたつの構築メソッドがある。</p>
@@ -18436,7 +18436,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <div class="sourceCode" id="cb332"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb332-1"><a href="#cb332-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">===</span> x</span>
 <span id="cb332-2"><a href="#cb332-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res32: Boolean = true</span></span>
 <span id="cb332-3"><a href="#cb332-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">===</span> y</span>
-<span id="cb332-4"><a href="#cb332-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res33: Boolean = false</span></span></code></pre></div>
+<span id="cb332-4"><a href="#cb332-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res33: Boolean = true</span></span></code></pre></div>
     <h4 data-number="6.3.4.1" id="演習-自由友愛等にゃん性"><span class="header-section-number">6.3.4.1</span> 演習:
     自由、友愛、等にゃん性</h4>
     <p><code>Cat</code> の例に対して <code>Eq</code>
@@ -20657,10 +20657,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val func = (x: Int) => x + 1
-    // func: Function1[Int, Int] = repl.MdocSession$MdocApp0$$$Lambda$20724/0x0000000805498840@3aa1ddd7
+    // func: Function1[Int, Int] = repl.MdocSession$MdocApp0$$$Lambda$20678/0x00000008053a5040@39b29506
 
     val liftedFunc = Functor[Option].lift(func)
-    // liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda$20725/0x0000000805499840@7d6c417d
+    // liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda$20679/0x00000008053a6040@49ebfe67
 
     liftedFunc(Option(1))
     // res1: Option[Int] = Some(value = 2)
@@ -20926,10 +20926,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     型の関数を、ファンクター内の値を操作する
     <code>F[A] =&gt; F[B]</code> 型関数に変換する。</p>
     <div class="sourceCode" id="cb412"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb412-1"><a href="#cb412-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func <span class="op">=</span> <span class="op">(</span>x<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span> <span class="op">=&gt;</span> x <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb412-2"><a href="#cb412-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func: Function1[Int, Int] = repl.MdocSession$MdocApp12$$$Lambda$20736/0x00000008054aa040@73500ced</span></span>
+<span id="cb412-2"><a href="#cb412-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func: Function1[Int, Int] = repl.MdocSession$MdocApp12$$$Lambda$20690/0x00000008053a9840@1dae5b5a</span></span>
 <span id="cb412-3"><a href="#cb412-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb412-4"><a href="#cb412-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> liftedFunc <span class="op">=</span> Functor<span class="op">[</span><span class="ex">Option</span><span class="op">].</span><span class="fu">lift</span><span class="op">(</span>func<span class="op">)</span></span>
-<span id="cb412-5"><a href="#cb412-5" aria-hidden="true" tabindex="-1"></a><span class="co">// liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda$20725/0x0000000805499840@52531fdd</span></span>
+<span id="cb412-5"><a href="#cb412-5" aria-hidden="true" tabindex="-1"></a><span class="co">// liftedFunc: Function1[Option[Int], Option[Int]] = cats.Functor$$Lambda$20679/0x00000008053a6040@7832548d</span></span>
 <span id="cb412-6"><a href="#cb412-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb412-7"><a href="#cb412-7" aria-hidden="true" tabindex="-1"></a><span class="fu">liftedFunc</span><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">))</span></span>
 <span id="cb412-8"><a href="#cb412-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res13: Option[Int] = Some(value = 2)</span></span></code></pre></div>
@@ -22143,7 +22143,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     ```
     ```scala
     val func3 = func1.map(func2)
-    // func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda$20730/0x000000080549e040@76a40e47
+    // func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda$20706/0x00000008053c6040@37caaf67
     ```
 
     `Function1` has two type parameters
@@ -22304,7 +22304,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val func3c = func2b.contramap(func1)
-    // func3c: Function1[Int, Double] = scala.Function1$$Lambda$20879/0x000000080535e040@bdc9d59
+    // func3c: Function1[Int, Double] = scala.Function1$$Lambda$20877/0x0000000805235840@39bb73d
     ```
 
     The difference between `func2` and `func2b` is
@@ -22342,7 +22342,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb460-4"><a href="#cb460-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func1 <span class="op">=</span> <span class="op">(</span>x<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span>    <span class="op">=&gt;</span> x<span class="op">.</span>toDouble</span>
 <span id="cb460-5"><a href="#cb460-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func2 <span class="op">=</span> <span class="op">(</span>y<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span> <span class="op">=&gt;</span> y <span class="op">*</span> <span class="dv">2</span></span></code></pre></div>
     <div class="sourceCode" id="cb461"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb461-1"><a href="#cb461-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func3 <span class="op">=</span> func1<span class="op">.</span><span class="fu">map</span><span class="op">(</span>func2<span class="op">)</span></span>
-<span id="cb461-2"><a href="#cb461-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda$20730/0x000000080549e040@673e0921</span></span></code></pre></div>
+<span id="cb461-2"><a href="#cb461-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3: Function1[Int, Double] = cats.instances.Function1Instances0$$anon$11$$Lambda$20706/0x00000008053c6040@3ad82fdc</span></span></code></pre></div>
     <p><code>Function1</code>
     は引数をひとつと戻り値型、合わせてふたつの型パラメータをもっている。</p>
     <div class="sourceCode" id="cb462"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb462-1"><a href="#cb462-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Function1<span class="op">[-</span>A<span class="op">,</span> <span class="op">+</span>B<span class="op">]</span> <span class="op">{</span></span>
@@ -22502,7 +22502,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <code>contramap</code> を呼び出すことが可能となる。</p>
     <div class="sourceCode" id="cb476"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb476-1"><a href="#cb476-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func2b<span class="op">:</span> <span class="ex">Double</span> <span class="op">&lt;=</span> <span class="ex">Double</span> <span class="op">=</span> func2</span></code></pre></div>
     <div class="sourceCode" id="cb477"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb477-1"><a href="#cb477-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> func3c <span class="op">=</span> func2b<span class="op">.</span><span class="fu">contramap</span><span class="op">(</span>func1<span class="op">)</span></span>
-<span id="cb477-2"><a href="#cb477-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3c: Function1[Int, Double] = scala.Function1$$Lambda$20879/0x000000080535e040@2a32f4ca</span></span></code></pre></div>
+<span id="cb477-2"><a href="#cb477-2" aria-hidden="true" tabindex="-1"></a><span class="co">// func3c: Function1[Int, Double] = scala.Function1$$Lambda$20877/0x0000000805235840@62cbe106</span></span></code></pre></div>
     <p><code>func2</code> と <code>func2b</code>
     の違いは純粋に構文的なものである。どちらも参照している値は同じだし、型エイリアスには構文上の違いを除けば完全に互換性がある。しかし驚くべきことに、この簡単な書き換えだけで、問題を解決するために必要なヒントをコンパイラに与えることができる。</p>
     <p>このような右から左への型パラメータ除去を行わなければならないことは稀である。ほとんどの多パラメータ型コンストラクタは右バイアスで設計されており、コンパイラが標準でサポートしている左から右への除去に適合する。しかし、上述のような奇妙なケースに遭遇した場合に備えて、この除去順序の特性を知っておくことは有益である。</p>
@@ -23425,7 +23425,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val fm = Monad[Future]
-    // fm: Monad[[T >: Nothing <: Any] => Future[T]] = cats.instances.FutureInstances$$anon$1@17eb22bc
+    // fm: Monad[[T >: Nothing <: Any] => Future[T]] = cats.instances.FutureInstances$$anon$1@4ea978b7
     ```
 
     The `Monad` instance uses the captured `ExecutionContext`
@@ -23592,7 +23592,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     をスコープに含めれば、インスタンスを呼び出すために必要な暗黙の解決が行われる。</p>
     <div class="sourceCode" id="cb496"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb496-1"><a href="#cb496-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span></code></pre></div>
     <div class="sourceCode" id="cb497"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb497-1"><a href="#cb497-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> fm <span class="op">=</span> Monad<span class="op">[</span><span class="ex">Future</span><span class="op">]</span></span>
-<span id="cb497-2"><a href="#cb497-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fm: Monad[[T &gt;: Nothing &lt;: Any] =&gt; Future[T]] = cats.instances.FutureInstances$$anon$1@a64bb7a</span></span></code></pre></div>
+<span id="cb497-2"><a href="#cb497-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fm: Monad[[T &gt;: Nothing &lt;: Any] =&gt; Future[T]] = cats.instances.FutureInstances$$anon$1@630921e1</span></span></code></pre></div>
     <p>この <code>Monad</code> インスタンスは、暗黙的に渡された
     <code>ExecutionContext</code> を、この後に行われる <code>pure</code>
     や <code>flatMap</code> 呼び出しで利用する。</p>
@@ -25007,12 +25007,12 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       math.random()
     }
     // Computing X
-    // x: Double = 0.28079846321238466
+    // x: Double = 0.9529485048238071
 
     x // first access
-    // res0: Double = 0.28079846321238466
+    // res0: Double = 0.9529485048238071
     x // second access
-    // res1: Double = 0.28079846321238466
+    // res1: Double = 0.9529485048238071
     ```
 
     This is an example of call-by-value evaluation:
@@ -25034,10 +25034,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     y // first access
     // Computing Y
-    // res2: Double = 0.9943595421806529
+    // res2: Double = 0.0847294069710871
     y // second access
     // Computing Y
-    // res3: Double = 0.5626783255698635
+    // res3: Double = 0.03082912235554791
     ```
 
     These are the properties of call-by-name evaluation:
@@ -25061,9 +25061,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     z // first access
     // Computing Z
-    // res4: Double = 0.05702877020917152
+    // res4: Double = 0.46715987863282826
     z // second access
-    // res5: Double = 0.05702877020917152
+    // res5: Double = 0.46715987863282826
     ```
 
     Let's summarize. There are two properties of interest:
@@ -25094,11 +25094,11 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val now = Eval.now(math.random() + 1000)
-    // now: Eval[Double] = Now(value = 1000.1434879158359)
+    // now: Eval[Double] = Now(value = 1000.7422803192524)
     val always = Eval.always(math.random() + 3000)
-    // always: Eval[Double] = cats.Always@3ddfe12d
+    // always: Eval[Double] = cats.Always@14c33c45
     val later = Eval.later(math.random() + 2000)
-    // later: Eval[Double] = cats.Later@787bd642
+    // later: Eval[Double] = cats.Later@5fc2893
     ```
 
     We can extract the result of an `Eval`
@@ -25106,11 +25106,11 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     now.value
-    // res6: Double = 1000.1434879158359
+    // res6: Double = 1000.7422803192524
     always.value
-    // res7: Double = 3000.188475701143
+    // res7: Double = 3000.911943160157
     later.value
-    // res8: Double = 2000.1572872195584
+    // res8: Double = 2000.0740245657526
     ```
 
     Each type of `Eval` calculates its result
@@ -25124,12 +25124,12 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       math.random()
     }
     // Computing X
-    // x: Eval[Double] = Now(value = 0.3410303720983636)
+    // x: Eval[Double] = Now(value = 0.6834085608196377)
 
     x.value // first access
-    // res10: Double = 0.3410303720983636
+    // res10: Double = 0.6834085608196377
     x.value // second access
-    // res11: Double = 0.3410303720983636
+    // res11: Double = 0.6834085608196377
     ```
 
     `Eval.always` captures a lazy computation,
@@ -25140,14 +25140,14 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       println("Computing Y")
       math.random()
     }
-    // y: Eval[Double] = cats.Always@764877b9
+    // y: Eval[Double] = cats.Always@45e6f371
 
     y.value // first access
     // Computing Y
-    // res12: Double = 0.39272225886572276
+    // res12: Double = 0.7491755126517147
     y.value // second access
     // Computing Y
-    // res13: Double = 0.9543986586698887
+    // res13: Double = 0.8577852600206101
     ```
 
     Finally, `Eval.later` captures a lazy, memoized computation,
@@ -25158,13 +25158,13 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       println("Computing Z")
       math.random()
     }
-    // z: Eval[Double] = cats.Later@fd750b9
+    // z: Eval[Double] = cats.Later@4c2b3f01
 
     z.value // first access
     // Computing Z
-    // res14: Double = 0.8104407326437557
+    // res14: Double = 0.2355836889128038
     z.value // second access
-    // res15: Double = 0.8104407326437557
+    // res15: Double = 0.2355836889128038
     ```
 
 
@@ -25191,7 +25191,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     val greeting = Eval
       .always{ println("Step 1"); "Hello" }
       .map{ str => println("Step 2"); s"$str world" }
-    // greeting: Eval[String] = cats.Eval$$anon$4@7ad8d816
+    // greeting: Eval[String] = cats.Eval$$anon$4@6a46dca9
 
     greeting.value
     // Step 1
@@ -25213,7 +25213,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       a + b
     }
     // Calculating A
-    // ans: Eval[Int] = cats.Eval$$anon$4@1f59a57e
+    // ans: Eval[Int] = cats.Eval$$anon$4@5abd7caa
 
     ans.value // first access
     // Calculating B
@@ -25236,7 +25236,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       .map{ str => println("Step 2"); s"$str sat on" }
       .memoize
       .map{ str => println("Step 3"); s"$str the mat" }
-    // saying: Eval[String] = cats.Eval$$anon$4@1bd73f7f
+    // saying: Eval[String] = cats.Eval$$anon$4@2134d93b
 
     saying.value // first access
     // Step 1
@@ -25393,12 +25393,12 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb559-3"><a href="#cb559-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb559-4"><a href="#cb559-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb559-5"><a href="#cb559-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing X</span></span>
-<span id="cb559-6"><a href="#cb559-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Double = 0.1474212238074829</span></span>
+<span id="cb559-6"><a href="#cb559-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Double = 0.8021359790672512</span></span>
 <span id="cb559-7"><a href="#cb559-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb559-8"><a href="#cb559-8" aria-hidden="true" tabindex="-1"></a>x <span class="co">// 最初のアクセス</span></span>
-<span id="cb559-9"><a href="#cb559-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res26: Double = 0.1474212238074829</span></span>
+<span id="cb559-9"><a href="#cb559-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res26: Double = 0.8021359790672512</span></span>
 <span id="cb559-10"><a href="#cb559-10" aria-hidden="true" tabindex="-1"></a>x <span class="co">// 二回目のアクセス</span></span>
-<span id="cb559-11"><a href="#cb559-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res27: Double = 0.1474212238074829</span></span></code></pre></div>
+<span id="cb559-11"><a href="#cb559-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res27: Double = 0.8021359790672512</span></span></code></pre></div>
     <p>これは値呼び評価の例である。</p>
     <ul>
     <li>計算は定義された時点で評価される（先行評価）</li>
@@ -25414,10 +25414,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb560-5"><a href="#cb560-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb560-6"><a href="#cb560-6" aria-hidden="true" tabindex="-1"></a>y <span class="co">// 最初のアクセス</span></span>
 <span id="cb560-7"><a href="#cb560-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb560-8"><a href="#cb560-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res28: Double = 0.906766901799465</span></span>
+<span id="cb560-8"><a href="#cb560-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res28: Double = 0.7583133189237127</span></span>
 <span id="cb560-9"><a href="#cb560-9" aria-hidden="true" tabindex="-1"></a>y <span class="co">// 二度目のアクセス</span></span>
 <span id="cb560-10"><a href="#cb560-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb560-11"><a href="#cb560-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res29: Double = 0.15996352115715828</span></span></code></pre></div>
+<span id="cb560-11"><a href="#cb560-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res29: Double = 0.11257899936254245</span></span></code></pre></div>
     <p>名前呼び評価は以下のような性質をもっている。</p>
     <ul>
     <li>計算は利用された時点で評価される（遅延評価）</li>
@@ -25433,9 +25433,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb561-5"><a href="#cb561-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb561-6"><a href="#cb561-6" aria-hidden="true" tabindex="-1"></a>z <span class="co">// 最初のアクセス</span></span>
 <span id="cb561-7"><a href="#cb561-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Z</span></span>
-<span id="cb561-8"><a href="#cb561-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res30: Double = 0.39546956591335924</span></span>
+<span id="cb561-8"><a href="#cb561-8" aria-hidden="true" tabindex="-1"></a><span class="co">// res30: Double = 0.3328018132227585</span></span>
 <span id="cb561-9"><a href="#cb561-9" aria-hidden="true" tabindex="-1"></a>z <span class="co">// 二度目のアクセス</span></span>
-<span id="cb561-10"><a href="#cb561-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res31: Double = 0.39546956591335924</span></span></code></pre></div>
+<span id="cb561-10"><a href="#cb561-10" aria-hidden="true" tabindex="-1"></a><span class="co">// res31: Double = 0.3328018132227585</span></span></code></pre></div>
     <p>まとめよう。重要な特性の軸はふたつある。</p>
     <ul>
     <li>定義時に評価される（先行評価）か使用時に評価される（遅延評価）か</li>
@@ -25456,19 +25456,19 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <code>Eval</code> 型として返される。</p>
     <div class="sourceCode" id="cb562"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb562-1"><a href="#cb562-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Eval</span></code></pre></div>
     <div class="sourceCode" id="cb563"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb563-1"><a href="#cb563-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> now <span class="op">=</span> Eval<span class="op">.</span><span class="fu">now</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1000</span><span class="op">)</span></span>
-<span id="cb563-2"><a href="#cb563-2" aria-hidden="true" tabindex="-1"></a><span class="co">// now: Eval[Double] = Now(value = 1000.9811277247478)</span></span>
+<span id="cb563-2"><a href="#cb563-2" aria-hidden="true" tabindex="-1"></a><span class="co">// now: Eval[Double] = Now(value = 1000.5200580864193)</span></span>
 <span id="cb563-3"><a href="#cb563-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> always <span class="op">=</span> Eval<span class="op">.</span><span class="fu">always</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">3000</span><span class="op">)</span></span>
-<span id="cb563-4"><a href="#cb563-4" aria-hidden="true" tabindex="-1"></a><span class="co">// always: Eval[Double] = cats.Always@1b17caa4</span></span>
+<span id="cb563-4"><a href="#cb563-4" aria-hidden="true" tabindex="-1"></a><span class="co">// always: Eval[Double] = cats.Always@78328ccf</span></span>
 <span id="cb563-5"><a href="#cb563-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> later <span class="op">=</span> Eval<span class="op">.</span><span class="fu">later</span><span class="op">(</span>math<span class="op">.</span><span class="fu">random</span><span class="op">()</span> <span class="op">+</span> <span class="dv">2000</span><span class="op">)</span></span>
-<span id="cb563-6"><a href="#cb563-6" aria-hidden="true" tabindex="-1"></a><span class="co">// later: Eval[Double] = cats.Later@48ad7dbb</span></span></code></pre></div>
+<span id="cb563-6"><a href="#cb563-6" aria-hidden="true" tabindex="-1"></a><span class="co">// later: Eval[Double] = cats.Later@1efed4df</span></span></code></pre></div>
     <p><code>Eval</code> インスタンスがもつ結果は <code>value</code>
     メソッドを使って展開できる。</p>
     <div class="sourceCode" id="cb564"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb564-1"><a href="#cb564-1" aria-hidden="true" tabindex="-1"></a>now<span class="op">.</span>value</span>
-<span id="cb564-2"><a href="#cb564-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res32: Double = 1000.9811277247478</span></span>
+<span id="cb564-2"><a href="#cb564-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res32: Double = 1000.5200580864193</span></span>
 <span id="cb564-3"><a href="#cb564-3" aria-hidden="true" tabindex="-1"></a>always<span class="op">.</span>value</span>
-<span id="cb564-4"><a href="#cb564-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res33: Double = 3000.6562209617173</span></span>
+<span id="cb564-4"><a href="#cb564-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res33: Double = 3000.7273318693724</span></span>
 <span id="cb564-5"><a href="#cb564-5" aria-hidden="true" tabindex="-1"></a>later<span class="op">.</span>value</span>
-<span id="cb564-6"><a href="#cb564-6" aria-hidden="true" tabindex="-1"></a><span class="co">// res34: Double = 2000.1778468191253</span></span></code></pre></div>
+<span id="cb564-6"><a href="#cb564-6" aria-hidden="true" tabindex="-1"></a><span class="co">// res34: Double = 2000.7581818483884</span></span></code></pre></div>
     <p><code>Eval</code>
     のそれぞれの型は、前述の評価モデルのいずれかを使用して結果を計算する。<code>Eval.now</code>
     は、値を<em>今すぐ</em>取得するもので、そのセマンティクスは
@@ -25479,12 +25479,12 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb565-3"><a href="#cb565-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb565-4"><a href="#cb565-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb565-5"><a href="#cb565-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing X</span></span>
-<span id="cb565-6"><a href="#cb565-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Eval[Double] = Now(value = 0.9203365722803868)</span></span>
+<span id="cb565-6"><a href="#cb565-6" aria-hidden="true" tabindex="-1"></a><span class="co">// x: Eval[Double] = Now(value = 0.753369419273102)</span></span>
 <span id="cb565-7"><a href="#cb565-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb565-8"><a href="#cb565-8" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
-<span id="cb565-9"><a href="#cb565-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res36: Double = 0.9203365722803868</span></span>
+<span id="cb565-9"><a href="#cb565-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res36: Double = 0.753369419273102</span></span>
 <span id="cb565-10"><a href="#cb565-10" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>value <span class="co">// 二度目のアクセス</span></span>
-<span id="cb565-11"><a href="#cb565-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res37: Double = 0.9203365722803868</span></span></code></pre></div>
+<span id="cb565-11"><a href="#cb565-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res37: Double = 0.753369419273102</span></span></code></pre></div>
     <p><code>Eval.always</code>
     は遅延評価される計算を表す。<code>def</code>
     のようなものである。</p>
@@ -25492,14 +25492,14 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb566-2"><a href="#cb566-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Computing Y&quot;</span><span class="op">)</span></span>
 <span id="cb566-3"><a href="#cb566-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb566-4"><a href="#cb566-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb566-5"><a href="#cb566-5" aria-hidden="true" tabindex="-1"></a><span class="co">// y: Eval[Double] = cats.Always@616f5620</span></span>
+<span id="cb566-5"><a href="#cb566-5" aria-hidden="true" tabindex="-1"></a><span class="co">// y: Eval[Double] = cats.Always@4c394b24</span></span>
 <span id="cb566-6"><a href="#cb566-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb566-7"><a href="#cb566-7" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb566-8"><a href="#cb566-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb566-9"><a href="#cb566-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res38: Double = 0.04588089747361779</span></span>
+<span id="cb566-9"><a href="#cb566-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res38: Double = 0.5553221182505715</span></span>
 <span id="cb566-10"><a href="#cb566-10" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>value <span class="co">// 二度目のアクセス</span></span>
 <span id="cb566-11"><a href="#cb566-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Y</span></span>
-<span id="cb566-12"><a href="#cb566-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res39: Double = 0.8771124143365044</span></span></code></pre></div>
+<span id="cb566-12"><a href="#cb566-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res39: Double = 0.14174714064377603</span></span></code></pre></div>
     <p>最後に、<code>Eval.later</code>
     は遅延評価されメモ化される計算を表す。<code>lazy val</code>
     のようなものである。</p>
@@ -25507,13 +25507,13 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb567-2"><a href="#cb567-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Computing Z&quot;</span><span class="op">)</span></span>
 <span id="cb567-3"><a href="#cb567-3" aria-hidden="true" tabindex="-1"></a>  math<span class="op">.</span><span class="fu">random</span><span class="op">()</span></span>
 <span id="cb567-4"><a href="#cb567-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb567-5"><a href="#cb567-5" aria-hidden="true" tabindex="-1"></a><span class="co">// z: Eval[Double] = cats.Later@70914a1e</span></span>
+<span id="cb567-5"><a href="#cb567-5" aria-hidden="true" tabindex="-1"></a><span class="co">// z: Eval[Double] = cats.Later@1b64d4d</span></span>
 <span id="cb567-6"><a href="#cb567-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb567-7"><a href="#cb567-7" aria-hidden="true" tabindex="-1"></a>z<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb567-8"><a href="#cb567-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Computing Z</span></span>
-<span id="cb567-9"><a href="#cb567-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res40: Double = 0.6216061409808596</span></span>
+<span id="cb567-9"><a href="#cb567-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res40: Double = 0.6033244113310103</span></span>
 <span id="cb567-10"><a href="#cb567-10" aria-hidden="true" tabindex="-1"></a>z<span class="op">.</span>value <span class="co">// 二度目のアクセス</span></span>
-<span id="cb567-11"><a href="#cb567-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res41: Double = 0.6216061409808596</span></span></code></pre></div>
+<span id="cb567-11"><a href="#cb567-11" aria-hidden="true" tabindex="-1"></a><span class="co">// res41: Double = 0.6033244113310103</span></span></code></pre></div>
     <p>これら三つの振る舞いを下表にまとめる。</p>
     <div class="table-responsive">
     <table>
@@ -25550,7 +25550,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <div class="sourceCode" id="cb568"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb568-1"><a href="#cb568-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> greeting <span class="op">=</span> Eval</span>
 <span id="cb568-2"><a href="#cb568-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>always<span class="op">{</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 1&quot;</span><span class="op">);</span> <span class="st">&quot;Hello&quot;</span> <span class="op">}</span></span>
 <span id="cb568-3"><a href="#cb568-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 2&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> world</span><span class="ss">&quot;</span> <span class="op">}</span></span>
-<span id="cb568-4"><a href="#cb568-4" aria-hidden="true" tabindex="-1"></a><span class="co">// greeting: Eval[String] = cats.Eval$$anon$4@288736db</span></span>
+<span id="cb568-4"><a href="#cb568-4" aria-hidden="true" tabindex="-1"></a><span class="co">// greeting: Eval[String] = cats.Eval$$anon$4@ab97605</span></span>
 <span id="cb568-5"><a href="#cb568-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb568-6"><a href="#cb568-6" aria-hidden="true" tabindex="-1"></a>greeting<span class="op">.</span>value</span>
 <span id="cb568-7"><a href="#cb568-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1</span></span>
@@ -25567,7 +25567,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb569-6"><a href="#cb569-6" aria-hidden="true" tabindex="-1"></a>  a <span class="op">+</span> b</span>
 <span id="cb569-7"><a href="#cb569-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb569-8"><a href="#cb569-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Calculating A</span></span>
-<span id="cb569-9"><a href="#cb569-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ans: Eval[Int] = cats.Eval$$anon$4@5d8fba10</span></span>
+<span id="cb569-9"><a href="#cb569-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ans: Eval[Int] = cats.Eval$$anon$4@2ac977c3</span></span>
 <span id="cb569-10"><a href="#cb569-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb569-11"><a href="#cb569-11" aria-hidden="true" tabindex="-1"></a>ans<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb569-12"><a href="#cb569-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Calculating B</span></span>
@@ -25585,7 +25585,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb570-3"><a href="#cb570-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 2&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> sat on</span><span class="ss">&quot;</span> <span class="op">}</span></span>
 <span id="cb570-4"><a href="#cb570-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>memoize</span>
 <span id="cb570-5"><a href="#cb570-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>map<span class="op">{</span> str <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span><span class="st">&quot;Step 3&quot;</span><span class="op">);</span> <span class="ss">s&quot;$str</span><span class="st"> the mat</span><span class="ss">&quot;</span> <span class="op">}</span></span>
-<span id="cb570-6"><a href="#cb570-6" aria-hidden="true" tabindex="-1"></a><span class="co">// saying: Eval[String] = cats.Eval$$anon$4@c8cd126</span></span>
+<span id="cb570-6"><a href="#cb570-6" aria-hidden="true" tabindex="-1"></a><span class="co">// saying: Eval[String] = cats.Eval$$anon$4@21e8a393</span></span>
 <span id="cb570-7"><a href="#cb570-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb570-8"><a href="#cb570-8" aria-hidden="true" tabindex="-1"></a>saying<span class="op">.</span>value <span class="co">// 最初のアクセス</span></span>
 <span id="cb570-9"><a href="#cb570-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1</span></span>
@@ -26408,7 +26408,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     val catName: Reader[Cat, String] =
       Reader(cat => cat.name)
     // catName: Kleisli[Id, Cat, String] = Kleisli(
-    //   run = repl.MdocSession$MdocApp0$$$Lambda$22055/0x00000008056a3840@7d530689
+    //   run = repl.MdocSession$MdocApp0$$$Lambda$22038/0x00000008056d5040@3f8aae3c
     // )
     ```
 
@@ -26655,7 +26655,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb609-3"><a href="#cb609-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> catName<span class="op">:</span> <span class="ex">Reader</span><span class="op">[</span>Cat<span class="op">,</span> <span class="ex">String</span><span class="op">]</span> <span class="op">=</span></span>
 <span id="cb609-4"><a href="#cb609-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Reader</span><span class="op">(</span>cat <span class="op">=&gt;</span> cat<span class="op">.</span>name<span class="op">)</span></span>
 <span id="cb609-5"><a href="#cb609-5" aria-hidden="true" tabindex="-1"></a><span class="co">// catName: Kleisli[Id, Cat, String] = Kleisli(</span></span>
-<span id="cb609-6"><a href="#cb609-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   run = repl.MdocSession$MdocApp10$$$Lambda$22069/0x00000008056be040@2673d215</span></span>
+<span id="cb609-6"><a href="#cb609-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   run = repl.MdocSession$MdocApp10$$$Lambda$22052/0x00000008056ef840@259eb96c</span></span>
 <span id="cb609-7"><a href="#cb609-7" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
     <p><code>Reader</code> の <code>run</code>
     で再び関数を取り出すことができ、通常どおり <code>apply</code>
@@ -26922,27 +26922,27 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val getDemo = State.get[Int]
-    // getDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Int] = cats.data.IndexedStateT@2c1c9537
+    // getDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Int] = cats.data.IndexedStateT@243ceebc
     getDemo.run(10).value
     // res1: Tuple2[Int, Int] = (10, 10)
 
     val setDemo = State.set[Int](30)
-    // setDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@1ab67909
+    // setDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@512527c1
     setDemo.run(10).value
     // res2: Tuple2[Int, Unit] = (30, ())
 
     val pureDemo = State.pure[Int, String]("Result")
-    // pureDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, String] = cats.data.IndexedStateT@5f1f9e92
+    // pureDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, String] = cats.data.IndexedStateT@7a14fe64
     pureDemo.run(10).value
     // res3: Tuple2[Int, String] = (10, "Result")
 
     val inspectDemo = State.inspect[Int, String](x => s"${x}!")
-    // inspectDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, String] = cats.data.IndexedStateT@64cf3bc8
+    // inspectDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, String] = cats.data.IndexedStateT@21477887
     inspectDemo.run(10).value
     // res4: Tuple2[Int, String] = (10, "10!")
 
     val modifyDemo = State.modify[Int](_ + 1)
-    // modifyDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@3edf3bf8
+    // modifyDemo: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@78598fb5
     modifyDemo.run(10).value
     // res5: Tuple2[Int, Unit] = (11, ())
     ```
@@ -26964,7 +26964,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       _ <- modify[Int](_ + 1)
       c <- inspect[Int, Int](_ * 1000)
     } yield (a, b, c)
-    // program: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@25bc106
+    // program: IndexedStateT[[A >: Nothing <: Any] => Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@4b7e569f
 
     val (state, result) = program.run(1).value
     // state: Int = 3
@@ -27120,7 +27120,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       _   <- evalOne("2")
       ans <- evalOne("+")
     } yield ans
-    // program: IndexedStateT[[A >: Nothing <: Any] => Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@298afdc5
+    // program: IndexedStateT[[A >: Nothing <: Any] => Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@6e373a74
 
     program.runA(Nil).value
     // res11: Int = 3
@@ -27158,7 +27158,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val multistageProgram = evalAll(List("1", "2", "+", "3", "*"))
-    // multistageProgram: IndexedStateT[[A >: Nothing <: Any] => Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@1638c637
+    // multistageProgram: IndexedStateT[[A >: Nothing <: Any] => Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@22f20d8f
 
     multistageProgram.runA(Nil).value
     // res13: Int = 9
@@ -27176,7 +27176,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
       _   <- evalAll(List("3", "4", "+"))
       ans <- evalOne("*")
     } yield ans
-    // biggerProgram: IndexedStateT[[A >: Nothing <: Any] => Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@40b1f2d2
+    // biggerProgram: IndexedStateT[[A >: Nothing <: Any] => Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@71103033
 
     biggerProgram.runA(Nil).value
     // res14: Int = 21
@@ -27292,27 +27292,27 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <li><code>modify</code>: 関数を使用して状態を更新する</li>
     </ul>
     <div class="sourceCode" id="cb628"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb628-1"><a href="#cb628-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> getDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>get<span class="op">[</span><span class="bu">Int</span><span class="op">]</span></span>
-<span id="cb628-2"><a href="#cb628-2" aria-hidden="true" tabindex="-1"></a><span class="co">// getDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Int] = cats.data.IndexedStateT@6bc3cae4</span></span>
+<span id="cb628-2"><a href="#cb628-2" aria-hidden="true" tabindex="-1"></a><span class="co">// getDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Int] = cats.data.IndexedStateT@5ecbf84c</span></span>
 <span id="cb628-3"><a href="#cb628-3" aria-hidden="true" tabindex="-1"></a>getDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb628-4"><a href="#cb628-4" aria-hidden="true" tabindex="-1"></a><span class="co">// res18: Tuple2[Int, Int] = (10, 10)</span></span>
 <span id="cb628-5"><a href="#cb628-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb628-6"><a href="#cb628-6" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> setDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>set<span class="op">[</span><span class="bu">Int</span><span class="op">](</span><span class="dv">30</span><span class="op">)</span></span>
-<span id="cb628-7"><a href="#cb628-7" aria-hidden="true" tabindex="-1"></a><span class="co">// setDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@679e7e10</span></span>
+<span id="cb628-7"><a href="#cb628-7" aria-hidden="true" tabindex="-1"></a><span class="co">// setDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@6d4de450</span></span>
 <span id="cb628-8"><a href="#cb628-8" aria-hidden="true" tabindex="-1"></a>setDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb628-9"><a href="#cb628-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res19: Tuple2[Int, Unit] = (30, ())</span></span>
 <span id="cb628-10"><a href="#cb628-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb628-11"><a href="#cb628-11" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> pureDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>pure<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">](</span><span class="st">&quot;Result&quot;</span><span class="op">)</span></span>
-<span id="cb628-12"><a href="#cb628-12" aria-hidden="true" tabindex="-1"></a><span class="co">// pureDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@16fdc272</span></span>
+<span id="cb628-12"><a href="#cb628-12" aria-hidden="true" tabindex="-1"></a><span class="co">// pureDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@6676a75b</span></span>
 <span id="cb628-13"><a href="#cb628-13" aria-hidden="true" tabindex="-1"></a>pureDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb628-14"><a href="#cb628-14" aria-hidden="true" tabindex="-1"></a><span class="co">// res20: Tuple2[Int, String] = (10, &quot;Result&quot;)</span></span>
 <span id="cb628-15"><a href="#cb628-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb628-16"><a href="#cb628-16" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> inspectDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>inspect<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">](</span>x <span class="op">=&gt;</span> <span class="ss">s&quot;${</span>x<span class="ss">}</span><span class="st">!</span><span class="ss">&quot;</span><span class="op">)</span></span>
-<span id="cb628-17"><a href="#cb628-17" aria-hidden="true" tabindex="-1"></a><span class="co">// inspectDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@7a17e3c4</span></span>
+<span id="cb628-17"><a href="#cb628-17" aria-hidden="true" tabindex="-1"></a><span class="co">// inspectDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, String] = cats.data.IndexedStateT@5e3f59a1</span></span>
 <span id="cb628-18"><a href="#cb628-18" aria-hidden="true" tabindex="-1"></a>inspectDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb628-19"><a href="#cb628-19" aria-hidden="true" tabindex="-1"></a><span class="co">// res21: Tuple2[Int, String] = (10, &quot;10!&quot;)</span></span>
 <span id="cb628-20"><a href="#cb628-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb628-21"><a href="#cb628-21" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> modifyDemo <span class="op">=</span> <span class="ex">State</span><span class="op">.</span>modify<span class="op">[</span><span class="bu">Int</span><span class="op">](</span>_ <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
-<span id="cb628-22"><a href="#cb628-22" aria-hidden="true" tabindex="-1"></a><span class="co">// modifyDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@4e420c6c</span></span>
+<span id="cb628-22"><a href="#cb628-22" aria-hidden="true" tabindex="-1"></a><span class="co">// modifyDemo: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Unit] = cats.data.IndexedStateT@2fc308af</span></span>
 <span id="cb628-23"><a href="#cb628-23" aria-hidden="true" tabindex="-1"></a>modifyDemo<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span>value</span>
 <span id="cb628-24"><a href="#cb628-24" aria-hidden="true" tabindex="-1"></a><span class="co">// res22: Tuple2[Int, Unit] = (11, ())</span></span></code></pre></div>
     <p>for
@@ -27326,7 +27326,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb630-5"><a href="#cb630-5" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">&lt;-</span> modify<span class="op">[</span><span class="bu">Int</span><span class="op">](</span>_ <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
 <span id="cb630-6"><a href="#cb630-6" aria-hidden="true" tabindex="-1"></a>  c <span class="op">&lt;-</span> inspect<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span>_ <span class="op">*</span> <span class="dv">1000</span><span class="op">)</span></span>
 <span id="cb630-7"><a href="#cb630-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">,</span> c<span class="op">)</span></span>
-<span id="cb630-8"><a href="#cb630-8" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@6d2ba213</span></span>
+<span id="cb630-8"><a href="#cb630-8" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], Int, Int, Tuple3[Int, Int, Int]] = cats.data.IndexedStateT@601801a9</span></span>
 <span id="cb630-9"><a href="#cb630-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb630-10"><a href="#cb630-10" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="op">(</span>state<span class="op">,</span> result<span class="op">)</span> <span class="op">=</span> program<span class="op">.</span><span class="fu">run</span><span class="op">(</span><span class="dv">1</span><span class="op">).</span>value</span>
 <span id="cb630-11"><a href="#cb630-11" aria-hidden="true" tabindex="-1"></a><span class="co">// state: Int = 3</span></span>
@@ -27420,7 +27420,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb639-3"><a href="#cb639-3" aria-hidden="true" tabindex="-1"></a>  _   <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;2&quot;</span><span class="op">)</span></span>
 <span id="cb639-4"><a href="#cb639-4" aria-hidden="true" tabindex="-1"></a>  ans <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;+&quot;</span><span class="op">)</span></span>
 <span id="cb639-5"><a href="#cb639-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> ans</span>
-<span id="cb639-6"><a href="#cb639-6" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@4e3f9209</span></span>
+<span id="cb639-6"><a href="#cb639-6" aria-hidden="true" tabindex="-1"></a><span class="co">// program: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@e733f32</span></span>
 <span id="cb639-7"><a href="#cb639-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb639-8"><a href="#cb639-8" aria-hidden="true" tabindex="-1"></a>program<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb639-9"><a href="#cb639-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res28: Int = 3</span></span></code></pre></div>
@@ -27448,7 +27448,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <p><code>evalAll</code>
     を使えば、複数ステップからなる式を手軽に評価できる。</p>
     <div class="sourceCode" id="cb642"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb642-1"><a href="#cb642-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> multistageProgram <span class="op">=</span> <span class="fu">evalAll</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="st">&quot;1&quot;</span><span class="op">,</span> <span class="st">&quot;2&quot;</span><span class="op">,</span> <span class="st">&quot;+&quot;</span><span class="op">,</span> <span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;*&quot;</span><span class="op">))</span></span>
-<span id="cb642-2"><a href="#cb642-2" aria-hidden="true" tabindex="-1"></a><span class="co">// multistageProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@6a10946b</span></span>
+<span id="cb642-2"><a href="#cb642-2" aria-hidden="true" tabindex="-1"></a><span class="co">// multistageProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@9df2e90</span></span>
 <span id="cb642-3"><a href="#cb642-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb642-4"><a href="#cb642-4" aria-hidden="true" tabindex="-1"></a>multistageProgram<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb642-5"><a href="#cb642-5" aria-hidden="true" tabindex="-1"></a><span class="co">// res30: Int = 9</span></span></code></pre></div>
@@ -27462,7 +27462,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb643-3"><a href="#cb643-3" aria-hidden="true" tabindex="-1"></a>  _   <span class="op">&lt;-</span> <span class="fu">evalAll</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;4&quot;</span><span class="op">,</span> <span class="st">&quot;+&quot;</span><span class="op">))</span></span>
 <span id="cb643-4"><a href="#cb643-4" aria-hidden="true" tabindex="-1"></a>  ans <span class="op">&lt;-</span> <span class="fu">evalOne</span><span class="op">(</span><span class="st">&quot;*&quot;</span><span class="op">)</span></span>
 <span id="cb643-5"><a href="#cb643-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> ans</span>
-<span id="cb643-6"><a href="#cb643-6" aria-hidden="true" tabindex="-1"></a><span class="co">// biggerProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@707afddb</span></span>
+<span id="cb643-6"><a href="#cb643-6" aria-hidden="true" tabindex="-1"></a><span class="co">// biggerProgram: IndexedStateT[[A &gt;: Nothing &lt;: Any] =&gt; Eval[A], List[Int], List[Int], Int] = cats.data.IndexedStateT@1ef0353d</span></span>
 <span id="cb643-7"><a href="#cb643-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb643-8"><a href="#cb643-8" aria-hidden="true" tabindex="-1"></a>biggerProgram<span class="op">.</span><span class="fu">runA</span><span class="op">(</span>Nil<span class="op">).</span>value</span>
 <span id="cb643-9"><a href="#cb643-9" aria-hidden="true" tabindex="-1"></a><span class="co">// res31: Int = 21</span></span></code></pre></div>
@@ -29571,7 +29571,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     val add: (Int, Int) => Int = (a, b) => a + b
-    // add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp0$$$Lambda$18808/0x0000000804d53840@6c9d6f0c
+    // add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp0$$$Lambda$18817/0x0000000804d18840@77103706
     ```
 
     ```scala
@@ -29770,7 +29770,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     を使用して値を関数に適用する。</p>
     <p>この構文が型安全である点も魅力的である。指定した関数の引数の個数や型が誤っている場合、コンパイルエラーが発生する。</p>
     <div class="sourceCode" id="cb711"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb711-1"><a href="#cb711-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> add<span class="op">:</span> <span class="op">(</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Int</span> <span class="op">=</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">=&gt;</span> a <span class="op">+</span> b</span>
-<span id="cb711-2"><a href="#cb711-2" aria-hidden="true" tabindex="-1"></a><span class="co">// add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp16$$$Lambda$18815/0x0000000804cb6840@673dec00</span></span></code></pre></div>
+<span id="cb711-2"><a href="#cb711-2" aria-hidden="true" tabindex="-1"></a><span class="co">// add: Function2[Int, Int, Int] = repl.MdocSession$MdocApp16$$$Lambda$18824/0x0000000804d1b840@f9b3e9</span></span></code></pre></div>
     <div class="sourceCode" id="cb712"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb712-1"><a href="#cb712-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="dv">3</span><span class="op">)).</span><span class="fu">mapN</span><span class="op">(</span>add<span class="op">)</span></span>
 <span id="cb712-2"><a href="#cb712-2" aria-hidden="true" tabindex="-1"></a><span class="co">// error: </span></span>
 <span id="cb712-3"><a href="#cb712-3" aria-hidden="true" tabindex="-1"></a><span class="co">// &#39;:&#39; expected, but &#39;(&#39; found</span></span>
@@ -33645,15 +33645,15 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     randomRGB.replicateA(2).run
     // res1: List[Color] = List(
     //   Rgb(
-    //     r = UnsignedByte(value = -70),
-    //     g = UnsignedByte(value = -59),
-    //     b = UnsignedByte(value = -2),
+    //     r = UnsignedByte(value = -117),
+    //     g = UnsignedByte(value = 69),
+    //     b = UnsignedByte(value = -30),
     //     a = Normalized(get = 1.0)
     //   ),
     //   Rgb(
-    //     r = UnsignedByte(value = -74),
-    //     g = UnsignedByte(value = 81),
-    //     b = UnsignedByte(value = 29),
+    //     r = UnsignedByte(value = 108),
+    //     g = UnsignedByte(value = 56),
+    //     b = UnsignedByte(value = 70),
     //     a = Normalized(get = 1.0)
     //   )
     // )
@@ -33900,15 +33900,15 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <div class="sourceCode" id="cb853"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb853-1"><a href="#cb853-1" aria-hidden="true" tabindex="-1"></a>randomRGB<span class="op">.</span><span class="fu">replicateA</span><span class="op">(</span><span class="dv">2</span><span class="op">).</span>run</span>
 <span id="cb853-2"><a href="#cb853-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res8: List[Color] = List(</span></span>
 <span id="cb853-3"><a href="#cb853-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   Rgb(</span></span>
-<span id="cb853-4"><a href="#cb853-4" aria-hidden="true" tabindex="-1"></a><span class="co">//     r = UnsignedByte(value = -1),</span></span>
-<span id="cb853-5"><a href="#cb853-5" aria-hidden="true" tabindex="-1"></a><span class="co">//     g = UnsignedByte(value = 77),</span></span>
-<span id="cb853-6"><a href="#cb853-6" aria-hidden="true" tabindex="-1"></a><span class="co">//     b = UnsignedByte(value = 61),</span></span>
+<span id="cb853-4"><a href="#cb853-4" aria-hidden="true" tabindex="-1"></a><span class="co">//     r = UnsignedByte(value = 49),</span></span>
+<span id="cb853-5"><a href="#cb853-5" aria-hidden="true" tabindex="-1"></a><span class="co">//     g = UnsignedByte(value = 93),</span></span>
+<span id="cb853-6"><a href="#cb853-6" aria-hidden="true" tabindex="-1"></a><span class="co">//     b = UnsignedByte(value = 31),</span></span>
 <span id="cb853-7"><a href="#cb853-7" aria-hidden="true" tabindex="-1"></a><span class="co">//     a = Normalized(get = 1.0)</span></span>
 <span id="cb853-8"><a href="#cb853-8" aria-hidden="true" tabindex="-1"></a><span class="co">//   ),</span></span>
 <span id="cb853-9"><a href="#cb853-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   Rgb(</span></span>
-<span id="cb853-10"><a href="#cb853-10" aria-hidden="true" tabindex="-1"></a><span class="co">//     r = UnsignedByte(value = -3),</span></span>
-<span id="cb853-11"><a href="#cb853-11" aria-hidden="true" tabindex="-1"></a><span class="co">//     g = UnsignedByte(value = 10),</span></span>
-<span id="cb853-12"><a href="#cb853-12" aria-hidden="true" tabindex="-1"></a><span class="co">//     b = UnsignedByte(value = -28),</span></span>
+<span id="cb853-10"><a href="#cb853-10" aria-hidden="true" tabindex="-1"></a><span class="co">//     r = UnsignedByte(value = 9),</span></span>
+<span id="cb853-11"><a href="#cb853-11" aria-hidden="true" tabindex="-1"></a><span class="co">//     g = UnsignedByte(value = -101),</span></span>
+<span id="cb853-12"><a href="#cb853-12" aria-hidden="true" tabindex="-1"></a><span class="co">//     b = UnsignedByte(value = 74),</span></span>
 <span id="cb853-13"><a href="#cb853-13" aria-hidden="true" tabindex="-1"></a><span class="co">//     a = Normalized(get = 1.0)</span></span>
 <span id="cb853-14"><a href="#cb853-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   )</span></span>
 <span id="cb853-15"><a href="#cb853-15" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
@@ -36325,7 +36325,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 
     ```scala
     quiz
-    // res0: Program[Controls & Layout, Tuple2[String, Int]] = repl.MdocSession$MdocApp$$Lambda$22648/0x0000000805989840@4e87b5bb
+    // res0: Program[Controls & Layout, Tuple2[String, Int]] = repl.MdocSession$MdocApp$$Lambda$22639/0x00000008057cc440@39043b37
     ```
 
     This encoding requires more work from the library developer. However this is a one off cost, and result is that library users write much simpler code. For most applications of tagless final I think this is an appropriate trade off.
@@ -36578,7 +36578,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <p>これは見た目にも通常のコードと変わらない。<code>quiz</code>
     の型を見れば、必要なプログラム代数がすべて型推論によって正しく導出されていることがわかる。</p>
     <div class="sourceCode" id="cb915"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb915-1"><a href="#cb915-1" aria-hidden="true" tabindex="-1"></a>quiz</span>
-<span id="cb915-2"><a href="#cb915-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Program[Controls &amp; Layout, Tuple2[String, Int]] = repl.MdocSession$MdocApp1$$Lambda$22653/0x000000080598ec40@2dec1c25</span></span></code></pre></div>
+<span id="cb915-2"><a href="#cb915-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res2: Program[Controls &amp; Layout, Tuple2[String, Int]] = repl.MdocSession$MdocApp1$$Lambda$22644/0x00000008057c9040@5531a9</span></span></code></pre></div>
     <p>このエンコーディングではライブラリ開発者側により多くの作業が必要となる。だがそれは一度きりのコストであり、その代わりとしてライブラリ利用者ははるかに簡潔なコードを書くことができる。Tagless
     Final
     のほとんどの用途において、このトレードオフは妥当なものだと考えている。</p>
@@ -39660,7 +39660,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <code>Foldable</code>
     インスタンスを用いて実装できる。すべてのファンクターが
     <code>Foldable</code>
-    インスタンスをもつわけではないが、それら両方の型クラスを備えたデータ型を基礎として
+    インスタンスをもつわけではないが、これら両方の型クラスを備えたデータ型を基礎として
     MapReduce システムは構築される。Reduce ステップでは、分散処理された
     <code>map</code> の結果に対して <code>foldLeft</code>
     を適用することになる。</p>
@@ -39756,7 +39756,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     処理を複数ノードに自由に分散することができる。ただし、各ノード内の部分シーケンスは元のデータセットにおける順序を保持する必要がある。</p>
     <p><code>fold</code> は計算の初期値として <code>B</code>
     型の要素を必要とする。<code>fold</code>
-    が任意の数の並列ステップに分割される可能性を考えると、初期値は計算結果に影響を与えてならない。このことは、初期値が<em>単位元</em>であることをおのずと要請する。</p>
+    が任意の数の並列ステップに分割される可能性を考えると、初期値は計算結果に影響を与えてならない。このことは、初期値が<em>単位元</em>であることを要請する。</p>
     <div class="sourceCode" id="cb963"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb963-1"><a href="#cb963-1" aria-hidden="true" tabindex="-1"></a><span class="fu">reduce</span><span class="op">(</span>seed<span class="op">,</span> a1<span class="op">)</span> <span class="op">==</span> <span class="fu">reduce</span><span class="op">(</span>a1<span class="op">,</span> seed<span class="op">)</span> <span class="op">==</span> a1</span></code></pre></div>
     <p>まとめると、並列化された <code>fold</code>
     が正しい結果を得るには、以下の条件を満たす必要がある。</p>
@@ -39773,40 +39773,40 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     を実装する。データフローをモデル化するために、まず
     <code>foldMap</code>
     というメソッドを実装するところから始めよう。</p>
-    <h2 data-number="18.2" id="implementing-foldmap"><span class="header-section-number">18.2</span> Implementing
-    <em>foldMap</em></h2>
-    <p>We saw <code>foldMap</code> briefly back when we covered
-    <code>Foldable</code>. It is one of the derived operations that sits
-    on top of <code>foldLeft</code> and <code>foldRight</code>. However,
-    rather than use <code>Foldable</code>, we will re-implement
-    <code>foldMap</code> here ourselves as it will provide useful
-    insight into the structure of map-reduce.</p>
-    <p>Start by writing out the signature of <code>foldMap</code>. It
-    should accept the following parameters:</p>
+    <h2 data-number="18.2" id="foldmap-の実装"><span class="header-section-number">18.2</span> <em>foldMap</em>
+    の実装</h2>
+    <p><code>foldMap</code> については、以前 <code>Foldable</code>
+    を扱った際に簡単に見た。これは <code>foldLeft</code> と
+    <code>foldRight</code>
+    の上に構築される派生操作のひとつである。ただし、今回は
+    <code>Foldable</code> を使わず <code>foldMap</code>
+    を自分たちで再実装する。そうすることで MapReduce
+    の構造に関する有用な洞察を得ることができる。</p>
+    <p>まずは <code>foldMap</code>
+    のシグネチャを記述せよ。なお、この関数は以下のパラメータを受け取る必要がある。</p>
     <ul>
-    <li>a sequence of type <code>Vector[A]</code>;</li>
-    <li>a function of type <code>A =&gt; B</code>, where there is a
-    <code>Monoid</code> for <code>B</code>;</li>
+    <li><code>Vector[A]</code> 型のシーケンス</li>
+    <li><code>A =&gt; B</code> 型の関数。ただし <code>B</code> に対して
+    <code>Monoid</code> インスタンスが存在すること</li>
     </ul>
-    <p>You will have to add implicit parameters or context bounds to
-    complete the type signature.</p>
+    <p>この型シグネチャを完成させるには、暗黙パラメータもしくはコンテキスト境界を追加する必要がある。</p>
     <div class="solution">
     <div class="sourceCode" id="cb964"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb964-1"><a href="#cb964-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Monoid</span>
 <span id="cb964-2"><a href="#cb964-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb964-3"><a href="#cb964-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span> Single<span class="co">-</span>threaded map<span class="co">-</span>reduce function<span class="co">.</span></span>
-<span id="cb964-4"><a href="#cb964-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">*</span> Maps <span class="co">`</span>func<span class="co">`</span> over <span class="co">`</span>values<span class="co">`</span> and reduces using a <span class="co">`</span>Monoid<span class="co">[</span>B<span class="co">]`.</span></span>
+<span id="cb964-3"><a href="#cb964-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span> <span class="co">シングルスレッドの</span> MapReduce <span class="co">関数。</span></span>
+<span id="cb964-4"><a href="#cb964-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">*</span> <span class="co">`</span>values<span class="co">`</span> <span class="co">を</span> <span class="co">`</span>func<span class="co">`</span> <span class="co">でマップし、`</span>Monoid<span class="co">[</span>B<span class="co">]`</span> <span class="co">によって畳み込む。</span></span>
 <span id="cb964-5"><a href="#cb964-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">*/</span></span>
 <span id="cb964-6"><a href="#cb964-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foldMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">:</span> Monoid<span class="op">](</span>values<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> B <span class="op">=</span></span>
 <span id="cb964-7"><a href="#cb964-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">???</span></span></code></pre></div>
     </div>
-    <p>Now implement the body of <code>foldMap</code>. Use the flow
-    chart in Figure 17 as a guide to the steps required:</p>
+    <p>つづいて <code>foldMap</code>
+    の本体を実装せよ。必要な手順のガイドとして図17のフローチャートをもちいること。</p>
     <ol type="1">
-    <li>start with a sequence of items of type <code>A</code>;</li>
-    <li>map over the list to produce a sequence of items of type
-    <code>B</code>;</li>
-    <li>use the <code>Monoid</code> to reduce the items to a single
-    <code>B</code>.</li>
+    <li>型 <code>A</code> の要素をもつシーケンスを用意する</li>
+    <li>それを <code>func</code> でマップし、型 <code>B</code>
+    の要素をもつシーケンスを生成する</li>
+    <li><code>Monoid</code> を用い、シーケンスを単一の <code>B</code>
+    型の値へと畳み込む</li>
     </ol>
     <figure id="fig:map-reduce:fold-map">
     <svg id="svg_e920b4022e3705007059" alt="foldMap algorithm" width="1420px" height="1041px" viewBox="0 0 1420 1041">
@@ -39966,52 +39966,47 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 </svg>
     <figcaption>Figure 17: <em>foldMap</em> algorithm</figcaption>
     </figure>
-    <p>Here’s some sample output for reference:</p>
-    <div class="sourceCode" id="cb965"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb965-1"><a href="#cb965-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span><span class="dt">int</span><span class="op">.</span>_ <span class="co">// for Monoid</span></span></code></pre></div>
+    <p>参考までに、以下に出力のサンプルを示す。</p>
+    <div class="sourceCode" id="cb965"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb965-1"><a href="#cb965-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span><span class="dt">int</span><span class="op">.</span>_ <span class="co">// Monoid</span></span></code></pre></div>
     <div class="sourceCode" id="cb966"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb966-1"><a href="#cb966-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldMap</span><span class="op">(</span><span class="ex">Vector</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">))(</span>identity<span class="op">)</span></span>
 <span id="cb966-2"><a href="#cb966-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res21: Int = 6</span></span></code></pre></div>
-    <div class="sourceCode" id="cb967"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb967-1"><a href="#cb967-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>string<span class="op">.</span>_ <span class="co">// for Monoid</span></span></code></pre></div>
-    <div class="sourceCode" id="cb968"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb968-1"><a href="#cb968-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Mapping to a String uses the concatenation monoid:</span></span>
+    <div class="sourceCode" id="cb967"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb967-1"><a href="#cb967-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>string<span class="op">.</span>_ <span class="co">// Monoid</span></span></code></pre></div>
+    <div class="sourceCode" id="cb968"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb968-1"><a href="#cb968-1" aria-hidden="true" tabindex="-1"></a><span class="co">// String へのマッピングでは連結モノイドが使われる。</span></span>
 <span id="cb968-2"><a href="#cb968-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldMap</span><span class="op">(</span><span class="ex">Vector</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">))(</span>_<span class="op">.</span>toString <span class="op">+</span> <span class="st">&quot;! &quot;</span><span class="op">)</span></span>
 <span id="cb968-3"><a href="#cb968-3" aria-hidden="true" tabindex="-1"></a><span class="co">// res22: String = &quot;1! 2! 3! &quot;</span></span>
 <span id="cb968-4"><a href="#cb968-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb968-5"><a href="#cb968-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Mapping over a String to produce a String:</span></span>
+<span id="cb968-5"><a href="#cb968-5" aria-hidden="true" tabindex="-1"></a><span class="co">// 各文字を String へマッピングして再び String を作る。</span></span>
 <span id="cb968-6"><a href="#cb968-6" aria-hidden="true" tabindex="-1"></a><span class="fu">foldMap</span><span class="op">(</span><span class="st">&quot;Hello world!&quot;</span><span class="op">.</span>toVector<span class="op">)(</span>_<span class="op">.</span>toString<span class="op">.</span>toUpperCase<span class="op">)</span></span>
 <span id="cb968-7"><a href="#cb968-7" aria-hidden="true" tabindex="-1"></a><span class="co">// res23: String = &quot;HELLO WORLD!&quot;</span></span></code></pre></div>
     <div class="solution">
-    <p>We have to modify the type signature to accept a
-    <code>Monoid</code> for <code>B</code>. With that change we can use
-    the <code>Monoid</code> <code>empty</code> and <code>|+|</code>
-    syntax as described in Section 7.3.3:</p>
+    <p><code>B</code> に対する <code>Monoid</code>
+    を受け取るために型シグネチャを変更する必要がある。そうすることで、7.3.3節で述べた
+    <code>Monoid.empty</code> や <code>|+|</code>
+    構文が使えるようになる。</p>
     <div class="sourceCode" id="cb969"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb969-1"><a href="#cb969-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Monoid</span>
-<span id="cb969-2"><a href="#cb969-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>semigroup<span class="op">.</span>_ <span class="co">// for |+|</span></span>
+<span id="cb969-2"><a href="#cb969-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>semigroup<span class="op">.</span>_ <span class="co">// |+|</span></span>
 <span id="cb969-3"><a href="#cb969-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb969-4"><a href="#cb969-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foldMap<span class="op">[</span>A<span class="op">,</span> B <span class="op">:</span> Monoid<span class="op">](</span>as<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> B <span class="op">=</span></span>
 <span id="cb969-5"><a href="#cb969-5" aria-hidden="true" tabindex="-1"></a>  as<span class="op">.</span><span class="fu">map</span><span class="op">(</span>func<span class="op">).</span><span class="fu">foldLeft</span><span class="op">(</span>Monoid<span class="op">[</span>B<span class="op">].</span>empty<span class="op">)(</span>_ <span class="op">|+|</span> _<span class="op">)</span></span></code></pre></div>
-    <p>We can make a slight alteration to this code to do everything in
-    one step:</p>
+    <p>このコードをすこし書き換えて、すべてを一度に行うこともできる。</p>
     <div class="sourceCode" id="cb970"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb970-1"><a href="#cb970-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foldMap<span class="op">[</span>A<span class="op">,</span> B <span class="op">:</span> Monoid<span class="op">](</span>as<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> B <span class="op">=</span></span>
 <span id="cb970-2"><a href="#cb970-2" aria-hidden="true" tabindex="-1"></a>  as<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span>Monoid<span class="op">[</span>B<span class="op">].</span>empty<span class="op">)(</span>_ <span class="op">|+|</span> <span class="fu">func</span><span class="op">(</span>_<span class="op">))</span></span></code></pre></div>
     </div>
-    <h2 data-number="18.3" id="parallelising-foldmap"><span class="header-section-number">18.3</span> Parallelising
-    <em>foldMap</em></h2>
-    <p>Now we have a working single-threaded implementation of
-    <code>foldMap</code>, let’s look at distributing work to run in
-    parallel. We’ll use our single-threaded version of
-    <code>foldMap</code> as a building block.</p>
-    <p>We’ll write a multi-CPU implementation that simulates the way we
-    would distribute work in a map-reduce cluster as shown in Figure
-    18:</p>
+    <h2 data-number="18.3" id="foldmap-の並列化"><span class="header-section-number">18.3</span> <em>foldMap</em>
+    の並列化</h2>
+    <p>シングルスレッドの <code>foldMap</code>
+    実装が動作するようになったので、次はこれを並列実行するための分散処理に目を向けてみよう。ここでは、先ほどのシングルスレッド版
+    <code>foldMap</code> を構成要素として利用する。</p>
+    <p>これから実装するのは、複数の CPU
+    を使って並列処理を行うバージョンである。これは、図18に示されている
+    MapReduce クラスタにおける処理分散の仕組みを模している。</p>
     <ol type="1">
-    <li>we start with an initial list of all the data we need to
-    process;</li>
-    <li>we divide the data into batches, sending one batch to each
-    CPU;</li>
-    <li>the CPUs run a batch-level map phase in parallel;</li>
-    <li>the CPUs run a batch-level reduce phase in parallel, producing a
-    local result for each batch;</li>
-    <li>we reduce the results for each batch to a single final
-    result.</li>
+    <li>処理対象となるすべてのデータを最初に用意する</li>
+    <li>データをいくつかのバッチに分割し、それぞれを各 CPU に送る</li>
+    <li>Map フェーズを各 CPU がバッチ単位で並列に実行する</li>
+    <li>Reduce フェーズを各 CPU
+    がバッチ単位で並列に実行し、バッチごとの結果を得る</li>
+    <li>各バッチの結果をひとつに畳み込んで最終結果を得る</li>
     </ol>
     <figure id="fig:map-reduce:parallel-fold-map">
     <svg id="svg_66a11eb7ee05ff53cd13" alt="parallelFoldMap algorithm" width="1420px" height="1640px" viewBox="0 0 1420 1640">
@@ -40794,21 +40789,25 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <figcaption>Figure 18: <em>parallelFoldMap</em>
     algorithm</figcaption>
     </figure>
-    <p>Scala provides some simple tools to distribute work amongst
-    threads. We could use the <a href="http://docs.scala-lang.org/overviews/parallel-collections/overview.html">parallel
-    collections library</a> to implement a solution, but let’s challenge
-    ourselves by diving a bit deeper and implementing the algorithm
-    ourselves using <code>Futures</code>.</p>
-    <h3 data-number="18.3.1" id="futures-thread-pools-and-executioncontexts"><span class="header-section-number">18.3.1</span> <em>Futures</em>, Thread
-    Pools, and ExecutionContexts</h3>
-    <p>We already know a fair amount about the monadic nature of
-    <code>Futures</code>. Let’s take a moment for a quick recap, and to
-    describe how Scala futures are scheduled behind the scenes.</p>
-    <p><code>Futures</code> run on a thread pool, determined by an
-    implicit <code>ExecutionContext</code> parameter. Whenever we create
-    a <code>Future</code>, whether through a call to
-    <code>Future.apply</code> or some other combinator, we must have an
-    implicit <code>ExecutionContext</code> in scope:</p>
+    <p>Scala
+    には、スレッド間で仕事を分配するための簡単なツールが用意されている。たとえば
+    <a href="http://docs.scala-lang.org/overviews/parallel-collections/overview.html">parallel
+    collections library</a>
+    を使ってこの課題を実装することも可能である。しかし今回はもうすこし深く掘り下げ、<code>Future</code>
+    を用いて自前でアルゴリズムを実装することに挑戦してみたい。</p>
+    <h3 data-number="18.3.1" id="future-とスレッドプールと-executioncontext"><span class="header-section-number">18.3.1</span> <em>Future</em>
+    とスレッドプールと ExecutionContext</h3>
+    <p><code>Future</code>
+    がモナド的であることについてはすでにかなり理解が進んでいる。それを簡単におさらいし、Scala
+    の <code>Future</code>
+    が裏側でどのようにスケジューリングされているのかを確認しよう。</p>
+    <p><code>Future</code>
+    はスレッドプール上で実行される。そのプールは暗黙の
+    <code>ExecutionContext</code>
+    パラメータによって決定される。<code>Future.apply</code>
+    やその他のコンビネータによって <code>Future</code>
+    を作成するときは必ず、スコープ内に暗黙の
+    <code>ExecutionContext</code> が存在していなければならない。</p>
     <div class="sourceCode" id="cb971"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb971-1"><a href="#cb971-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span><span class="ex">Future</span></span>
 <span id="cb971-2"><a href="#cb971-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span></code></pre></div>
     <div class="sourceCode" id="cb972"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb972-1"><a href="#cb972-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> future1 <span class="op">=</span> <span class="ex">Future</span> <span class="op">{</span></span>
@@ -40820,20 +40819,20 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb972-7"><a href="#cb972-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span><span class="dv">100</span> to <span class="dv">200</span><span class="op">).</span>toList<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="dv">0</span><span class="op">)(</span>_ <span class="op">+</span> _<span class="op">)</span></span>
 <span id="cb972-8"><a href="#cb972-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb972-9"><a href="#cb972-9" aria-hidden="true" tabindex="-1"></a><span class="co">// future2: Future[Int] = Future(Success(15150))</span></span></code></pre></div>
-    <p>In this example we’ve imported a
-    <code>ExecutionContext.Implicits.global</code>. This default context
-    allocates a thread pool with one thread per CPU in our machine. When
-    we create a <code>Future</code> the <code>ExecutionContext</code>
-    schedules it for execution. If there is a free thread in the pool,
-    the <code>Future</code> starts executing immediately. Most modern
-    machines have at least two CPUs, so in our example it is likely that
-    <code>future1</code> and <code>future2</code> will execute in
-    parellel.</p>
-    <p>Some combinators create new <code>Futures</code> that schedule
-    work based on the results of other <code>Futures</code>. The
-    <code>map</code> and <code>flatMap</code> methods, for example,
-    schedule computations that run as soon as their input values are
-    computed and a CPU is available:</p>
+    <p>この例では <code>ExecutionContext.Implicits.global</code>
+    をインポートしている。このデフォルトのコンテキストでは、マシン上の
+    CPU
+    ごとにひとつスレッドを割り当てたスレッドプールが使用される。<code>Future</code>
+    を作成すると、<code>ExecutionContext</code>
+    がその実行をスケジューリングする。プール内に空いているスレッドがあれば、<code>Future</code>
+    は即座に実行を開始する。現代の多くのマシンはすくなくともふたつの CPU
+    を備えているため、上記の例における <code>future1</code> と
+    <code>future2</code> は並列に実行される可能性が高い。</p>
+    <p>他の <code>Future</code>
+    の結果に基づいて処理をスケジューリングする新たな <code>Future</code>
+    を作成するようなコンビネータもある。たとえば <code>map</code> や
+    <code>flatMap</code> は、入力値が計算され、かつ利用可能な CPU
+    があれば、即座に計算を実行する。</p>
     <div class="sourceCode" id="cb973"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb973-1"><a href="#cb973-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> future3 <span class="op">=</span> future1<span class="op">.</span><span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>toString<span class="op">)</span></span>
 <span id="cb973-2"><a href="#cb973-2" aria-hidden="true" tabindex="-1"></a><span class="co">// future3: Future[String] = Future(Success(5050))</span></span>
 <span id="cb973-3"><a href="#cb973-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -40842,44 +40841,45 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb973-6"><a href="#cb973-6" aria-hidden="true" tabindex="-1"></a>  b <span class="op">&lt;-</span> future2</span>
 <span id="cb973-7"><a href="#cb973-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">yield</span> a <span class="op">+</span> b</span>
 <span id="cb973-8"><a href="#cb973-8" aria-hidden="true" tabindex="-1"></a><span class="co">// future4: Future[Int] = Future(Success(20200))</span></span></code></pre></div>
-    <p>As we saw in Section 12.2, we can convert a
-    <code>List[Future[A]]</code> to a <code>Future[List[A]]</code> using
-    <code>Future.sequence</code>:</p>
+    <p>12.2節で見たように、<code>Future.sequence</code> を使えば
+    <code>List[Future[A]]</code> を <code>Future[List[A]]</code>
+    に変換できる。</p>
     <div class="sourceCode" id="cb974"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb974-1"><a href="#cb974-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Future</span><span class="op">.</span><span class="fu">sequence</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="ex">Future</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Future</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Future</span><span class="op">(</span><span class="dv">3</span><span class="op">)))</span></span>
 <span id="cb974-2"><a href="#cb974-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res26: Future[List[Int]] = Future(Success(List(1, 2, 3)))</span></span></code></pre></div>
-    <p>or an instance of <code>Traverse</code>:</p>
-    <div class="sourceCode" id="cb975"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb975-1"><a href="#cb975-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>future<span class="op">.</span>_ <span class="co">// for Applicative</span></span>
-<span id="cb975-2"><a href="#cb975-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>list<span class="op">.</span>_   <span class="co">// for Traverse</span></span>
-<span id="cb975-3"><a href="#cb975-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>traverse<span class="op">.</span>_  <span class="co">// for sequence</span></span></code></pre></div>
+    <p>あるいは <code>Traverse</code> インスタンスを使ってもよい。</p>
+    <div class="sourceCode" id="cb975"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb975-1"><a href="#cb975-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>future<span class="op">.</span>_ <span class="co">// Applicative</span></span>
+<span id="cb975-2"><a href="#cb975-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>list<span class="op">.</span>_   <span class="co">// Traverse</span></span>
+<span id="cb975-3"><a href="#cb975-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>traverse<span class="op">.</span>_  <span class="co">// sequence</span></span></code></pre></div>
     <div class="sourceCode" id="cb976"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb976-1"><a href="#cb976-1" aria-hidden="true" tabindex="-1"></a><span class="ex">List</span><span class="op">(</span><span class="ex">Future</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Future</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="ex">Future</span><span class="op">(</span><span class="dv">3</span><span class="op">)).</span>sequence</span>
 <span id="cb976-2"><a href="#cb976-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res27: Future[List[Int]] = Future(Success(List(1, 2, 3)))</span></span></code></pre></div>
-    <p>An <code>ExecutionContext</code> is required in either case.
-    Finally, we can use <code>Await.result</code> to block on a
-    <code>Future</code> until a result is available:</p>
+    <p>いずれの場合も <code>ExecutionContext</code>
+    インスタンスが必要である。最後に、<code>Await.result</code> を使えば
+    <code>Future</code> の結果を得られるまで待機することができる。</p>
     <div class="sourceCode" id="cb977"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb977-1"><a href="#cb977-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>_</span>
 <span id="cb977-2"><a href="#cb977-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>duration<span class="op">.</span>_</span></code></pre></div>
-    <div class="sourceCode" id="cb978"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb978-1"><a href="#cb978-1" aria-hidden="true" tabindex="-1"></a>Await<span class="op">.</span><span class="fu">result</span><span class="op">(</span><span class="ex">Future</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="fl">1.</span>second<span class="op">)</span> <span class="co">// wait for the result</span></span>
+    <div class="sourceCode" id="cb978"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb978-1"><a href="#cb978-1" aria-hidden="true" tabindex="-1"></a>Await<span class="op">.</span><span class="fu">result</span><span class="op">(</span><span class="ex">Future</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="fl">1.</span>second<span class="op">)</span> <span class="co">// 結果を待つ</span></span>
 <span id="cb978-2"><a href="#cb978-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res28: Int = 1</span></span></code></pre></div>
-    <p>There are also <code>Monad</code> and <code>Monoid</code>
-    implementations for <code>Future</code> available from
-    <code>cats.instances.future</code>:</p>
+    <p>また、<code>cats.instances.future</code> では <code>Future</code>
+    に対する <code>Monad</code> および <code>Monoid</code>
+    実装も提供されている。</p>
     <div class="sourceCode" id="cb979"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb979-1"><a href="#cb979-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.{</span>Monad<span class="op">,</span> Monoid<span class="op">}</span></span>
-<span id="cb979-2"><a href="#cb979-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span><span class="dt">int</span><span class="op">.</span>_    <span class="co">// for Monoid</span></span>
-<span id="cb979-3"><a href="#cb979-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>future<span class="op">.</span>_ <span class="co">// for Monad and Monoid</span></span>
+<span id="cb979-2"><a href="#cb979-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span><span class="dt">int</span><span class="op">.</span>_    <span class="co">// Monoid[Int]</span></span>
+<span id="cb979-3"><a href="#cb979-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>future<span class="op">.</span>_ <span class="co">// Future 用の Monad と Monoid</span></span>
 <span id="cb979-4"><a href="#cb979-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb979-5"><a href="#cb979-5" aria-hidden="true" tabindex="-1"></a>Monad<span class="op">[</span><span class="ex">Future</span><span class="op">].</span><span class="fu">pure</span><span class="op">(</span><span class="dv">42</span><span class="op">)</span></span>
 <span id="cb979-6"><a href="#cb979-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb979-7"><a href="#cb979-7" aria-hidden="true" tabindex="-1"></a>Monoid<span class="op">[</span><span class="ex">Future</span><span class="op">[</span><span class="bu">Int</span><span class="op">]].</span><span class="fu">combine</span><span class="op">(</span><span class="ex">Future</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> <span class="ex">Future</span><span class="op">(</span><span class="dv">2</span><span class="op">))</span></span></code></pre></div>
     <h3 data-number="18.3.2" id="dividing-work"><span class="header-section-number">18.3.2</span> Dividing Work</h3>
-    <p>Now we’ve refreshed our memory of <code>Futures</code>, let’s
-    look at how we can divide work into batches. We can query the number
-    of available CPUs on our machine using an API call from the Java
-    standard library:</p>
+    <p><code>Future</code>
+    の復習を終えたところで、次は作業をどのようにバッチに分割すればよいか見ていこう。マシン上の利用可能な
+    CPU 数は、Java の標準ライブラリが提供する API
+    を使って調べることができる。</p>
     <div class="sourceCode" id="cb980"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb980-1"><a href="#cb980-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Runtime</span><span class="op">.</span>getRuntime<span class="op">.</span>availableProcessors</span>
 <span id="cb980-2"><a href="#cb980-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res31: Int = 4</span></span></code></pre></div>
-    <p>We can partition a sequence (actually anything that implements
-    <code>Vector</code>) using the <code>grouped</code> method. We’ll
-    use this to split off batches of work for each CPU:</p>
+    <p><code>grouped</code> メソッドを使えばシーケンス（実際には
+    <code>Vector</code>
+    を実装している任意のコレクション）を分割できる。このメソッドを用いて、各
+    CPU に割り当てるバッチを切り出す。</p>
     <div class="sourceCode" id="cb981"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb981-1"><a href="#cb981-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span><span class="dv">1</span> to <span class="dv">10</span><span class="op">).</span>toList<span class="op">.</span><span class="fu">grouped</span><span class="op">(</span><span class="dv">3</span><span class="op">).</span>toList</span>
 <span id="cb981-2"><a href="#cb981-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res32: List[List[Int]] = List(</span></span>
 <span id="cb981-3"><a href="#cb981-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   List(1, 2, 3),</span></span>
@@ -40887,35 +40887,32 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb981-5"><a href="#cb981-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   List(7, 8, 9),</span></span>
 <span id="cb981-6"><a href="#cb981-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   List(10)</span></span>
 <span id="cb981-7"><a href="#cb981-7" aria-hidden="true" tabindex="-1"></a><span class="co">// )</span></span></code></pre></div>
-    <h3 data-number="18.3.3" id="implementing-parallelfoldmap"><span class="header-section-number">18.3.3</span> Implementing
-    <em>parallelFoldMap</em></h3>
-    <p>Implement a parallel version of <code>foldMap</code> called
-    <code>parallelFoldMap</code>. Here is the type signature:</p>
+    <h3 data-number="18.3.3" id="parallelfoldmap-の実装"><span class="header-section-number">18.3.3</span> <em>parallelFoldMap</em>
+    の実装</h3>
+    <p><code>foldMap</code> の並列版、<code>parallelFoldMap</code>
+    を実装せよ。以下をその型シグネチャとする。</p>
     <div class="sourceCode" id="cb982"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb982-1"><a href="#cb982-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parallelFoldMap<span class="op">[</span>A<span class="op">,</span> B <span class="op">:</span> Monoid<span class="op">]</span></span>
 <span id="cb982-2"><a href="#cb982-2" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>values<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb982-3"><a href="#cb982-3" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="op">???</span></span></code></pre></div>
-    <p>Use the techniques described above to split the work into
-    batches, one batch per CPU. Process each batch in a parallel thread.
-    Refer back to Figure 18 if you need to review the overall
-    algorithm.</p>
-    <p>For bonus points, process the batches for each CPU using your
-    implementation of <code>foldMap</code> from above.</p>
+    <p>前述のテクニックを用いて作業を複数のバッチに分割する。バッチは
+    CPU
+    ごとにひとつ、各バッチを並列スレッドで処理する。全体のアルゴリズムを確認したければ図18を改めて参照するとよい。</p>
+    <p>可能であれば、各 CPU のバッチ処理には上で定義した
+    <code>foldMap</code> 実装を再利用してほしい。</p>
     <div class="solution">
-    <p>Here is an annotated solution that splits out each
-    <code>map</code> and <code>fold</code> into a separate line of
-    code:</p>
+    <p>コードをフェーズごとに分けてコメントをつけた解答例を以下に示す。</p>
     <div class="sourceCode" id="cb983"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb983-1"><a href="#cb983-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parallelFoldMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">:</span> Monoid<span class="op">]</span></span>
 <span id="cb983-2"><a href="#cb983-2" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>values<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb983-3"><a href="#cb983-3" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb983-4"><a href="#cb983-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Calculate the number of items to pass to each CPU:</span></span>
+<span id="cb983-4"><a href="#cb983-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 各 CPU に渡すデータ件数を算出</span></span>
 <span id="cb983-5"><a href="#cb983-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> numCores  <span class="op">=</span> <span class="ex">Runtime</span><span class="op">.</span>getRuntime<span class="op">.</span>availableProcessors</span>
 <span id="cb983-6"><a href="#cb983-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> groupSize <span class="op">=</span> <span class="op">(</span><span class="fl">1.0</span> <span class="op">*</span> values<span class="op">.</span>size <span class="op">/</span> numCores<span class="op">).</span>ceil<span class="op">.</span>toInt</span>
 <span id="cb983-7"><a href="#cb983-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb983-8"><a href="#cb983-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Create one group for each CPU:</span></span>
+<span id="cb983-8"><a href="#cb983-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// データを CPU ごとのグループに分割</span></span>
 <span id="cb983-9"><a href="#cb983-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> groups<span class="op">:</span> <span class="ex">Iterator</span><span class="op">[</span><span class="ex">Vector</span><span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span></span>
 <span id="cb983-10"><a href="#cb983-10" aria-hidden="true" tabindex="-1"></a>    values<span class="op">.</span><span class="fu">grouped</span><span class="op">(</span>groupSize<span class="op">)</span></span>
 <span id="cb983-11"><a href="#cb983-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb983-12"><a href="#cb983-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Create a future to foldMap each group:</span></span>
+<span id="cb983-12"><a href="#cb983-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 各グループを foldMap するための Future インスタンスを作成</span></span>
 <span id="cb983-13"><a href="#cb983-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> futures<span class="op">:</span> <span class="ex">Iterator</span><span class="op">[</span><span class="ex">Future</span><span class="op">[</span>B<span class="op">]]</span> <span class="op">=</span></span>
 <span id="cb983-14"><a href="#cb983-14" aria-hidden="true" tabindex="-1"></a>    groups map <span class="op">{</span> group <span class="op">=&gt;</span></span>
 <span id="cb983-15"><a href="#cb983-15" aria-hidden="true" tabindex="-1"></a>      <span class="ex">Future</span> <span class="op">{</span></span>
@@ -40923,7 +40920,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb983-17"><a href="#cb983-17" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
 <span id="cb983-18"><a href="#cb983-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb983-19"><a href="#cb983-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb983-20"><a href="#cb983-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">// foldMap over the groups to calculate a final result:</span></span>
+<span id="cb983-20"><a href="#cb983-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">// グループごとの結果を最終結果へと畳み込む</span></span>
 <span id="cb983-21"><a href="#cb983-21" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Future</span><span class="op">.</span><span class="fu">sequence</span><span class="op">(</span>futures<span class="op">)</span> map <span class="op">{</span> iterable <span class="op">=&gt;</span></span>
 <span id="cb983-22"><a href="#cb983-22" aria-hidden="true" tabindex="-1"></a>    iterable<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span>Monoid<span class="op">[</span>B<span class="op">].</span>empty<span class="op">)(</span>_ <span class="op">|+|</span> _<span class="op">)</span></span>
 <span id="cb983-23"><a href="#cb983-23" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
@@ -40933,11 +40930,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb983-27"><a href="#cb983-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parallelFoldMap</span><span class="op">((</span><span class="dv">1</span> to <span class="dv">1000000</span><span class="op">).</span>toVector<span class="op">)(</span>identity<span class="op">)</span></span></code></pre></div>
     <div class="sourceCode" id="cb984"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb984-1"><a href="#cb984-1" aria-hidden="true" tabindex="-1"></a>Await<span class="op">.</span><span class="fu">result</span><span class="op">(</span>result<span class="op">,</span> <span class="fl">1.</span>second<span class="op">)</span></span>
 <span id="cb984-2"><a href="#cb984-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res34: Int = 1784293664</span></span></code></pre></div>
-    <p>We can re-use our definition of <code>foldMap</code> for a more
-    concise solution. Note that the local maps and reduces in steps 3
-    and 4 of Figure 18 are actually equivalent to a single call to
-    <code>foldMap</code>, shortening the entire algorithm as
-    follows:</p>
+    <p>上で定義した <code>foldMap</code>
+    を再利用すれば、もっと簡潔な解答が得られる。図18のステップ3と4にあたるバッチ単位でのマップと畳み込みは、単一の
+    <code>foldMap</code>
+    呼び出しによって実現できる。これにより、全体のアルゴリズムは以下のとおり簡略化される。</p>
     <div class="sourceCode" id="cb985"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb985-1"><a href="#cb985-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parallelFoldMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">:</span> Monoid<span class="op">]</span></span>
 <span id="cb985-2"><a href="#cb985-2" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>values<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb985-3"><a href="#cb985-3" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
@@ -40960,30 +40956,30 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     <div class="sourceCode" id="cb986"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb986-1"><a href="#cb986-1" aria-hidden="true" tabindex="-1"></a>Await<span class="op">.</span><span class="fu">result</span><span class="op">(</span>result<span class="op">,</span> <span class="fl">1.</span>second<span class="op">)</span></span>
 <span id="cb986-2"><a href="#cb986-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res36: Int = 1784293664</span></span></code></pre></div>
     </div>
-    <h3 data-number="18.3.4" id="parallelfoldmap-with-more-cats"><span class="header-section-number">18.3.4</span> <em>parallelFoldMap</em>
-    with more Cats</h3>
-    <p>Although we implemented <code>foldMap</code> ourselves above, the
-    method is also available as part of the <code>Foldable</code> type
-    class we discussed in Section 12.1.</p>
-    <p>Reimplement <code>parallelFoldMap</code> using Cats’
-    <code>Foldable</code> and <code>Traverseable</code> type
-    classes.</p>
+    <h3 data-number="18.3.4" id="cats-をもっと活用した-parallelfoldmap-実装"><span class="header-section-number">18.3.4</span> Cats をもっと活用した
+    <em>parallelFoldMap</em> 実装</h3>
+    <p>先ほどは <code>foldMap</code>
+    を自前で実装したが、このメソッドは12.1節で紹介した
+    <code>Foldable</code>
+    型クラスにも含まれており、利用することができる。</p>
+    <p>Cats の <code>Foldable</code> と <code>Traverseable</code>
+    型クラスを用いて <code>parallelFoldMap</code> を再実装せよ。</p>
     <div class="solution">
-    <p>We’ll restate all of the necessary imports for completeness:</p>
+    <p>完全を期すために、必要なすべてのインポート文を改めて記載する。</p>
     <div class="sourceCode" id="cb987"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb987-1"><a href="#cb987-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>Monoid</span>
 <span id="cb987-2"><a href="#cb987-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb987-3"><a href="#cb987-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span><span class="dt">int</span><span class="op">.</span>_    <span class="co">// for Monoid</span></span>
-<span id="cb987-4"><a href="#cb987-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>future<span class="op">.</span>_ <span class="co">// for Applicative and Monad</span></span>
-<span id="cb987-5"><a href="#cb987-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>vector<span class="op">.</span>_ <span class="co">// for Foldable and Traverse</span></span>
+<span id="cb987-3"><a href="#cb987-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span><span class="dt">int</span><span class="op">.</span>_    <span class="co">// Monoid</span></span>
+<span id="cb987-4"><a href="#cb987-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>future<span class="op">.</span>_ <span class="co">// Applicative と Monad</span></span>
+<span id="cb987-5"><a href="#cb987-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>instances<span class="op">.</span>vector<span class="op">.</span>_ <span class="co">// Foldable と Traverse</span></span>
 <span id="cb987-6"><a href="#cb987-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb987-7"><a href="#cb987-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>foldable<span class="op">.</span>_  <span class="co">// for combineAll and foldMap</span></span>
-<span id="cb987-8"><a href="#cb987-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>traverse<span class="op">.</span>_  <span class="co">// for traverse</span></span>
+<span id="cb987-7"><a href="#cb987-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>foldable<span class="op">.</span>_  <span class="co">// combineAll と foldMap</span></span>
+<span id="cb987-8"><a href="#cb987-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>traverse<span class="op">.</span>_  <span class="co">// traverse</span></span>
 <span id="cb987-9"><a href="#cb987-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb987-10"><a href="#cb987-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>_</span>
 <span id="cb987-11"><a href="#cb987-11" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>duration<span class="op">.</span>_</span>
 <span id="cb987-12"><a href="#cb987-12" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span></code></pre></div>
-    <p>Here’s the implementation of <code>parallelFoldMap</code>
-    delegating as much of the method body to Cats as possible:</p>
+    <p>メソッド本体にできるかぎり Cats を利用した
+    <code>parallelFoldMap</code> 実装を以下に示す。</p>
     <div class="sourceCode" id="cb988"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb988-1"><a href="#cb988-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parallelFoldMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">:</span> Monoid<span class="op">]</span></span>
 <span id="cb988-2"><a href="#cb988-2" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>values<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span>A<span class="op">])</span></span>
 <span id="cb988-3"><a href="#cb988-3" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>func<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
@@ -41000,45 +40996,39 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 <span id="cb989-2"><a href="#cb989-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parallelFoldMap</span><span class="op">((</span><span class="dv">1</span> to <span class="dv">1000</span><span class="op">).</span>toVector<span class="op">)(</span>_ <span class="op">*</span> <span class="dv">1000</span><span class="op">)</span></span></code></pre></div>
     <div class="sourceCode" id="cb990"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb990-1"><a href="#cb990-1" aria-hidden="true" tabindex="-1"></a>Await<span class="op">.</span><span class="fu">result</span><span class="op">(</span>future<span class="op">,</span> <span class="fl">1.</span>second<span class="op">)</span></span>
 <span id="cb990-2"><a href="#cb990-2" aria-hidden="true" tabindex="-1"></a><span class="co">// res38: Int = 500500000</span></span></code></pre></div>
-    <p>The call to <code>vector.grouped</code> returns an
-    <code>Iterable[Iterator[Int]]</code>. We sprinkle calls to
-    <code>toVector</code> through the code to convert the data back to a
-    form that Cats can understand. The call to <code>traverse</code>
-    creates a <code>Future[Vector[Int]]</code> containing one
-    <code>Int</code> per batch. The call to <code>map</code> then
-    combines the <code>match</code> using the <code>combineAll</code>
-    method from <code>Foldable</code>.</p>
+    <p><code>vector.grouped</code> 呼び出しは
+    <code>Iterable[Iterator[Int]]</code> を返す。このデータを Cats
+    が理解できる形式に戻すため、コードのいくつかの場所で
+    <code>toVector</code> を呼び出している。<code>traverse</code>
+    呼び出しは、バッチごとにひとつの <code>Int</code> 値をもった
+    <code>Future[Vector[Int]]</code> インスタンスを生成する。そして
+    <code>map</code> 呼び出しは <code>Foldable</code> の
+    <code>combineAll</code>
+    メソッドを用いて各バッチの結果をひとつにまとめている。</p>
     </div>
-    <h2 data-number="18.4" id="summary"><span class="header-section-number">18.4</span> Summary</h2>
-    <p>In this case study we implemented a system that imitates
-    map-reduce as performed on a cluster. Our algorithm followed three
-    steps:</p>
+    <h2 data-number="18.4" id="まとめ-13"><span class="header-section-number">18.4</span> まとめ</h2>
+    <p>このケーススタディでは、本来クラスタ上で行われる MapReduce
+    を模倣したシステムを実装した。今回のアルゴリズムは次の三ステップで構成されていた。</p>
     <ol type="1">
-    <li>batch the data and send one batch to each “node”;</li>
-    <li>perform a local map-reduce on each batch;</li>
-    <li>combine the results using monoid addition.</li>
+    <li>データをバッチに分割し、各バッチをそれぞれの「ノード」に送る</li>
+    <li>バッチごとに MapReduce を実行する</li>
+    <li>モノイドによる加法を用いて結果を統合する</li>
     </ol>
-    <p>Our toy system emulates the batching behaviour of real-world
-    map-reduce systems such as Hadoop. However, in reality we are
-    running all of our work on a single machine where communcation
-    between nodes is negligible. We don’t actually need to batch data to
-    gain efficient parallel processing of a list. We can simply map
-    using a <code>Functor</code> and reduce using a
-    <code>Monoid</code>.</p>
-    <p>Regardless of the batching strategy, mapping and reducing with
-    <code>Monoids</code> is a powerful and general framework that isn’t
-    limited to simple tasks like addition and string concatenation. Most
-    of the tasks data scientists perform in their day-to-day analyses
-    can be cast as monoids. There are monoids for all the following:</p>
+    <p>このおもちゃのようなシステムは、Hadoop のような実際の MapReduce
+    システムにおける分散処理の挙動を模倣している。とはいえ現実にはすべての処理は単一マシン上で行われており、ノード間通信のコストは無視できる。厳密に言えば、リストの並列処理を効率的に行うためにデータをバッチに分割する必要はない。単に
+    <code>Functor</code> でマッピングし、<code>Monoid</code>
+    で畳み込めばよい。</p>
+    <p>バッチ分割の戦略を採用するかどうかにかかわらず、マッピングおよび
+    <code>Monoid</code>
+    を用いた畳み込みは、強力かつ汎用的な枠組みである。それは加算や文字列連結といった単純な処理にとどまらない。データサイエンティストが日々の分析で行っている多くのタスクは、モノイドとして扱える。以下に挙げたものいずれにもモノイドは存在する。</p>
     <ul>
-    <li>approximate sets such as the Bloom filter;</li>
-    <li>set cardinality estimators, such as the HyperLogLog
-    algorithm;</li>
-    <li>vectors and vector operations like stochastic gradient
-    descent;</li>
-    <li>quantile estimators such as the t-digest</li>
+    <li>Bloom フィルタのような近似集合</li>
+    <li>HyperLogLog
+    アルゴリズムのような集合のカーディナリティ推定器</li>
+    <li>確率的勾配降下法などに用いるベクトルとその演算</li>
+    <li>t-Digest のような分位数推定器</li>
     </ul>
-    <p>to name but a few.</p>
+    <p>これらはほんの一例にすぎない。</p>
     <h1 data-number="19" id="case-study-data-validation"><span class="header-section-number">19</span> Case Study: Data
     Validation</h1>
     <p>In this case study we will build a library for validation. What
@@ -42767,7 +42757,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     library. There’s still plenty more to do, but we have a
     sophisticated building block from Cats to work with. We’ll leave
     further improvements up to the reader.</p>
-    <h2 data-number="19.6" id="summary-1"><span class="header-section-number">19.6</span> Summary</h2>
+    <h2 data-number="19.6" id="summary"><span class="header-section-number">19.6</span> Summary</h2>
     <p>This case study has been an exercise in removing rather than
     building abstractions. We started with a fairly complex
     <code>Check</code> type. Once we realised we were conflating two
@@ -43637,7 +43627,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
     it is boilerplate setting up syntax for operations on the type
     class. We can cut down on this using compiler plugins such as <a href="https://github.com/mpilquist/simulacrum">Simulacrum</a> and <a href="https://github.com/typelevel/kind-projector">Kind
     Projector</a>.</p>
-    <h2 data-number="20.6" id="summary-2"><span class="header-section-number">20.6</span> Summary</h2>
+    <h2 data-number="20.6" id="summary-1"><span class="header-section-number">20.6</span> Summary</h2>
     <p>In this case study we’ve seen how we can use type classes to
     model a simple CRDT, the GCounter, in Scala. Our implementation
     gives us a lot of flexibility and code reuse: we aren’t tied to the
